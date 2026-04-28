@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<title>MSC Flyer Publicitario</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet"/>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#111; display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; padding:2rem; font-family:'Outfit',sans-serif; gap:1.5rem; }
+
+.controls { display:flex; gap:1rem; flex-wrap:wrap; justify-content:center; }
+.ctrl-btn {
+  background:#0057a8; color:white; border:none; padding:.6rem 1.4rem;
+  border-radius:50px; font-family:'Outfit',sans-serif; font-size:.9rem;
+  cursor:pointer; transition:all .2s;
+}
+.ctrl-btn:hover { background:#00b4d8; }
+.ctrl-btn.active { background:#f4b942; color:#031d3a; font-weight:700; }
+
+/* ── FLYER ── */
+.flyer {
+  width: 1080px;
+  height: 1080px;
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  transform-origin: top center;
+}
+
+/* VARIANTE 1 — Noche dramática */
+.flyer.v1 {
+  background: linear-gradient(150deg, #031d3a 0%, #052e5e 40%, #063a70 70%, #031d3a 100%);
+}
+.flyer.v1 .bg-photo {
+  position:absolute; inset:0;
+  background: url('img_nocturna.jpg') center/cover no-repeat;
+  opacity: .35;
+}
+.flyer.v1::before {
+  content:''; position:absolute; inset:0;
+  background: linear-gradient(180deg, rgba(3,29,58,.7) 0%, transparent 40%, rgba(3,29,58,.9) 75%);
+  z-index:1;
+}
+
+/* VARIANTE 2 — Día vibrante */
+.flyer.v2 {
+  background: linear-gradient(135deg, #0057a8 0%, #00b4d8 50%, #031d3a 100%);
+}
+.flyer.v2 .bg-photo {
+  position:absolute; inset:0;
+  background: url('img_aerea.jpg') center/cover no-repeat;
+  opacity: .3;
+}
+.flyer.v2::before {
+  content:''; position:absolute; inset:0;
+  background: linear-gradient(160deg, rgba(0,87,168,.75) 0%, rgba(0,180,216,.5) 50%, rgba(3,29,58,.85) 100%);
+  z-index:1;
+}
+
+/* VARIANTE 3 — Acción */
+.flyer.v3 {
+  background: #031d3a;
+}
+.flyer.v3 .bg-photo {
+  position:absolute; inset:0;
+  background: url('img_hero1.jpg') center 30%/cover no-repeat;
+  opacity: .28;
+}
+.flyer.v3::before {
+  content:''; position:absolute; inset:0;
+  background: linear-gradient(180deg, rgba(3,29,58,.5) 0%, rgba(3,29,58,.4) 50%, rgba(3,29,58,.95) 80%);
+  z-index:1;
+}
+
+.flyer-content { position:relative; z-index:2; height:100%; display:flex; flex-direction:column; padding:60px; }
+
+/* HEADER */
+.flyer-top { display:flex; justify-content:space-between; align-items:flex-start; }
+.logo-area { display:flex; align-items:center; gap:14px; }
+.logo-circle {
+  width:72px; height:72px; border-radius:50%;
+  background: linear-gradient(135deg, #0057a8, #00b4d8);
+  display:flex; align-items:center; justify-content:center;
+  font-size:2.2rem; border:3px solid rgba(244,185,66,.6);
+  box-shadow: 0 0 30px rgba(0,180,216,.4);
+}
+.logo-text-area { display:flex; flex-direction:column; }
+.logo-name { font-family:'Bebas Neue',sans-serif; font-size:1.6rem; color:#ffffff; letter-spacing:.06em; line-height:1; }
+.logo-sub  { font-size:.75rem; color:#00b4d8; letter-spacing:.12em; text-transform:uppercase; margin-top:2px; }
+
+.badge-inscripciones {
+  background: linear-gradient(135deg, #f4b942, #e8a020);
+  color: #031d3a; font-weight:900; font-size:1rem;
+  padding:.6rem 1.4rem; border-radius:50px;
+  letter-spacing:.06em; text-transform:uppercase;
+  box-shadow: 0 4px 20px rgba(244,185,66,.5);
+  animation: pulse-gold 2s infinite;
+}
+@keyframes pulse-gold {
+  0%,100% { box-shadow: 0 4px 20px rgba(244,185,66,.5); }
+  50%      { box-shadow: 0 6px 36px rgba(244,185,66,.8); }
+}
+
+/* MAIN TEXT */
+.flyer-main { flex:1; display:flex; flex-direction:column; justify-content:center; margin: 20px 0; }
+.flyer-tag  { color:#00b4d8; font-size:1rem; letter-spacing:.18em; text-transform:uppercase; font-weight:600; margin-bottom:18px; }
+.flyer-h1   {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:6.5rem; line-height:.92; color:white;
+  letter-spacing:.02em; margin-bottom:24px;
+}
+.flyer-h1 em { color:#f4b942; font-style:normal; display:block; }
+.flyer-desc { font-size:1.25rem; color:rgba(255,255,255,.8); line-height:1.65; max-width:600px; margin-bottom:40px; }
+
+/* PROGRAMAS */
+.programas-row { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:40px; }
+.prog-chip {
+  background:rgba(255,255,255,.1); border:1.5px solid rgba(0,180,216,.4);
+  color:white; border-radius:50px;
+  padding:.45rem 1.1rem; font-size:.9rem; font-weight:500;
+  backdrop-filter:blur(4px);
+}
+
+/* OFERTA */
+.oferta-box {
+  background: linear-gradient(135deg, rgba(244,185,66,.15), rgba(244,185,66,.05));
+  border:2px solid rgba(244,185,66,.5); border-radius:20px;
+  padding:24px 32px; display:flex; align-items:center; gap:24px;
+  backdrop-filter:blur(6px); max-width:680px;
+}
+.oferta-icon { font-size:3rem; flex-shrink:0; }
+.oferta-text h3 { font-family:'Bebas Neue',sans-serif; font-size:2rem; color:#f4b942; letter-spacing:.05em; }
+.oferta-text p  { color:rgba(255,255,255,.8); font-size:1rem; line-height:1.5; }
+
+/* FOOTER */
+.flyer-bottom { display:flex; justify-content:space-between; align-items:flex-end; }
+.contact-info { display:flex; flex-direction:column; gap:8px; }
+.contact-row  { display:flex; align-items:center; gap:10px; color:rgba(255,255,255,.9); font-size:1rem; }
+.contact-row .ico { font-size:1.2rem; }
+.contact-row strong { color:#f4b942; }
+
+.qr-placeholder {
+  width:100px; height:100px; background:white; border-radius:12px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:.65rem; color:#031d3a; text-align:center; font-weight:600;
+  border:3px solid #f4b942; padding:6px;
+}
+
+/* WAVE DECO */
+.wave-deco {
+  position:absolute; bottom:0; left:0; width:100%; z-index:1; opacity:.15;
+}
+
+/* ESCALA */
+@media (max-width:1140px) {
+  .flyer { transform:scale(0.55); }
+}
+</style>
+</head>
+<body>
+
+<div class="controls">
+  <button class="ctrl-btn active" onclick="cambiarVariante('v1',this)">🌙 Versión Nocturna</button>
+  <button class="ctrl-btn" onclick="cambiarVariante('v2',this)">☀️ Versión Día</button>
+  <button class="ctrl-btn" onclick="cambiarVariante('v3',this)">🏊 Versión Acción</button>
+</div>
+
+<div class="flyer v1" id="flyer">
+
+  <div class="bg-photo"></div>
+
+  <svg class="wave-deco" viewBox="0 0 1080 120" preserveAspectRatio="none">
+    <path d="M0,60 C270,120 810,0 1080,60 L1080,120 L0,120 Z" fill="#00b4d8"/>
+  </svg>
+
+  <div class="flyer-content">
+
+    <!-- TOP -->
+    <div class="flyer-top">
+      <div class="logo-area">
+        <div class="logo-circle">🏊</div>
+        <div class="logo-text-area">
+          <span class="logo-name">Maracaibo Swimming Club</span>
+          <span class="logo-sub">Escuela Profesional de Natación</span>
+        </div>
+      </div>
+      <div class="badge-inscripciones">🎯 Inscripciones Abiertas</div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="flyer-main">
+      <div class="flyer-tag">⭐ Para niños, jóvenes y adultos</div>
+      <h1 class="flyer-h1">
+        APRENDE A<br>NADAR CON
+        <em>CAMPEONES</em>
+      </h1>
+      <p class="flyer-desc">
+        Clases profesionales con técnica, disciplina y pasión.<br>
+        Grupos reducidos · Todos los niveles · Modalidad presencial y a domicilio.
+      </p>
+
+      <div class="programas-row">
+        <span class="prog-chip">🍼 Bebés y Mamás</span>
+        <span class="prog-chip">🎒 Infantil</span>
+        <span class="prog-chip">🏅 Juvenil</span>
+        <span class="prog-chip">🏆 Competición</span>
+        <span class="prog-chip">🌊 Adultos</span>
+      </div>
+
+      <div class="oferta-box">
+        <div class="oferta-icon">🎁</div>
+        <div class="oferta-text">
+          <h3>Primera clase de evaluación GRATIS</h3>
+          <p>Sin compromiso · Conócenos y decide · Cupos limitados</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTTOM -->
+    <div class="flyer-bottom">
+      <div class="contact-info">
+        <div class="contact-row">
+          <span class="ico">📱</span>
+          <span>WhatsApp: <strong>0414-6004468</strong></span>
+        </div>
+        <div class="contact-row">
+          <span class="ico">📸</span>
+          <span>Instagram: <strong>@mcboswimclub</strong></span>
+        </div>
+        <div class="contact-row">
+          <span class="ico">📍</span>
+          <span>CIDEZ · Calle 67, Av. Universidad, Maracaibo</span>
+        </div>
+        <div class="contact-row">
+          <span class="ico">🌐</span>
+          <span><strong>mcboswimclub.com</strong></span>
+        </div>
+      </div>
+      <div class="qr-placeholder">
+        📲 Escanea para más info
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function cambiarVariante(v, btn) {
+  const flyer = document.getElementById('flyer');
+  flyer.className = 'flyer ' + v;
+  document.querySelectorAll('.ctrl-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+</script>
+</body>
+</html>
