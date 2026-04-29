@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Portal Instructor — Maracaibo Swimming Club</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --navy:    #031d3a;
+      --blue:    #0057a8;
+      --cyan:    #00b4d8;
+      --gold:    #f4b942;
+      --light:   #e8f4fd;
+      --white:   #ffffff;
+      --gray:    #64748b;
+      --surface: #f0f7ff;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger:  #ef4444;
+      --process: #8b5cf6;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Outfit', sans-serif; background: var(--surface); color: var(--navy); min-height: 100vh; }
+
+    /* ── LOGIN ── */
+    #login-screen {
+      min-height: 100vh;
+      background: linear-gradient(150deg, var(--navy) 0%, #052e5e 60%, var(--navy) 100%);
+      display: flex; align-items: center; justify-content: center;
+      padding: 2rem;
+      position: relative; overflow: hidden;
+    }
+    .login-bg-circle {
+      position: absolute; border-radius: 50%; opacity: .06; background: var(--cyan); pointer-events: none;
+    }
+    .login-bg-circle.c1 { width: 600px; height: 600px; top: -200px; right: -150px; }
+    .login-bg-circle.c2 { width: 350px; height: 350px; bottom: -100px; left: -80px; }
+    .login-card {
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(0,180,216,.2);
+      border-radius: 28px;
+      padding: 3rem 2.5rem;
+      width: 100%; max-width: 420px;
+      backdrop-filter: blur(20px);
+      position: relative; z-index: 2;
+      box-shadow: 0 30px 80px rgba(0,0,0,.4);
+    }
+    .login-logo { text-align: center; margin-bottom: 2rem; }
+    .login-logo .icon {
+      width: 70px; height: 70px; background: linear-gradient(135deg,var(--blue),var(--cyan));
+      border-radius: 20px; display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; margin: 0 auto 1rem;
+      box-shadow: 0 8px 30px rgba(0,180,216,.35);
+    }
+    .login-logo h1 { font-family: 'Bebas Neue',sans-serif; font-size: 1.6rem; color: var(--white); letter-spacing: .08em; }
+    .login-logo p { color: rgba(255,255,255,.45); font-size: .82rem; letter-spacing: .1em; text-transform: uppercase; margin-top: .3rem; }
+    .login-title { font-family: 'Bebas Neue',sans-serif; font-size: 2rem; color: var(--white); letter-spacing: .06em; margin-bottom: .4rem; }
+    .login-sub { color: rgba(255,255,255,.45); font-size: .88rem; margin-bottom: 2rem; }
+    .form-group { margin-bottom: 1.2rem; }
+    .form-group label { display: block; color: rgba(255,255,255,.6); font-size: .82rem; letter-spacing: .08em; text-transform: uppercase; margin-bottom: .5rem; }
+    .form-group input, .form-group select {
+      width: 100%; padding: .85rem 1.1rem;
+      background: rgba(255,255,255,.07);
+      border: 1.5px solid rgba(255,255,255,.12);
+      border-radius: 12px; color: white;
+      font-family: 'Outfit',sans-serif; font-size: .95rem;
+      transition: border-color .2s, background .2s;
+      outline: none;
+    }
+    .form-group input::placeholder { color: rgba(255,255,255,.25); }
+    .form-group input:focus, .form-group select:focus {
+      border-color: var(--cyan);
+      background: rgba(0,180,216,.07);
+    }
+    .form-group select option { background: var(--navy); color: white; }
+    .btn-login {
+      width: 100%; padding: 1rem;
+      background: linear-gradient(135deg,var(--blue),var(--cyan));
+      border: none; border-radius: 12px;
+      color: white; font-family: 'Outfit',sans-serif;
+      font-size: 1rem; font-weight: 700; letter-spacing: .05em;
+      cursor: pointer; margin-top: .5rem;
+      transition: all .2s;
+      box-shadow: 0 6px 24px rgba(0,87,168,.4);
+    }
+    .btn-login:hover { transform: translateY(-2px); box-shadow: 0 10px 32px rgba(0,180,216,.5); }
+    .login-error {
+      background: rgba(239,68,68,.15); border: 1px solid rgba(239,68,68,.3);
+      color: #fca5a5; border-radius: 10px; padding: .7rem 1rem;
+      font-size: .85rem; margin-top: 1rem; display: none;
+    }
+
+    /* ── APP ── */
+    #app { display: none; min-height: 100vh; }
+
+    /* TOPBAR */
+    .topbar {
+      background: var(--navy); position: fixed; top: 0; width: 100%; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: .9rem 2rem;
+      box-shadow: 0 2px 20px rgba(0,0,0,.3);
+    }
+    .topbar-left { display: flex; align-items: center; gap: .8rem; }
+    .topbar-logo { display: flex; align-items: center; gap: .6rem; text-decoration: none; }
+    .topbar-logo .icon { width: 36px; height: 36px; background: linear-gradient(135deg,var(--blue),var(--cyan)); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+    .topbar-logo span { font-family: 'Bebas Neue',sans-serif; color: white; font-size: 1.2rem; letter-spacing: .06em; }
+    .topbar-divider { width: 1px; height: 28px; background: rgba(255,255,255,.1); }
+    .topbar-section { font-family: 'Bebas Neue',sans-serif; color: var(--cyan); font-size: 1.1rem; letter-spacing: .08em; }
+    .topbar-right { display: flex; align-items: center; gap: 1rem; }
+    .instructor-badge {
+      display: flex; align-items: center; gap: .5rem;
+      background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
+      border-radius: 50px; padding: .4rem .9rem;
+    }
+    .instructor-badge .avatar { width: 28px; height: 28px; background: var(--cyan); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: .9rem; }
+    .instructor-badge span { color: rgba(255,255,255,.8); font-size: .85rem; font-weight: 500; }
+    .btn-logout { background: rgba(239,68,68,.15); border: 1px solid rgba(239,68,68,.25); color: #fca5a5; border-radius: 50px; padding: .4rem .9rem; font-size: .82rem; cursor: pointer; font-family: 'Outfit',sans-serif; transition: all .2s; }
+    .btn-logout:hover { background: rgba(239,68,68,.3); }
+
+    /* MAIN */
+    .main { padding-top: 70px; }
+
+    /* TABS */
+    .tabs-bar {
+      background: white; border-bottom: 1px solid rgba(3,29,58,.08);
+      display: flex; gap: 0; padding: 0 2rem; overflow-x: auto;
+      position: sticky; top: 70px; z-index: 90;
+    }
+    .tab-btn {
+      padding: 1rem 1.5rem; border: none; background: none;
+      font-family: 'Outfit',sans-serif; font-size: .9rem; font-weight: 500;
+      color: var(--gray); cursor: pointer; border-bottom: 2.5px solid transparent;
+      transition: all .2s; white-space: nowrap;
+      display: flex; align-items: center; gap: .5rem;
+    }
+    .tab-btn:hover { color: var(--blue); }
+    .tab-btn.active { color: var(--blue); border-bottom-color: var(--cyan); font-weight: 600; }
+
+    /* CONTENT */
+    .tab-content { display: none; padding: 2rem; max-width: 1100px; margin: 0 auto; }
+    .tab-content.active { display: block; }
+
+    /* PAGE HEADER */
+    .page-header { margin-bottom: 2rem; }
+    .page-header h2 { font-family: 'Bebas Neue',sans-serif; font-size: 2.2rem; letter-spacing: .05em; color: var(--navy); }
+    .page-header p { color: var(--gray); font-size: .95rem; margin-top: .3rem; }
+
+    /* DATE BAR */
+    .date-bar {
+      background: white; border-radius: 16px; padding: 1.2rem 1.5rem;
+      border: 1.5px solid rgba(0,87,168,.1);
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;
+    }
+    .date-info { display: flex; align-items: center; gap: .8rem; }
+    .date-info .date-icon { width: 42px; height: 42px; background: linear-gradient(135deg,var(--blue),var(--cyan)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+    .date-info .date-text strong { display: block; color: var(--navy); font-size: 1rem; font-weight: 600; }
+    .date-info .date-text span { color: var(--gray); font-size: .82rem; }
+    .class-selector { display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; }
+    .class-selector label { color: var(--gray); font-size: .85rem; }
+    .class-selector select {
+      padding: .55rem 1rem; border: 1.5px solid rgba(0,87,168,.2);
+      border-radius: 10px; font-family: 'Outfit',sans-serif; font-size: .88rem;
+      color: var(--navy); background: white; outline: none; cursor: pointer;
+      transition: border-color .2s;
+    }
+    .class-selector select:focus { border-color: var(--cyan); }
+    .btn-load {
+      padding: .55rem 1.3rem; background: var(--blue); color: white;
+      border: none; border-radius: 10px; font-family: 'Outfit',sans-serif;
+      font-size: .88rem; font-weight: 600; cursor: pointer; transition: all .2s;
+    }
+    .btn-load:hover { background: var(--cyan); }
+
+    /* CLASS CARD */
+    .class-info-card {
+      background: linear-gradient(135deg, var(--navy), #052e5e);
+      border-radius: 18px; padding: 1.5rem 2rem;
+      display: flex; align-items: center; gap: 2rem; flex-wrap: wrap;
+      margin-bottom: 1.5rem; color: white;
+    }
+    .class-info-card .ci-item { display: flex; align-items: center; gap: .6rem; }
+    .class-info-card .ci-icon { font-size: 1.3rem; }
+    .class-info-card .ci-label { font-size: .75rem; color: rgba(255,255,255,.5); text-transform: uppercase; letter-spacing: .08em; }
+    .class-info-card .ci-val { font-weight: 600; font-size: .95rem; }
+
+    /* STUDENTS TABLE */
+    .section-card {
+      background: white; border-radius: 18px;
+      border: 1.5px solid rgba(0,87,168,.08);
+      overflow: hidden; margin-bottom: 1.5rem;
+    }
+    .section-card-header {
+      padding: 1.2rem 1.5rem; border-bottom: 1px solid rgba(0,87,168,.07);
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--surface);
+    }
+    .section-card-header h3 { font-family: 'Bebas Neue',sans-serif; font-size: 1.3rem; letter-spacing: .05em; color: var(--navy); }
+    .section-card-header span { color: var(--gray); font-size: .82rem; }
+
+    /* ATTENDANCE */
+    .attendance-grid { padding: 1.2rem; display: flex; flex-direction: column; gap: .8rem; }
+    .student-row {
+      display: flex; align-items: center; gap: 1rem;
+      padding: 1rem 1.2rem; border-radius: 12px;
+      border: 1.5px solid rgba(0,87,168,.07);
+      background: var(--surface); transition: all .2s;
+      flex-wrap: wrap;
+    }
+    .student-row:hover { border-color: rgba(0,180,216,.3); box-shadow: 0 4px 14px rgba(0,87,168,.08); }
+    .student-avatar {
+      width: 40px; height: 40px; background: linear-gradient(135deg,var(--blue),var(--cyan));
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      color: white; font-weight: 700; font-size: .95rem; flex-shrink: 0;
+    }
+    .student-name { flex: 1; min-width: 140px; }
+    .student-name strong { display: block; font-size: .95rem; color: var(--navy); }
+    .student-name span { color: var(--gray); font-size: .78rem; }
+    .attendance-btns { display: flex; gap: .4rem; }
+    .att-btn {
+      padding: .4rem .9rem; border-radius: 50px; border: 1.5px solid;
+      font-size: .8rem; font-weight: 600; cursor: pointer;
+      font-family: 'Outfit',sans-serif; transition: all .2s;
+    }
+    .att-btn.present { border-color: var(--success); color: var(--success); background: transparent; }
+    .att-btn.present.active, .att-btn.present:hover { background: var(--success); color: white; }
+    .att-btn.absent { border-color: var(--danger); color: var(--danger); background: transparent; }
+    .att-btn.absent.active, .att-btn.absent:hover { background: var(--danger); color: white; }
+    .att-btn.justified { border-color: var(--warning); color: var(--warning); background: transparent; }
+    .att-btn.justified.active, .att-btn.justified:hover { background: var(--warning); color: white; }
+    .att-status { font-size: .78rem; font-weight: 600; padding: .25rem .7rem; border-radius: 50px; }
+    .att-status.present { background: rgba(16,185,129,.12); color: var(--success); }
+    .att-status.absent { background: rgba(239,68,68,.12); color: var(--danger); }
+    .att-status.justified { background: rgba(245,158,11,.12); color: var(--warning); }
+
+    /* OBJECTIVES */
+    .objectives-section { padding: 1.2rem; }
+    .obj-class-notes {
+      background: var(--surface); border-radius: 12px; padding: 1rem;
+      border: 1.5px solid rgba(0,87,168,.08); margin-bottom: 1.5rem;
+    }
+    .obj-class-notes label { display: block; font-size: .82rem; font-weight: 600; color: var(--navy); margin-bottom: .5rem; text-transform: uppercase; letter-spacing: .06em; }
+    .obj-class-notes textarea {
+      width: 100%; padding: .8rem 1rem; border: 1.5px solid rgba(0,87,168,.12);
+      border-radius: 10px; font-family: 'Outfit',sans-serif; font-size: .9rem;
+      color: var(--navy); resize: vertical; min-height: 80px; outline: none;
+      transition: border-color .2s;
+    }
+    .obj-class-notes textarea:focus { border-color: var(--cyan); }
+
+    .objectives-list { display: flex; flex-direction: column; gap: 1rem; }
+    .obj-item {
+      border: 1.5px solid rgba(0,87,168,.1); border-radius: 14px; overflow: hidden;
+    }
+    .obj-header {
+      padding: .9rem 1.2rem; background: var(--surface);
+      display: flex; align-items: center; gap: .8rem;
+    }
+    .obj-number { width: 28px; height: 28px; background: var(--blue); border-radius: 50%; color: white; font-size: .8rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .obj-header h4 { flex: 1; font-size: .95rem; font-weight: 600; color: var(--navy); }
+    .obj-difficulty {
+      font-size: .72rem; font-weight: 600; padding: .2rem .7rem; border-radius: 50px;
+      background: rgba(0,87,168,.1); color: var(--blue); text-transform: uppercase; letter-spacing: .06em;
+    }
+    .obj-difficulty.escalado { background: rgba(244,185,66,.15); color: #b45309; }
+    .obj-body { padding: 1rem 1.2rem; }
+    .obj-desc { font-size: .85rem; color: var(--gray); margin-bottom: .8rem; line-height: 1.6; }
+    .obj-escalado-toggle {
+      display: flex; align-items: center; gap: .5rem; margin-bottom: 1rem;
+      cursor: pointer; width: fit-content;
+    }
+    .obj-escalado-toggle input { cursor: pointer; accent-color: var(--gold); }
+    .obj-escalado-toggle label { font-size: .82rem; color: var(--gray); cursor: pointer; }
+    .obj-escalado-desc {
+      background: rgba(244,185,66,.08); border: 1px solid rgba(244,185,66,.25);
+      border-radius: 8px; padding: .7rem 1rem; font-size: .82rem; color: #92400e;
+      margin-bottom: 1rem; display: none;
+    }
+    .obj-escalado-desc.visible { display: block; }
+
+    /* STUDENT EVAL per objective */
+    .obj-students { display: flex; flex-direction: column; gap: .5rem; }
+    .obj-student-row {
+      display: flex; align-items: center; gap: 1rem;
+      padding: .6rem .8rem; border-radius: 8px; background: white;
+      border: 1px solid rgba(0,87,168,.06); flex-wrap: wrap;
+    }
+    .obj-student-name { flex: 1; min-width: 120px; font-size: .88rem; color: var(--navy); font-weight: 500; }
+    .eval-btns { display: flex; gap: .35rem; }
+    .eval-btn {
+      padding: .3rem .75rem; border-radius: 50px; border: 1.5px solid;
+      font-size: .75rem; font-weight: 600; cursor: pointer;
+      font-family: 'Outfit',sans-serif; transition: all .18s;
+    }
+    .eval-btn.no-logro { border-color: var(--danger); color: var(--danger); background: transparent; }
+    .eval-btn.no-logro.active, .eval-btn.no-logro:hover { background: var(--danger); color: white; }
+    .eval-btn.en-proceso { border-color: var(--process); color: var(--process); background: transparent; }
+    .eval-btn.en-proceso.active, .eval-btn.en-proceso:hover { background: var(--process); color: white; }
+    .eval-btn.logro { border-color: var(--success); color: var(--success); background: transparent; }
+    .eval-btn.logro.active, .eval-btn.logro:hover { background: var(--success); color: white; }
+
+    /* DIFFICULTY ESCALATION */
+    .difficulty-section {
+      background: rgba(244,185,66,.06); border: 1px solid rgba(244,185,66,.2);
+      border-radius: 10px; padding: 1rem; margin-bottom: 1rem;
+    }
+    .difficulty-section label { display: block; font-size: .8rem; font-weight: 600; color: #92400e; margin-bottom: .5rem; text-transform: uppercase; letter-spacing: .06em; }
+    .difficulty-toggle { display: flex; align-items: center; gap: .8rem; margin-bottom: .8rem; }
+    .toggle-switch { position: relative; width: 44px; height: 24px; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute; inset: 0; background: rgba(0,0,0,.15);
+      border-radius: 50px; cursor: pointer; transition: .3s;
+    }
+    .toggle-slider::before {
+      content: ''; position: absolute; width: 18px; height: 18px;
+      background: white; border-radius: 50%; top: 3px; left: 3px; transition: .3s;
+    }
+    .toggle-switch input:checked + .toggle-slider { background: var(--gold); }
+    .toggle-switch input:checked + .toggle-slider::before { transform: translateX(20px); }
+    .difficulty-note {
+      width: 100%; padding: .6rem .9rem; border: 1.5px solid rgba(244,185,66,.3);
+      border-radius: 8px; font-family: 'Outfit',sans-serif; font-size: .85rem;
+      color: var(--navy); background: white; outline: none; resize: vertical;
+      min-height: 60px; display: none;
+    }
+    .difficulty-note.visible { display: block; }
+
+    /* SUBMIT */
+    .submit-section {
+      background: white; border-radius: 18px; padding: 1.5rem 2rem;
+      border: 1.5px solid rgba(0,87,168,.08);
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem;
+    }
+    .submit-info { }
+    .submit-info strong { display: block; font-size: 1rem; color: var(--navy); }
+    .submit-info span { color: var(--gray); font-size: .85rem; }
+    .btn-submit {
+      padding: .85rem 2rem; background: linear-gradient(135deg,var(--blue),var(--cyan));
+      border: none; border-radius: 12px; color: white;
+      font-family: 'Outfit',sans-serif; font-size: 1rem; font-weight: 700;
+      cursor: pointer; transition: all .2s;
+      box-shadow: 0 6px 20px rgba(0,87,168,.3);
+      display: flex; align-items: center; gap: .6rem;
+    }
+    .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(0,180,216,.4); }
+    .btn-submit:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+    /* SUCCESS TOAST */
+    .toast {
+      position: fixed; bottom: 2rem; right: 2rem; z-index: 9999;
+      background: var(--navy); color: white; border-radius: 14px;
+      padding: 1rem 1.5rem; display: flex; align-items: center; gap: .8rem;
+      box-shadow: 0 10px 40px rgba(0,0,0,.3);
+      transform: translateY(100px); opacity: 0;
+      transition: all .35s cubic-bezier(.4,0,.2,1);
+      max-width: 360px;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast .toast-icon { font-size: 1.4rem; }
+    .toast .toast-text strong { display: block; font-size: .95rem; }
+    .toast .toast-text span { font-size: .8rem; color: rgba(255,255,255,.6); }
+
+    /* HISTORIAL TAB */
+    .history-filters {
+      display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem; align-items: center;
+    }
+    .history-filters select, .history-filters input {
+      padding: .55rem 1rem; border: 1.5px solid rgba(0,87,168,.15);
+      border-radius: 10px; font-family: 'Outfit',sans-serif; font-size: .88rem;
+      color: var(--navy); background: white; outline: none;
+    }
+    .history-filters select:focus, .history-filters input:focus { border-color: var(--cyan); }
+
+    .history-card {
+      background: white; border-radius: 14px; border: 1.5px solid rgba(0,87,168,.08);
+      padding: 1.2rem 1.5rem; margin-bottom: 1rem;
+      transition: all .2s;
+    }
+    .history-card:hover { border-color: rgba(0,180,216,.3); box-shadow: 0 4px 16px rgba(0,87,168,.08); }
+    .history-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: .8rem; flex-wrap: wrap; gap: .5rem; }
+    .history-card-header .hc-date { font-weight: 600; color: var(--navy); font-size: .95rem; }
+    .history-card-header .hc-class { background: var(--surface); border-radius: 50px; padding: .25rem .8rem; font-size: .78rem; color: var(--blue); font-weight: 600; }
+    .history-card .hc-stats { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+    .hc-stat { display: flex; align-items: center; gap: .4rem; font-size: .85rem; color: var(--gray); }
+    .hc-stat .dot { width: 8px; height: 8px; border-radius: 50%; }
+    .dot.present { background: var(--success); }
+    .dot.absent { background: var(--danger); }
+    .dot.process { background: var(--process); }
+
+    /* PROGRESS TAB */
+    .student-select-bar {
+      background: white; border-radius: 16px; padding: 1.2rem 1.5rem;
+      border: 1.5px solid rgba(0,87,168,.1); margin-bottom: 1.5rem;
+      display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+    }
+    .student-select-bar label { color: var(--gray); font-size: .88rem; font-weight: 500; }
+    .student-select-bar select {
+      padding: .6rem 1.1rem; border: 1.5px solid rgba(0,87,168,.2);
+      border-radius: 10px; font-family: 'Outfit',sans-serif; font-size: .9rem;
+      color: var(--navy); background: white; outline: none; cursor: pointer;
+      min-width: 220px;
+    }
+
+    .progress-card {
+      background: white; border-radius: 18px; border: 1.5px solid rgba(0,87,168,.08);
+      overflow: hidden; margin-bottom: 1.5rem;
+    }
+    .progress-card-header {
+      background: linear-gradient(135deg,var(--navy),#052e5e);
+      padding: 1.5rem 2rem; display: flex; align-items: center; gap: 1.2rem;
+    }
+    .prog-avatar { width: 52px; height: 52px; background: var(--cyan); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: white; font-weight: 700; flex-shrink: 0; }
+    .prog-info strong { display: block; color: white; font-size: 1.1rem; font-weight: 600; }
+    .prog-info span { color: rgba(255,255,255,.5); font-size: .82rem; }
+    .prog-badges { display: flex; gap: .6rem; margin-top: .5rem; flex-wrap: wrap; }
+    .prog-badge { background: rgba(0,180,216,.2); color: var(--cyan); font-size: .75rem; font-weight: 600; padding: .2rem .7rem; border-radius: 50px; }
+
+    .objectives-progress { padding: 1.5rem; }
+    .obj-progress-item { margin-bottom: 1.2rem; }
+    .obj-progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: .4rem; }
+    .obj-progress-header span { font-size: .88rem; font-weight: 500; color: var(--navy); }
+    .obj-progress-header .obj-eval-badge { font-size: .75rem; font-weight: 700; padding: .2rem .7rem; border-radius: 50px; }
+    .obj-eval-badge.logro { background: rgba(16,185,129,.12); color: var(--success); }
+    .obj-eval-badge.en-proceso { background: rgba(139,92,246,.12); color: var(--process); }
+    .obj-eval-badge.no-logro { background: rgba(239,68,68,.12); color: var(--danger); }
+    .obj-eval-badge.sin-eval { background: rgba(100,116,139,.1); color: var(--gray); }
+    .progress-bar-bg { background: var(--surface); border-radius: 50px; height: 8px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; border-radius: 50px; transition: width .5s ease; }
+    .progress-bar-fill.logro { background: linear-gradient(90deg, var(--success), #34d399); }
+    .progress-bar-fill.en-proceso { background: linear-gradient(90deg, var(--process), #a78bfa); }
+    .progress-bar-fill.no-logro { background: linear-gradient(90deg, var(--danger), #f87171); }
+
+    /* LOADING */
+    .loading-overlay {
+      position: fixed; inset: 0; background: rgba(3,29,58,.7);
+      z-index: 9998; display: none; align-items: center; justify-content: center;
+      backdrop-filter: blur(4px);
+    }
+    .loading-overlay.active { display: flex; }
+    .loading-box { background: white; border-radius: 20px; padding: 2rem 2.5rem; text-align: center; }
+    .loading-box .spinner { width: 44px; height: 44px; border: 3px solid var(--surface); border-top-color: var(--cyan); border-radius: 50%; animation: spin .8s linear infinite; margin: 0 auto 1rem; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-box p { color: var(--navy); font-weight: 500; }
+
+    /* RESPONSIVE */
+    @media(max-width:768px) {
+      .topbar { padding: .8rem 1rem; }
+      .topbar-logo span { display: none; }
+      .tab-content { padding: 1rem; }
+      .class-info-card { flex-direction: column; gap: 1rem; }
+      .date-bar { flex-direction: column; align-items: flex-start; }
+      .submit-section { flex-direction: column; }
+      .btn-submit { width: 100%; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-bg-circle c1"></div>
+  <div class="login-bg-circle c2"></div>
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="icon">🏊</div>
+      <h1>Maracaibo Swimming Club</h1>
+      <p>Portal del Instructor</p>
+    </div>
+    <h2 class="login-title">Acceso</h2>
+    <p class="login-sub">Ingresa tus credenciales para continuar</p>
+    <div class="form-group">
+      <label>Instructor</label>
+      <select id="login-instructor">
+        <option value="">— Selecciona tu nombre —</option>
+        <option value="Walter Pérez">Walter Pérez</option>
+        <option value="Instructor Demo">Instructor Demo</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Contraseña</label>
+      <input type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/>
+    </div>
+    <button class="btn-login" onclick="doLogin()">Entrar al Portal →</button>
+    <div class="login-error" id="login-error">❌ Credenciales incorrectas. Intenta de nuevo.</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <a class="topbar-logo" href="#">
+        <div class="icon">🏊</div>
+        <span>MSC</span>
+      </a>
+      <div class="topbar-divider"></div>
+      <span class="topbar-section">Portal Instructor</span>
+    </div>
+    <div class="topbar-right">
+      <div class="instructor-badge">
+        <div class="avatar">👤</div>
+        <span id="topbar-name">Instructor</span>
+      </div>
+      <button class="btn-logout" onclick="doLogout()">Salir</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <!-- TABS -->
+    <div class="tabs-bar">
+      <button class="tab-btn active" onclick="switchTab('registro')">📋 Registro de Clase</button>
+      <button class="tab-btn" onclick="switchTab('historial')">📅 Historial</button>
+      <button class="tab-btn" onclick="switchTab('progreso')">📊 Progreso Alumnos</button>
+    </div>
+
+    <!-- TAB: REGISTRO DE CLASE -->
+    <div class="tab-content active" id="tab-registro">
+      <div class="page-header">
+        <h2>Registro de Clase</h2>
+        <p>Completa la asistencia y evaluación al finalizar cada sesión</p>
+      </div>
+
+      <!-- DATE & CLASS SELECTOR -->
+      <div class="date-bar">
+        <div class="date-info">
+          <div class="date-icon">📅</div>
+          <div class="date-text">
+            <strong id="today-date">—</strong>
+            <span id="today-time">—</span>
+          </div>
+        </div>
+        <div class="class-selector">
+          <label>Clase:</label>
+          <select id="class-select" onchange="loadClass()">
+            <option value="">— Selecciona grupo —</option>
+            <optgroup label="🫧 Burbuja">
+              <option value="burbuja-lv-1530">Burbuja · Lun-Vie 3:30pm</option>
+              <option value="burbuja-sab-11">Burbuja · Sábado 11am</option>
+            </optgroup>
+            <optgroup label="🎒 Iniciación">
+              <option value="iniciacion-lv-1500">Iniciación · Lun-Vie 3:00pm (2h)</option>
+              <option value="iniciacion-lv-1600">Iniciación · Lun-Vie 4:00pm (1h)</option>
+              <option value="iniciacion-sab-900">Iniciación · Sábado 9am</option>
+            </optgroup>
+            <optgroup label="🏊 Intermedio">
+              <option value="intermedio-lv-1600">Intermedio · Lun-Vie 4:00pm</option>
+              <option value="intermedio-sab-1000">Intermedio · Sábado 10am</option>
+            </optgroup>
+            <optgroup label="🏅 Avanzado">
+              <option value="avanzado-lv-1700">Avanzado · Lun-Vie 5:00pm</option>
+              <option value="avanzado-sab-800">Avanzado · Sábado 8am</option>
+            </optgroup>
+            <optgroup label="🌊 Adultos">
+              <option value="adultos-lv-1700">Adultos · Lun-Vie 5:00pm</option>
+              <option value="adultos-lv-1800">Adultos · Lun-Vie 6:00pm</option>
+              <option value="adultos-lv-1900">Adultos · Lun-Vie 7:00pm</option>
+              <option value="adultos-sab-800">Adultos · Sábado 8am</option>
+            </optgroup>
+            <optgroup label="⭐ Privadas">
+              <option value="privada-lv-1400">Privada · Lun-Vie 2:00pm</option>
+              <option value="privada-sab-800">Privada · Sábado 8am</option>
+            </optgroup>
+          </select>
+        </div>
+      </div>
+
+      <!-- CLASS INFO -->
+      <div class="class-info-card" id="class-info-card" style="display:none">
+        <div class="ci-item">
+          <span class="ci-icon">🏊</span>
+          <div>
+            <div class="ci-label">Nivel</div>
+            <div class="ci-val" id="ci-nivel">—</div>
+          </div>
+        </div>
+        <div class="ci-item">
+          <span class="ci-icon">🕐</span>
+          <div>
+            <div class="ci-label">Horario</div>
+            <div class="ci-val" id="ci-horario">—</div>
+          </div>
+        </div>
+        <div class="ci-item">
+          <span class="ci-icon">👥</span>
+          <div>
+            <div class="ci-label">Alumnos</div>
+            <div class="ci-val" id="ci-alumnos">—</div>
+          </div>
+        </div>
+        <div class="ci-item">
+          <span class="ci-icon">🏊‍♂️</span>
+          <div>
+            <div class="ci-label">Carril</div>
+            <div class="ci-val" id="ci-carril">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ATTENDANCE -->
+      <div class="section-card" id="attendance-card" style="display:none">
+        <div class="section-card-header">
+          <h3>✅ Asistencia</h3>
+          <span id="att-summary">0/0 presentes</span>
+        </div>
+        <div class="attendance-grid" id="attendance-list"></div>
+      </div>
+
+      <!-- OBJECTIVES -->
+      <div class="section-card" id="objectives-card" style="display:none">
+        <div class="section-card-header">
+          <h3>🎯 Objetivos y Evaluación</h3>
+          <span>Evalúa a los alumnos presentes</span>
+        </div>
+        <div class="objectives-section">
+          <div class="obj-class-notes">
+            <label>📝 Notas generales de la clase</label>
+            <textarea id="class-notes" placeholder="Describe brevemente lo trabajado en esta sesión, observaciones generales, logros del grupo..."></textarea>
+          </div>
+          <div class="objectives-list" id="objectives-list"></div>
+        </div>
+      </div>
+
+      <!-- SUBMIT -->
+      <div class="submit-section" id="submit-section" style="display:none">
+        <div class="submit-info">
+          <strong>¿Listo para guardar?</strong>
+          <span>El reporte quedará registrado en el sistema y no podrá modificarse.</span>
+        </div>
+        <button class="btn-submit" id="btn-submit" onclick="submitReport()">
+          💾 Guardar Reporte de Clase
+        </button>
+      </div>
+    </div>
+
+    <!-- TAB: HISTORIAL -->
+    <div class="tab-content" id="tab-historial">
+      <div class="page-header">
+        <h2>Historial de Clases</h2>
+        <p>Consulta los reportes de clases anteriores</p>
+      </div>
+      <div class="history-filters">
+        <select id="hist-nivel">
+          <option value="">Todos los niveles</option>
+          <option value="iniciacion">Iniciación</option>
+          <option value="intermedio">Intermedio</option>
+          <option value="avanzado">Avanzado</option>
+          <option value="adultos">Adultos</option>
+        </select>
+        <input type="month" id="hist-mes" />
+        <button class="btn-load" onclick="loadHistory()">Buscar</button>
+      </div>
+      <div id="history-list">
+        <div style="text-align:center;padding:3rem;color:var(--gray);">
+          <div style="font-size:2.5rem;margin-bottom:.8rem;">📅</div>
+          <p>Selecciona los filtros y presiona <strong>Buscar</strong></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: PROGRESO -->
+    <div class="tab-content" id="tab-progreso">
+      <div class="page-header">
+        <h2>Progreso de Alumnos</h2>
+        <p>Ficha individual de seguimiento pedagógico</p>
+      </div>
+      <div class="student-select-bar">
+        <label>👤 Alumno:</label>
+        <select id="student-select" onchange="loadStudentProgress()">
+          <option value="">— Selecciona un alumno —</option>
+        </select>
+      </div>
+      <div id="student-progress-content">
+        <div style="text-align:center;padding:3rem;color:var(--gray);">
+          <div style="font-size:2.5rem;margin-bottom:.8rem;">🏊</div>
+          <p>Selecciona un alumno para ver su progreso</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span class="toast-icon">✅</span>
+  <div class="toast-text">
+    <strong id="toast-title">Reporte guardado</strong>
+    <span id="toast-sub">Los datos han sido registrados correctamente</span>
+  </div>
+</div>
+
+<!-- LOADING -->
+<div class="loading-overlay" id="loading">
+  <div class="loading-box">
+    <div class="spinner"></div>
+    <p id="loading-text">Guardando reporte...</p>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════
+const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzWsSgVSXFbB9FnFhw1oxjRGgTa-28ltut0KYRKMmfqNAAn3f4GCb8a3kwsI0hE6ggSvQ/exec';
+
+// ═══════════════════════════════════════════════════════
+// INSTRUCTORES Y CONTRASEÑAS
+// (En producción esto se valida en el servidor)
+// ═══════════════════════════════════════════════════════
+const INSTRUCTORS = {
+  'Walter Pérez':    'msc2025',
+  'Instructor Demo': 'demo123'
+};
+
+// ═══════════════════════════════════════════════════════
+// OBJETIVOS POR NIVEL
+// ═══════════════════════════════════════════════════════
+const OBJETIVOS = {
+  burbuja: [
+    { id: 'b1', titulo: 'Ambientación al agua', desc: 'El bebé muestra comodidad y sin llanto al entrar al agua con el representante.', escalado: 'Se suelta brevemente del representante y flota asistido por el instructor.' },
+    { id: 'b2', titulo: 'Inmersión facial', desc: 'El bebé acepta que su cara entre en contacto con el agua sin resistencia.', escalado: 'El bebé realiza inmersión completa de cabeza por al menos 3 segundos.' },
+    { id: 'b3', titulo: 'Pataleo básico', desc: 'El bebé realiza movimientos de pataleo espontáneos o asistidos en el agua.', escalado: 'Pataleo coordinado sostenido por al menos 10 segundos.' }
+  ],
+  iniciacion: [
+    { id: 'i1', titulo: 'Inmersión y apertura de ojos', desc: 'El alumno se sumerge completamente y abre los ojos bajo el agua sin asistencia.', escalado: 'Realiza 5 inmersiones consecutivas con recuperación de objeto en el fondo.' },
+    { id: 'i2', titulo: 'Flotación ventral y dorsal', desc: 'El alumno flota en posición ventral y dorsal por al menos 5 segundos sin asistencia.', escalado: 'Mantiene flotación estable por 15 segundos, cambiando de posición autónomamente.' },
+    { id: 'i3', titulo: 'Respiración rítmica', desc: 'El alumno realiza la técnica de respiración lateral durante el estilo libre.', escalado: 'Mantiene respiración rítmica continua durante 25 metros de estilo libre.' },
+    { id: 'i4', titulo: 'Propulsión de brazos - Libre', desc: 'El alumno ejecuta el movimiento de brazada del estilo libre con tracción visible.', escalado: 'Completa 25 metros de estilo libre con brazada y respiración coordinadas.' },
+    { id: 'i5', titulo: 'Patada de pies - Libre', desc: 'El alumno ejecuta la patada de estilo libre (flutter kick) de forma continua.', escalado: 'Realiza 25 metros de patada con tabla sin parar.' },
+    { id: 'i6', titulo: 'Coordinación Estilo Libre completo', desc: 'El alumno nada estilo libre coordinando brazos, piernas y respiración.', escalado: 'Nada 50 metros de estilo libre continuo sin detenerse.' },
+    { id: 'i7', titulo: 'Posición de Espalda', desc: 'El alumno mantiene posición horizontal dorsal con cara fuera del agua.', escalado: 'Nada 25 metros de espalda sin tocar el borde.' },
+    { id: 'i8', titulo: 'Patada de Espalda', desc: 'El alumno ejecuta la patada de espalda con tabla de forma continua.', escalado: 'Realiza 25 metros de patada de espalda sin tabla.' }
+  ],
+  intermedio: [
+    { id: 'int1', titulo: 'Refuerzo Estilo Libre - Técnica', desc: 'El alumno nada 50m de estilo libre con técnica correcta de brazada y respiración.', escalado: 'Nada 100m estilo libre con ritmo sostenido y buena técnica.' },
+    { id: 'int2', titulo: 'Refuerzo Espalda - Técnica', desc: 'El alumno nada 50m de espalda con rotación de hombros y patada correcta.', escalado: 'Nada 100m de espalda sin perder posición horizontal.' },
+    { id: 'int3', titulo: 'Entrada al agua - Borde', desc: 'El alumno entra al agua desde el borde cayendo en posición vertical (pies primero y cabeza primero).', escalado: 'Entra en posición de flecha con extensión completa del cuerpo.' },
+    { id: 'int4', titulo: 'Salida olímpica básica', desc: 'El alumno ejecuta la salida desde el taco en posición de lanzamiento y entra al agua en flecha.', escalado: 'Entra en flecha y alcanza 5 metros con patada de delfín antes de emerger.' },
+    { id: 'int5', titulo: 'Inicio Estilo Pecho - Brazada', desc: 'El alumno ejecuta la brazada de pecho con la extensión y recuperación correcta.', escalado: 'Nada 25m de pecho coordinando brazos y piernas.' },
+    { id: 'int6', titulo: 'Patada de Rana (Pecho)', desc: 'El alumno realiza la patada de rana con apertura, propulsión y cierre correcto.', escalado: 'Realiza 25m de patada de pecho con tabla sin parar.' },
+    { id: 'int7', titulo: 'Inicio Estilo Mariposa - Ondulación', desc: 'El alumno realiza la ondulación corporal característica del estilo mariposa.', escalado: 'Realiza 15m de ondulación de mariposa con tabla.' }
+  ],
+  avanzado: [
+    { id: 'av1', titulo: 'Capacidad aeróbica - Series continuas', desc: 'El alumno completa series de 200m continuo en estilo libre sin detenerse.', escalado: 'Completa 400m en tiempo inferior a su marca personal anterior.' },
+    { id: 'av2', titulo: 'Salida olímpica competitiva', desc: 'El alumno sale del taco en flecha y avanza 5m con patada de delfín sin sacar la cabeza.', escalado: 'Realiza 6-7 patadas de delfín en flecha, alcanza 15m en menos de 8 segundos.' },
+    { id: 'av3', titulo: 'Viraje de volteo (Libre)', desc: 'El alumno ejecuta el viraje de volteo (flip turn) al llegar al borde.', escalado: 'Viraje en menos de 1 segundo con salida hidrodinámica.' },
+    { id: 'av4', titulo: 'Perfeccionamiento Mariposa', desc: 'El alumno nada 50m de mariposa con ondulación, brazada y respiración coordinadas.', escalado: 'Nada 100m de mariposa sin detenerse manteniendo ritmo.' },
+    { id: 'av5', titulo: 'Perfeccionamiento Pecho', desc: 'El alumno nada 50m de pecho con técnica de competición (deslizamiento optimizado).', escalado: 'Nada 100m de pecho con tiempo menor a su marca personal.' },
+    { id: 'av6', titulo: 'Individual Medley 100m', desc: 'El alumno completa 100m de combinado (25m cada estilo: Mariposa, Espalda, Pecho, Libre).', escalado: 'Completa 200m IM con transiciones correctas entre estilos.' }
+  ],
+  adultos: [
+    { id: 'ad1', titulo: 'Pérdida del miedo al agua', desc: 'El alumno entra y permanece en la piscina sin ansiedad visible.', escalado: 'Se desplaza autónomamente en zona profunda.' },
+    { id: 'ad2', titulo: 'Flotación básica', desc: 'El alumno flota en posición ventral y dorsal con mínima asistencia.', escalado: 'Mantiene flotación por 30 segundos en ambas posiciones.' },
+    { id: 'ad3', titulo: 'Respiración y submersión', desc: 'El alumno realiza respiración controlada y se sumerge sin pánico.', escalado: 'Controla respiración durante 10 inmersiones consecutivas.' },
+    { id: 'ad4', titulo: 'Nado de Libre básico', desc: 'El alumno nada 25m de estilo libre con brazada y respiración funcional.', escalado: 'Nada 50m de libre continuo con técnica aceptable.' },
+    { id: 'ad5', titulo: 'Nado de Espalda básico', desc: 'El alumno nada 25m de espalda manteniéndose a flote.', escalado: 'Nada 50m de espalda sin apoyarse en el borde.' }
+  ],
+  privada: [
+    { id: 'pr1', titulo: 'Objetivo personalizado 1', desc: 'Definido por el instructor según las necesidades del alumno.', escalado: 'Nivel avanzado del objetivo personalizado.' },
+    { id: 'pr2', titulo: 'Objetivo personalizado 2', desc: 'Definido por el instructor según las necesidades del alumno.', escalado: 'Nivel avanzado del objetivo personalizado.' },
+    { id: 'pr3', titulo: 'Objetivo personalizado 3', desc: 'Definido por el instructor según las necesidades del alumno.', escalado: 'Nivel avanzado del objetivo personalizado.' }
+  ]
+};
+
+// ═══════════════════════════════════════════════════════
+// ALUMNOS DEMO (en producción vienen de Sheets)
+// ═══════════════════════════════════════════════════════
+const ALUMNOS_DEMO = {
+  'iniciacion-lv-1500': [
+    { id: 'a1', nombre: 'Sofía Martínez', edad: '6 años', carril: 1 },
+    { id: 'a2', nombre: 'Mateo Rodríguez', edad: '7 años', carril: 1 },
+    { id: 'a3', nombre: 'Valentina López', edad: '5 años', carril: 1 },
+    { id: 'a4', nombre: 'Diego García', edad: '8 años', carril: 1 },
+    { id: 'a5', nombre: 'Isabella Pérez', edad: '6 años', carril: 1 }
+  ],
+  'intermedio-lv-1600': [
+    { id: 'a6', nombre: 'Andrés Fernández', edad: '10 años', carril: 2 },
+    { id: 'a7', nombre: 'Camila Torres', edad: '11 años', carril: 2 },
+    { id: 'a8', nombre: 'Miguel Sánchez', edad: '9 años', carril: 2 },
+    { id: 'a9', nombre: 'Lucía Vargas', edad: '12 años', carril: 2 }
+  ],
+  'avanzado-lv-1700': [
+    { id: 'a10', nombre: 'Alejandro Ruiz', edad: '14 años', carril: 3 },
+    { id: 'a11', nombre: 'Daniela Morales', edad: '15 años', carril: 3 },
+    { id: 'a12', nombre: 'Sebastián Castro', edad: '13 años', carril: 3 },
+    { id: 'a13', nombre: 'Gabriela Jiménez', edad: '16 años', carril: 3 },
+    { id: 'a14', nombre: 'Nicolás Herrera', edad: '14 años', carril: 3 },
+    { id: 'a15', nombre: 'Valeria Medina', edad: '15 años', carril: 3 }
+  ],
+  'adultos-lv-1800': [
+    { id: 'a16', nombre: 'Carlos Mendoza', edad: '35 años', carril: 4 },
+    { id: 'a17', nombre: 'Ana Suárez', edad: '28 años', carril: 4 },
+    { id: 'a18', nombre: 'Roberto Díaz', edad: '42 años', carril: 4 }
+  ]
+};
+
+// ═══════════════════════════════════════════════════════
+// ESTADO
+// ═══════════════════════════════════════════════════════
+let currentInstructor = null;
+let currentClass = null;
+let currentStudents = [];
+let attendance = {};
+let evaluations = {};
+let escalados = {};
+
+// ═══════════════════════════════════════════════════════
+// LOGIN
+// ═══════════════════════════════════════════════════════
+function doLogin() {
+  const name = document.getElementById('login-instructor').value;
+  const pass = document.getElementById('login-pass').value;
+  const err  = document.getElementById('login-error');
+  err.style.display = 'none';
+  if (!name || !INSTRUCTORS[name] || INSTRUCTORS[name] !== pass) {
+    err.style.display = 'block';
+    return;
+  }
+  currentInstructor = name;
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('topbar-name').textContent = name;
+  initDate();
+  populateStudentSelect();
+}
+
+function doLogout() {
+  currentInstructor = null;
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-pass').value = '';
+  document.getElementById('login-instructor').value = '';
+}
+
+// ═══════════════════════════════════════════════════════
+// DATE
+// ═══════════════════════════════════════════════════════
+function initDate() {
+  const now = new Date();
+  const opts = { weekday:'long', year:'numeric', month:'long', day:'numeric' };
+  document.getElementById('today-date').textContent = now.toLocaleDateString('es-VE', opts);
+  document.getElementById('today-time').textContent = now.toLocaleTimeString('es-VE', {hour:'2-digit',minute:'2-digit'}) + ' hrs';
+  document.getElementById('hist-mes').value = now.toISOString().slice(0,7);
+}
+
+// ═══════════════════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════════════════
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  const tabs = ['registro','historial','progreso'];
+  const idx = tabs.indexOf(tab);
+  document.querySelectorAll('.tab-btn')[idx].classList.add('active');
+  document.getElementById('tab-'+tab).classList.add('active');
+}
+
+// ═══════════════════════════════════════════════════════
+// LOAD CLASS
+// ═══════════════════════════════════════════════════════
+function loadClass() {
+  const val = document.getElementById('class-select').value;
+  if (!val) return;
+  currentClass = val;
+
+  // Determinar nivel
+  const nivel = val.split('-')[0];
+  const nivelLabels = { burbuja:'🫧 Burbuja', iniciacion:'🎒 Iniciación', intermedio:'🏊 Intermedio', avanzado:'🏅 Avanzado', adultos:'🌊 Adultos', privada:'⭐ Privada' };
+  const horarioLabel = document.getElementById('class-select').options[document.getElementById('class-select').selectedIndex].text;
+
+  // Alumnos para esta clase (demo o vacío)
+  currentStudents = ALUMNOS_DEMO[val] || generateDemoStudents(nivel);
+
+  // Mostrar info
+  document.getElementById('class-info-card').style.display = 'flex';
+  document.getElementById('ci-nivel').textContent    = nivelLabels[nivel] || nivel;
+  document.getElementById('ci-horario').textContent  = horarioLabel.split('·')[1]?.trim() || horarioLabel;
+  document.getElementById('ci-alumnos').textContent  = currentStudents.length + ' alumnos';
+  document.getElementById('ci-carril').textContent   = currentStudents[0]?.carril ? 'Carril ' + currentStudents[0].carril : 'Asignado';
+
+  // Reset estado
+  attendance = {}; evaluations = {}; escalados = {};
+  currentStudents.forEach(s => { attendance[s.id] = null; });
+
+  renderAttendance(nivel);
+  renderObjectives(nivel);
+
+  document.getElementById('attendance-card').style.display = 'block';
+  document.getElementById('objectives-card').style.display = 'block';
+  document.getElementById('submit-section').style.display = 'flex';
+}
+
+function generateDemoStudents(nivel) {
+  const names = ['Juan Pérez','María García','Luis Rodríguez','Ana Martínez','Carlos López'];
+  return names.map((n,i) => ({ id: 'x'+(i+1), nombre: n, edad: '—', carril: i+1 }));
+}
+
+// ═══════════════════════════════════════════════════════
+// ATTENDANCE
+// ═══════════════════════════════════════════════════════
+function renderAttendance(nivel) {
+  const list = document.getElementById('attendance-list');
+  list.innerHTML = '';
+  currentStudents.forEach(s => {
+    const initials = s.nombre.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    const row = document.createElement('div');
+    row.className = 'student-row';
+    row.id = 'srow-'+s.id;
+    row.innerHTML = `
+      <div class="student-avatar">${initials}</div>
+      <div class="student-name">
+        <strong>${s.nombre}</strong>
+        <span>${s.edad}</span>
+      </div>
+      <div class="attendance-btns">
+        <button class="att-btn present" onclick="setAtt('${s.id}','present',this)">✅ Presente</button>
+        <button class="att-btn absent" onclick="setAtt('${s.id}','absent',this)">❌ Ausente</button>
+        <button class="att-btn justified" onclick="setAtt('${s.id}','justified',this)">📋 Justificado</button>
+      </div>
+    `;
+    list.appendChild(row);
+  });
+  updateAttSummary();
+}
+
+function setAtt(id, status, btn) {
+  attendance[id] = status;
+  const row = document.getElementById('srow-'+id);
+  row.querySelectorAll('.att-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  // Actualizar eval rows — solo presentes evalúan
+  updateEvalVisibility(id, status);
+  updateAttSummary();
+}
+
+function updateAttSummary() {
+  const present = Object.values(attendance).filter(v=>v==='present').length;
+  const total = currentStudents.length;
+  document.getElementById('att-summary').textContent = `${present}/${total} presentes`;
+}
+
+function updateEvalVisibility(studentId, status) {
+  document.querySelectorAll(`.eval-row-${studentId}`).forEach(row => {
+    row.style.display = (status === 'present') ? 'flex' : 'none';
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// OBJECTIVES
+// ═══════════════════════════════════════════════════════
+function renderObjectives(nivel) {
+  const list = document.getElementById('objectives-list');
+  list.innerHTML = '';
+  const objs = OBJETIVOS[nivel] || OBJETIVOS['iniciacion'];
+
+  objs.forEach((obj, idx) => {
+    const item = document.createElement('div');
+    item.className = 'obj-item';
+    item.innerHTML = `
+      <div class="obj-header">
+        <div class="obj-number">${idx+1}</div>
+        <h4>${obj.titulo}</h4>
+        <span class="obj-difficulty" id="diff-badge-${obj.id}">Base</span>
+      </div>
+      <div class="obj-body">
+        <p class="obj-desc">${obj.desc}</p>
+
+        <div class="difficulty-section">
+          <label>🏆 Dificultad Escalada</label>
+          <div class="difficulty-toggle">
+            <label class="toggle-switch">
+              <input type="checkbox" id="esc-${obj.id}" onchange="toggleEscalado('${obj.id}')"/>
+              <span class="toggle-slider"></span>
+            </label>
+            <span style="font-size:.85rem;color:var(--gray);">Activar nivel de dificultad superior</span>
+          </div>
+          <p style="font-size:.82rem;color:#92400e;margin-bottom:.5rem;display:none" id="esc-desc-${obj.id}">
+            📋 ${obj.escalado}
+          </p>
+          <textarea class="difficulty-note" id="esc-note-${obj.id}" placeholder="Nota opcional sobre la dificultad escalada..."></textarea>
+        </div>
+
+        <div class="obj-students" id="obj-students-${obj.id}">
+          ${currentStudents.map(s => `
+            <div class="obj-student-row eval-row-${s.id}" style="display:none">
+              <span class="obj-student-name">${s.nombre}</span>
+              <div class="eval-btns">
+                <button class="eval-btn no-logro" onclick="setEval('${obj.id}','${s.id}','no-logro',this)">❌ No logró</button>
+                <button class="eval-btn en-proceso" onclick="setEval('${obj.id}','${s.id}','en-proceso',this)">🔄 En proceso</button>
+                <button class="eval-btn logro" onclick="setEval('${obj.id}','${s.id}','logro',this)">✅ Logró</button>
+              </div>
+            </div>
+          `).join('')}
+          <div style="font-size:.82rem;color:var(--gray);padding:.5rem 0;text-align:center" id="no-present-msg-${obj.id}">
+            Marca la asistencia primero para evaluar a los alumnos
+          </div>
+        </div>
+      </div>
+    `;
+    list.appendChild(item);
+  });
+}
+
+function toggleEscalado(objId) {
+  const cb = document.getElementById('esc-'+objId);
+  const note = document.getElementById('esc-note-'+objId);
+  const desc = document.getElementById('esc-desc-'+objId);
+  const badge = document.getElementById('diff-badge-'+objId);
+  const isOn = cb.checked;
+  note.classList.toggle('visible', isOn);
+  desc.style.display = isOn ? 'block' : 'none';
+  badge.textContent = isOn ? 'Escalado 🏆' : 'Base';
+  badge.classList.toggle('escalado', isOn);
+  escalados[objId] = isOn;
+}
+
+function setEval(objId, studentId, val, btn) {
+  if (!evaluations[objId]) evaluations[objId] = {};
+  evaluations[objId][studentId] = val;
+  const row = btn.closest('.obj-student-row');
+  row.querySelectorAll('.eval-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// ═══════════════════════════════════════════════════════
+// SUBMIT
+// ═══════════════════════════════════════════════════════
+async function submitReport() {
+  const presentCount = Object.values(attendance).filter(v=>v==='present').length;
+  if (presentCount === 0 && Object.values(attendance).every(v=>v===null)) {
+    showToast('⚠️','Asistencia pendiente','Debes marcar la asistencia primero.','warning');
+    return;
+  }
+
+  showLoading('Guardando reporte en Google Sheets...');
+  document.getElementById('btn-submit').disabled = true;
+
+  const nivel = currentClass.split('-')[0];
+  const objs = OBJETIVOS[nivel] || [];
+  const payload = {
+    accion: 'reporte_clase',
+    instructor: currentInstructor,
+    clase: currentClass,
+    fecha: new Date().toISOString(),
+    notas_clase: document.getElementById('class-notes').value,
+    asistencia: attendance,
+    evaluaciones: evaluations,
+    escalados: escalados,
+    objetivos_escalados_notas: objs.reduce((acc,o) => {
+      const note = document.getElementById('esc-note-'+o.id)?.value;
+      if (note) acc[o.id] = note;
+      return acc;
+    }, {}),
+    alumnos: currentStudents.map(s => ({ id: s.id, nombre: s.nombre }))
+  };
+
+  try {
+    const res = await fetch(SHEETS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    hideLoading();
+    if (data.success) {
+      showToast('✅','Reporte guardado','La clase quedó registrada correctamente.','success');
+      document.getElementById('btn-submit').disabled = false;
+    } else {
+      throw new Error(data.error || 'Error desconocido');
+    }
+  } catch(e) {
+    hideLoading();
+    // En modo demo guardamos localmente
+    console.log('Demo mode — datos del reporte:', payload);
+    showToast('✅','Reporte guardado (demo)','En producción se guardará en Google Sheets.','success');
+    document.getElementById('btn-submit').disabled = false;
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// HISTORIAL (demo)
+// ═══════════════════════════════════════════════════════
+function loadHistory() {
+  const list = document.getElementById('history-list');
+  const demoReports = [
+    { fecha:'Martes 22 de abril 2025', clase:'Iniciación · Lun-Vie 3:00pm', presentes:5, ausentes:0, objetivos:8 },
+    { fecha:'Lunes 21 de abril 2025',  clase:'Avanzado · Lun-Vie 5:00pm',   presentes:5, ausentes:1, objetivos:6 },
+    { fecha:'Sábado 19 de abril 2025', clase:'Intermedio · Sábado 10am',     presentes:4, ausentes:0, objetivos:7 }
+  ];
+  list.innerHTML = demoReports.map(r => `
+    <div class="history-card">
+      <div class="history-card-header">
+        <span class="hc-date">📅 ${r.fecha}</span>
+        <span class="hc-class">${r.clase}</span>
+      </div>
+      <div class="hc-stats">
+        <span class="hc-stat"><span class="dot present"></span>${r.presentes} presentes</span>
+        <span class="hc-stat"><span class="dot absent"></span>${r.ausentes} ausente</span>
+        <span class="hc-stat"><span class="dot process"></span>${r.objetivos} objetivos evaluados</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// PROGRESO ALUMNOS (demo)
+// ═══════════════════════════════════════════════════════
+function populateStudentSelect() {
+  const sel = document.getElementById('student-select');
+  const all = Object.values(ALUMNOS_DEMO).flat();
+  all.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s.id; opt.textContent = s.nombre;
+    sel.appendChild(opt);
+  });
+}
+
+function loadStudentProgress() {
+  const id = document.getElementById('student-select').value;
+  if (!id) return;
+  const all = Object.values(ALUMNOS_DEMO).flat();
+  const student = all.find(s => s.id === id);
+  if (!student) return;
+
+  const initials = student.nombre.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  const nivel = id.startsWith('a1') ? 'avanzado' : id.startsWith('a6')||id.startsWith('a7')||id.startsWith('a8')||id.startsWith('a9') ? 'intermedio' : 'iniciacion';
+  const objs = OBJETIVOS[nivel] || [];
+  const demoEvals = ['logro','en-proceso','logro','no-logro','en-proceso','logro','en-proceso','logro'];
+  const evalLabels = { 'logro':'✅ Logró', 'en-proceso':'🔄 En Proceso', 'no-logro':'❌ No Logró', 'sin-eval':'— Sin Evaluar' };
+  const widths = { 'logro':100, 'en-proceso':50, 'no-logro':15, 'sin-eval':0 };
+
+  document.getElementById('student-progress-content').innerHTML = `
+    <div class="progress-card">
+      <div class="progress-card-header">
+        <div class="prog-avatar">${initials}</div>
+        <div class="prog-info">
+          <strong>${student.nombre}</strong>
+          <span>${student.edad}</span>
+          <div class="prog-badges">
+            <span class="prog-badge">🏊 ${nivel.charAt(0).toUpperCase()+nivel.slice(1)}</span>
+            <span class="prog-badge">📅 Activo</span>
+          </div>
+        </div>
+      </div>
+      <div class="objectives-progress">
+        <p style="font-size:.82rem;color:var(--gray);margin-bottom:1.2rem;">Progreso por objetivo — última evaluación registrada</p>
+        ${objs.map((obj, i) => {
+          const ev = demoEvals[i] || 'sin-eval';
+          return `
+          <div class="obj-progress-item">
+            <div class="obj-progress-header">
+              <span>${obj.titulo}</span>
+              <span class="obj-eval-badge ${ev}">${evalLabels[ev]}</span>
+            </div>
+            <div class="progress-bar-bg">
+              <div class="progress-bar-fill ${ev}" style="width:${widths[ev]}%"></div>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+  `;
+}
+
+// ═══════════════════════════════════════════════════════
+// UI HELPERS
+// ═══════════════════════════════════════════════════════
+function showLoading(msg) {
+  document.getElementById('loading-text').textContent = msg || 'Cargando...';
+  document.getElementById('loading').classList.add('active');
+}
+function hideLoading() { document.getElementById('loading').classList.remove('active'); }
+
+function showToast(icon, title, sub) {
+  const t = document.getElementById('toast');
+  document.getElementById('toast').querySelector('.toast-icon').textContent = icon;
+  document.getElementById('toast-title').textContent = title;
+  document.getElementById('toast-sub').textContent = sub;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+</script>
+</body>
+</html>
