@@ -432,7 +432,7 @@
       <div class="mod-card">
         <div class="mod-icon">🏊‍♂️</div>
         <h3>En Nuestra Piscina</h3>
-        <p>Calle 67 (Av. Universidad) entre Av. 2A y 2C, Piscina del Colegio de Ingenieros del Estado Zulia, Maracaibo.</p>
+        <p>Calle 62 (Av. Universidad) entre Av. 2A y 2C, Piscina del Colegio de Ingenieros del Estado Zulia, Maracaibo.</p>
         <ul>
           <li>Piscina semiolímpica</li>
           <li>Grupos reducidos (máx. 6 alumnos)</li>
@@ -475,7 +475,7 @@
   <div class="section-inner">
     <span class="tag">Nuestra Ubicación</span>
     <h2 class="title">Encuéntranos en Maracaibo</h2>
-    <p class="sub">Estamos en las instalaciones del Colegio de Ingenieros del Estado Zulia, Calle 67 (Av. Universidad) entre Av. 2A y 2C, Maracaibo.</p>
+    <p class="sub">Estamos en las instalaciones del Colegio de Ingenieros del Estado Zulia, Calle 62 (Av. Universidad) entre Av. 2A y 2C, Maracaibo.</p>
     <div class="map-wrap">
       <iframe
         src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3893.5!2d-71.59538!3d10.6788!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8e89982f6a7d8f0f%3A0x1!2sColegio+de+Ingenieros+del+Estado+Zulia%2C+Av.+Universidad%2C+Maracaibo%2C+Venezuela!5e0!3m2!1ses!2sve!4v1"
@@ -483,7 +483,7 @@
       </iframe>
     </div>
     <div class="map-info">
-      <div class="map-chip"><span>📍</span> Calle 67 (Av. Universidad) entre Av. 2A y 2C, Colegio de Ingenieros del Estado Zulia, Maracaibo</div>
+      <div class="map-chip"><span>📍</span> Calle 62 (Av. Universidad) entre Av. 2A y 2C, Colegio de Ingenieros del Estado Zulia, Maracaibo</div>
       <div class="map-chip"><span>🕐</span> Lunes a Sábado · 6:00am – 8:00pm</div>
       <div class="map-chip"><span>📱</span> 0414-6004468</div>
       <div class="map-chip"><span>📸</span> @mcboswimclub</div>
@@ -542,7 +542,7 @@
     <a href="https://wa.me/584146004468" target="_blank">📱 0414-6004468</a>
     <a href="https://instagram.com/mcboswimclub" target="_blank">📸 @mcboswimclub</a>
   </div>
-  <p>© 2025 <strong>Maracaibo Swimming Club</strong> · Calle 67 (Av. Universidad) entre Av. 2A y 2C, Colegio de Ingenieros del Estado Zulia, Maracaibo, Venezuela · Todos los derechos reservados</p>
+  <p>© 2025 <strong>Maracaibo Swimming Club</strong> · Calle 62 (Av. Universidad) entre Av. 2A y 2C, Colegio de Ingenieros del Estado Zulia, Maracaibo, Venezuela · Todos los derechos reservados</p>
 </footer>
 
 <!-- CHATBOT FAB -->
@@ -581,7 +581,7 @@ let chatHistory = [];
 let collectingData = false;
 let userData = {};
 
-const SYSTEM_PROMPT = `Eres el asistente virtual del Maracaibo Swimming Club (MSC), escuela profesional de natación ubicada en la Piscina del CIDEZ, Calle 67 (Av. Universidad) entre Av. 2A y 2C, Maracaibo, Venezuela. Nuestro slogan es "Somos Familia Acuática".
+const SYSTEM_PROMPT = `Eres el asistente virtual del Maracaibo Swimming Club (MSC), escuela profesional de natación ubicada en la Piscina del CIDEZ, Calle 62 (Av. Universidad) entre Av. 2A y 2C, Maracaibo, Venezuela. Nuestro slogan es "Somos Familia Acuática".
 
 FECHA DE HOY: ${new Date().toLocaleDateString('es-VE', {weekday:'long', year:'numeric', month:'long', day:'numeric'})}
 
@@ -607,6 +607,7 @@ CLASES DE PRUEBA GRATUITAS (máx. 10 por mes)
 ═══════════════════════════════════
 - Niños: $0 · 30 min · Solo Lunes y Miércoles · 3:00 PM
 - Adultos: $0 · 30 min · Solo Lunes y Miércoles · 6:00 PM
+- EXCLUSIVAMENTE en la Piscina del CIDEZ · NO se ofrecen fuera de las instalaciones
 - El entrenador evalúa y define el nivel del alumno
 - Máximo 10 pruebas gratuitas por mes
 - Si los cupos están llenos → ofrecer clase de prueba de pago o lista de espera para el próximo mes
@@ -676,8 +677,10 @@ RECOPILACIÓN DE DATOS — uno a la vez
 3. Teléfono/WhatsApp
 4. Correo electrónico
 5. Nivel o tipo de clase de interés
-6. Modalidad (piscina o domicilio)
+6. Modalidad (piscina o domicilio) — SOLO para clases regulares, NO para pruebas ni privadas
 7. Día y horario preferido
+
+NOTA IMPORTANTE: Las clases de prueba y clases privadas son EXCLUSIVAMENTE en el CIDEZ. Si alguien pide servicios fuera del CIDEZ indícale que debe contactarnos por WhatsApp 0414-6004468 o email maracaiboswimmingclub@gmail.com
 
 VALIDACIÓN DE PRUEBA GRATUITA:
 - Máximo 10 pruebas gratuitas por mes
@@ -702,7 +705,7 @@ MENSAJE DE CONFIRMACIÓN — incluir siempre:
 - Nombre del alumno
 - Tipo de clase y costo
 - Fecha y hora exacta
-- Dirección: Piscina CIDEZ, Calle 67 (Av. Universidad) entre Av. 2A y 2C, Maracaibo
+- Dirección: Piscina CIDEZ, Calle 62 (Av. Universidad) entre Av. 2A y 2C, Maracaibo
 - Qué debe traer
 - Políticas aplicables
 - Que recibirá confirmación por email
