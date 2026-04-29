@@ -1,8 +1,8 @@
 [functions]
   directory = "netlify/functions"
+
 [build]
   ignore = ""
 
 [secrets_scanning]
-  enabled = true
-  omit_paths = ["portal-instructor.html"]
+  enabled = false
