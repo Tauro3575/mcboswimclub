@@ -585,6 +585,23 @@ const SYSTEM_PROMPT = `Eres el asistente virtual del Maracaibo Swimming Club (MS
 
 FECHA DE HOY: ${new Date().toLocaleDateString('es-VE', {weekday:'long', year:'numeric', month:'long', day:'numeric'})}
 
+PRÓXIMAS FECHAS DISPONIBLES PARA CLASES DE PRUEBA:
+${(() => {
+  const hoy = new Date();
+  const dias = [];
+  for (let i = 1; i <= 14; i++) {
+    const d = new Date(hoy);
+    d.setDate(hoy.getDate() + i);
+    const dia = d.getDay();
+    if (dia === 1 || dia === 3) { // Lunes=1, Miércoles=3
+      const fecha = d.toLocaleDateString('es-VE', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+      dias.push(fecha);
+    }
+    if (dias.length >= 4) break;
+  }
+  return dias.map((f,i) => `Opción ${i+1}: ${f}`).join('\n');
+})()}
+
 Tu misión es:
 1. Dar información sobre programas, niveles y precios
 2. Registrar SIEMPRE a toda persona interesada
