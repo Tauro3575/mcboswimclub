@@ -789,11 +789,21 @@ async function cargarAlumnosReales(claseKey) {
   };
   const horario = horarioMap[claseKey] || nivel;
 
+  const nivelMap = {
+    'burbuja':'Burbuja','iniciacion':'Iniciación',
+    'intermedio':'Intermedio','avanzado':'Avanzado',
+    'adultos':'Adultos','privada':'Privada'
+  };
+  const nivelFiltro = nivelMap[nivel] || '';
+
   try {
     const url = `${SHEETS_URL}?action=obtenerAlumnos&horario=${encodeURIComponent(horario)}`;
     const res  = await fetch(url);
     const data = await res.json();
-    return (data.alumnos || []).map((a, i) => ({
+    return (data.alumnos || [])
+      .filter(a => !nivelFiltro ||
+        String(a.nivel).toLowerCase().includes(nivelFiltro.toLowerCase()))
+      .map((a, i) => ({
       id: a.id,
       nombre: a.nombre,
       edad: a.nivel,
