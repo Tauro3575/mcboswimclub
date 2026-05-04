@@ -868,7 +868,7 @@ function switchTab(tab) {
 // ═══════════════════════════════════════════════════════
 // LOAD CLASS
 // ═══════════════════════════════════════════════════════
-function loadClass() {
+async function loadClass() {
   const val = document.getElementById('class-select').value;
   if (!val) return;
   currentClass = val;
@@ -879,7 +879,7 @@ function loadClass() {
   const horarioLabel = document.getElementById('class-select').options[document.getElementById('class-select').selectedIndex].text;
 
   // Alumnos para esta clase (demo o vacío)
-  currentStudents = ALUMNOS_DEMO[val] || generateDemoStudents(nivel);
+  currentStudents = await cargarAlumnosReales(val);
 
   // Mostrar info
   document.getElementById('class-info-card').style.display = 'flex';
