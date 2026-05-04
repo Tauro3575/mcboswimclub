@@ -1101,28 +1101,53 @@ async function submitReport() {
 // ═══════════════════════════════════════════════════════
 // HISTORIAL (demo)
 // ═══════════════════════════════════════════════════════
-function loadHistory() {
-  const list = document.getElementById('history-list');
-  const demoReports = [
-    { fecha:'Martes 22 de abril 2025', clase:'Iniciación · Lun-Vie 3:00pm', presentes:5, ausentes:0, objetivos:8 },
-    { fecha:'Lunes 21 de abril 2025',  clase:'Avanzado · Lun-Vie 5:00pm',   presentes:5, ausentes:1, objetivos:6 },
-    { fecha:'Sábado 19 de abril 2025', clase:'Intermedio · Sábado 10am',     presentes:4, ausentes:0, objetivos:7 }
-  ];
-  list.innerHTML = demoReports.map(r => `
-    <div class="history-card">
-      <div class="history-card-header">
-        <span class="hc-date">📅 ${r.fecha}</span>
-        <span class="hc-class">${r.clase}</span>
-      </div>
-      <div class="hc-stats">
-        <span class="hc-stat"><span class="dot present"></span>${r.presentes} presentes</span>
-        <span class="hc-stat"><span class="dot absent"></span>${r.ausentes} ausente</span>
-        <span class="hc-stat"><span class="dot process"></span>${r.objetivos} objetivos evaluados</span>
-      </div>
-    </div>
-  `).join('');
-}
+async function loadHistory() {
+  const nivel = document.getElementById('hist-nivel').value;
+  const mes   = document.getElementById('hist-mes').value;
+  const list  = document.getElementById('history-list');
 
+  list.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--gray);">⏳ Cargando historial...</div>';
+
+  try {
+    const params = new URLSearchParams();
+    params.append('action', 'obtenerHistorial');
+    if (nivel) params.append('nivel', nivel);
+    if (mes)   params.append('mes', mes.split('-')[1] + '/' + mes.split('-')[0]);
+
+    const res  = await fetch(`${SHEETS_URL}?${params.toString()}`);
+    const data = await res.json();
+    const reportes = data.reportes || [];
+
+    if (reportes.length === 0) {
+      list.innerHTML = `<div style="text-align:center;padding:3rem;color:var(--gray);">
+        <div style="font-size:2.5rem;margin-bottom:.8rem;">📅</div>
+        <p>No hay clases registradas para ese filtro</p>
+      </div>`;
+      return;
+    }
+
+    list.innerHTML = reportes.map(r => `
+      <div class="history-card">
+        <div class="history-card-header">
+          <span class="hc-date">📅 ${r.fecha}</span>
+          <span class="hc-class">${r.clase}</span>
+        </div>
+        <div class="hc-stats">
+          <span class="hc-stat"><span class="dot present"></span>${r.presentes} presentes</span>
+          <span class="hc-stat"><span class="dot absent"></span>${r.ausentes} ausentes</span>
+          <span class="hc-stat"><span class="dot process"></span>${r.justificados} justificados</span>
+          ${r.notas ? `<span class="hc-stat">📝 ${r.notas.substring(0,50)}${r.notas.length>50?'...':''}</span>` : ''}
+        </div>
+        <div style="font-size:.78rem;color:var(--gray);margin-top:.5rem;">👨‍🏫 ${r.instructor}</div>
+      </div>
+    `).join('');
+
+  } catch(e) {
+    list.innerHTML = `<div style="text-align:center;padding:3rem;color:var(--danger);">
+      <p>❌ Error cargando historial. Intenta de nuevo.</p>
+    </div>`;
+  }
+}
 // ═══════════════════════════════════════════════════════
 // PROGRESO ALUMNOS (demo)
 // ═══════════════════════════════════════════════════════
