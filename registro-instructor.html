@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Registro Instructor — Maracaibo Swimming Club</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --navy: #031d3a; --blue: #0057a8; --cyan: #00b4d8;
+      --gold: #f4b942; --white: #ffffff; --gray: #64748b;
+      --surface: #f0f7ff; --success: #10b981; --danger: #ef4444;
+    }
+    body { font-family: 'Outfit', sans-serif; background: var(--surface); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem; }
+
+    .container { width: 100%; max-width: 520px; }
+
+    /* ESTADOS */
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    /* CARD */
+    .card {
+      background: white; border-radius: 24px;
+      box-shadow: 0 8px 40px rgba(3,29,58,.12);
+      overflow: hidden;
+    }
+    .card-header {
+      background: linear-gradient(135deg, var(--navy), var(--blue));
+      padding: 2rem; text-align: center;
+    }
+    .card-header .icon { font-size: 2.5rem; margin-bottom: .5rem; }
+    .card-header h1 { font-family: 'Bebas Neue', sans-serif; color: white; font-size: 1.5rem; letter-spacing: .08em; }
+    .card-header p { color: var(--cyan); font-size: .82rem; letter-spacing: .1em; margin-top: .3rem; }
+    .card-body { padding: 2rem; }
+
+    /* FORM */
+    .form-group { margin-bottom: 1.2rem; }
+    .form-group label { display: block; font-size: .82rem; font-weight: 600; color: var(--navy); text-transform: uppercase; letter-spacing: .06em; margin-bottom: .5rem; }
+    .form-group input, .form-group select {
+      width: 100%; padding: .85rem 1rem;
+      border: 1.5px solid rgba(0,87,168,.15);
+      border-radius: 12px; font-family: 'Outfit', sans-serif;
+      font-size: .95rem; color: var(--navy); outline: none;
+      transition: border-color .2s;
+    }
+    .form-group input:focus, .form-group select:focus { border-color: var(--cyan); }
+    .form-group .hint { font-size: .75rem; color: var(--gray); margin-top: .4rem; }
+    .form-group .error { font-size: .75rem; color: var(--danger); margin-top: .4rem; display: none; }
+
+    /* PASSWORD STRENGTH */
+    .pwd-strength { margin-top: .5rem; }
+    .pwd-bar { height: 6px; background: #e2e8f0; border-radius: 50px; overflow: hidden; margin-bottom: .3rem; }
+    .pwd-fill { height: 100%; border-radius: 50px; transition: width .3s, background .3s; width: 0; }
+    .pwd-text { font-size: .75rem; color: var(--gray); }
+
+    /* BTN */
+    .btn-primary {
+      width: 100%; padding: 1rem;
+      background: linear-gradient(135deg, var(--blue), var(--cyan));
+      border: none; border-radius: 12px; color: white;
+      font-family: 'Outfit', sans-serif; font-size: 1rem; font-weight: 700;
+      cursor: pointer; transition: all .2s;
+      box-shadow: 0 6px 20px rgba(0,87,168,.3);
+      margin-top: .5rem;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(0,180,216,.4); }
+    .btn-primary:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+    /* LOADING */
+    .spinner { width: 40px; height: 40px; border: 3px solid #e2e8f0; border-top-color: var(--cyan); border-radius: 50%; animation: spin .8s linear infinite; margin: 0 auto 1rem; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* SUCCESS */
+    .success-icon { font-size: 4rem; text-align: center; margin-bottom: 1rem; }
+    .success-title { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; color: var(--navy); text-align: center; letter-spacing: .05em; }
+    .success-text { color: var(--gray); text-align: center; line-height: 1.7; margin-top: .5rem; }
+
+    /* ERROR */
+    .error-icon { font-size: 4rem; text-align: center; margin-bottom: 1rem; }
+    .error-title { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; color: var(--danger); text-align: center; letter-spacing: .05em; }
+    .error-text { color: var(--gray); text-align: center; line-height: 1.7; margin-top: .5rem; }
+
+    .footer-text { text-align: center; color: var(--gray); font-size: .78rem; margin-top: 1.5rem; }
+    .footer-text strong { color: var(--cyan); }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- VALIDANDO TOKEN -->
+  <div class="screen active" id="screen-validando">
+    <div class="card">
+      <div class="card-header">
+        <div class="icon">🏊</div>
+        <h1>Maracaibo Swimming Club</h1>
+        <p>REGISTRO DE INSTRUCTOR</p>
+      </div>
+      <div class="card-body" style="text-align:center;padding:3rem 2rem;">
+        <div class="spinner"></div>
+        <p style="color:var(--gray);">Validando tu invitación...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- FORMULARIO -->
+  <div class="screen" id="screen-form">
+    <div class="card">
+      <div class="card-header">
+        <div class="icon">👨‍🏫</div>
+        <h1>Completa tu Registro</h1>
+        <p>MARACAIBO SWIMMING CLUB</p>
+      </div>
+      <div class="card-body">
+        <div class="form-group">
+          <label>Nombre Completo</label>
+          <input type="text" id="reg-nombre" placeholder="Tu nombre y apellido"/>
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="reg-email" readonly style="background:#f8fafc;"/>
+        </div>
+        <div class="form-group">
+          <label>Teléfono / WhatsApp</label>
+          <input type="tel" id="reg-telefono" placeholder="Ej: 58-414-0000000"/>
+        </div>
+        <div class="form-group">
+          <label>Cédula / ID</label>
+          <input type="text" id="reg-cedula" placeholder="Ej: V-12345678"/>
+        </div>
+        <div class="form-group">
+          <label>Disponibilidad</label>
+          <select id="reg-disponibilidad">
+            <option value="">— Selecciona —</option>
+            <option value="Semanal">Semanal (Lunes a Viernes)</option>
+            <option value="Sabatino">Sabatino (Solo Sábados)</option>
+            <option value="Semanal y Sabatino">Semanal y Sabatino</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Contraseña</label>
+          <input type="password" id="reg-password" placeholder="Mínimo 9 caracteres" oninput="checkPassword()"/>
+          <div class="pwd-strength">
+            <div class="pwd-bar"><div class="pwd-fill" id="pwd-fill"></div></div>
+            <div class="pwd-text" id="pwd-text">Ingresa una contraseña</div>
+          </div>
+          <div class="hint">Debe tener: mayúsculas, minúsculas, números y caracteres especiales (!@#$%)</div>
+          <div class="error" id="pwd-error">La contraseña no cumple los requisitos mínimos</div>
+        </div>
+        <div class="form-group">
+          <label>Confirmar Contraseña</label>
+          <input type="password" id="reg-password2" placeholder="Repite tu contraseña"/>
+          <div class="error" id="pwd2-error">Las contraseñas no coinciden</div>
+        </div>
+        <button class="btn-primary" onclick="registrar()" id="btn-registrar">
+          ✅ Completar Registro
+        </button>
+      </div>
+    </div>
+    <p class="footer-text">🌊 <strong>Somos Familia Acuática</strong> · Maracaibo Swimming Club</p>
+  </div>
+
+  <!-- ÉXITO -->
+  <div class="screen" id="screen-exito">
+    <div class="card">
+      <div class="card-header">
+        <div class="icon">🏊</div>
+        <h1>Maracaibo Swimming Club</h1>
+        <p>REGISTRO COMPLETADO</p>
+      </div>
+      <div class="card-body" style="padding:2.5rem 2rem;">
+        <div class="success-icon">🎉</div>
+        <div class="success-title">¡Bienvenido/a!</div>
+        <p class="success-text">Tu registro ha sido completado exitosamente. Pronto recibirás tus clases asignadas y podrás acceder al portal de instructores.</p>
+        <div style="background:#e8f4fd;border-radius:12px;padding:1rem;margin-top:1.5rem;text-align:center;">
+          <p style="color:#0057a8;font-size:.88rem;">📱 ¿Tienes dudas? Contáctanos por WhatsApp</p>
+          <p style="color:#031d3a;font-weight:700;">0414-6004468</p>
+        </div>
+      </div>
+    </div>
+    <p class="footer-text">🌊 <strong>Somos Familia Acuática</strong> · Maracaibo Swimming Club</p>
+  </div>
+
+  <!-- ERROR -->
+  <div class="screen" id="screen-error">
+    <div class="card">
+      <div class="card-header" style="background:linear-gradient(135deg,#7f1d1d,#dc2626);">
+        <div class="icon">🏊</div>
+        <h1>Maracaibo Swimming Club</h1>
+        <p style="color:#fca5a5;">LINK INVÁLIDO</p>
+      </div>
+      <div class="card-body" style="padding:2.5rem 2rem;">
+        <div class="error-icon">⚠️</div>
+        <div class="error-title" id="error-titulo">Link Expirado</div>
+        <p class="error-text" id="error-mensaje">Este link de registro ha expirado o ya fue utilizado. Por favor solicita uno nuevo al administrador del club.</p>
+        <div style="background:#fee2e2;border-radius:12px;padding:1rem;margin-top:1.5rem;text-align:center;">
+          <p style="color:#dc2626;font-size:.88rem;">📱 Solicita un nuevo link por WhatsApp</p>
+          <p style="color:#031d3a;font-weight:700;">0414-6004468</p>
+        </div>
+      </div>
+    </div>
+    <p class="footer-text">🌊 <strong>Somos Familia Acuática</strong> · Maracaibo Swimming Club</p>
+  </div>
+
+</div>
+
+<script>
+const SHEETS_URL = '/.netlify/functions/instructor';
+let tokenActual = '';
+
+// ── INIT ──────────────────────────────────────────────
+window.addEventListener('load', async () => {
+  const params = new URLSearchParams(window.location.search);
+  const token  = params.get('token');
+
+  if (!token) {
+    showError('Link Inválido', 'No se encontró un token de registro válido en este link.');
+    return;
+  }
+
+  tokenActual = token;
+
+  try {
+    const res  = await fetch(`${SHEETS_URL}?action=validarToken&token=${token}`);
+    const data = await res.json();
+
+    if (!data.valido) {
+      const mensajes = {
+        'Token ya utilizado': 'Este link ya fue utilizado para registrarse. Cada link es de uso único.',
+        'Token expirado':     'Este link ha expirado (72 horas). Por favor solicita uno nuevo.',
+        'Token no encontrado':'Este link no es válido. Por favor solicita uno nuevo al administrador.'
+      };
+      showError('Link Inválido', mensajes[data.error] || data.error);
+      return;
+    }
+
+    // Token válido — mostrar formulario
+    document.getElementById('reg-email').value  = data.email  || '';
+    document.getElementById('reg-nombre').value = data.nombre || '';
+    showScreen('screen-form');
+
+  } catch(e) {
+    showError('Error de Conexión', 'No se pudo validar el link. Por favor intenta de nuevo.');
+  }
+});
+
+// ── PASSWORD STRENGTH ────────────────────────────────
+function checkPassword() {
+  const pwd  = document.getElementById('reg-password').value;
+  const fill = document.getElementById('pwd-fill');
+  const text = document.getElementById('pwd-text');
+
+  let score = 0;
+  if (pwd.length >= 9)          score++;
+  if (/[A-Z]/.test(pwd))        score++;
+  if (/[a-z]/.test(pwd))        score++;
+  if (/[0-9]/.test(pwd))        score++;
+  if (/[^A-Za-z0-9]/.test(pwd)) score++;
+
+  const colors = ['#ef4444','#f59e0b','#f59e0b','#10b981','#10b981'];
+  const labels = ['Muy débil','Débil','Regular','Fuerte','Muy fuerte'];
+  fill.style.width   = (score * 20) + '%';
+  fill.style.background = colors[score - 1] || '#e2e8f0';
+  text.textContent   = score > 0 ? labels[score - 1] : 'Ingresa una contraseña';
+  text.style.color   = colors[score - 1] || '#64748b';
+}
+
+function isPasswordValid(pwd) {
+  return pwd.length >= 9 &&
+    /[A-Z]/.test(pwd) &&
+    /[a-z]/.test(pwd) &&
+    /[0-9]/.test(pwd) &&
+    /[^A-Za-z0-9]/.test(pwd);
+}
+
+// ── REGISTRO ─────────────────────────────────────────
+async function registrar() {
+  const nombre        = document.getElementById('reg-nombre').value.trim();
+  const email         = document.getElementById('reg-email').value.trim();
+  const telefono      = document.getElementById('reg-telefono').value.trim();
+  const cedula        = document.getElementById('reg-cedula').value.trim();
+  const disponibilidad = document.getElementById('reg-disponibilidad').value;
+  const password      = document.getElementById('reg-password').value;
+  const password2     = document.getElementById('reg-password2').value;
+
+  // Validaciones
+  if (!nombre || !telefono || !cedula || !disponibilidad) {
+    alert('Por favor completa todos los campos.');
+    return;
+  }
+
+  const pwdError  = document.getElementById('pwd-error');
+  const pwd2Error = document.getElementById('pwd2-error');
+  pwdError.style.display  = 'none';
+  pwd2Error.style.display = 'none';
+
+  if (!isPasswordValid(password)) {
+    pwdError.style.display = 'block';
+    return;
+  }
+
+  if (password !== password2) {
+    pwd2Error.style.display = 'block';
+    return;
+  }
+
+  const btn = document.getElementById('btn-registrar');
+  btn.disabled     = true;
+  btn.textContent  = '⏳ Registrando...';
+
+  try {
+    const res  = await fetch(SHEETS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        accion:        'registrarInstructor',
+        token:         tokenActual,
+        nombre,
+        email,
+        telefono,
+        cedula,
+        disponibilidad,
+        password
+      })
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      showScreen('screen-exito');
+    } else {
+      alert('Error: ' + (data.error || 'No se pudo completar el registro.'));
+      btn.disabled    = false;
+      btn.textContent = '✅ Completar Registro';
+    }
+  } catch(e) {
+    alert('Error de conexión. Por favor intenta de nuevo.');
+    btn.disabled    = false;
+    btn.textContent = '✅ Completar Registro';
+  }
+}
+
+// ── HELPERS ──────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function showError(titulo, mensaje) {
+  document.getElementById('error-titulo').textContent  = titulo;
+  document.getElementById('error-mensaje').textContent = mensaje;
+  showScreen('screen-error');
+}
+</script>
+</body>
+</html>
