@@ -769,33 +769,39 @@ const OBJETIVOS = {
 // ═══════════════════════════════════════════════════════
 // ALUMNOS DEMO (en producción vienen de Sheets)
 // ═══════════════════════════════════════════════════════
-const ALUMNOS_DEMO = {
-  'iniciacion-lv-1500': [
-    { id: 'a1', nombre: 'Sofía Martínez', edad: '6 años', carril: 1 },
-    { id: 'a2', nombre: 'Mateo Rodríguez', edad: '7 años', carril: 1 },
-    { id: 'a3', nombre: 'Valentina López', edad: '5 años', carril: 1 },
-    { id: 'a4', nombre: 'Diego García', edad: '8 años', carril: 1 },
-    { id: 'a5', nombre: 'Isabella Pérez', edad: '6 años', carril: 1 }
-  ],
-  'intermedio-lv-1600': [
-    { id: 'a6', nombre: 'Andrés Fernández', edad: '10 años', carril: 2 },
-    { id: 'a7', nombre: 'Camila Torres', edad: '11 años', carril: 2 },
-    { id: 'a8', nombre: 'Miguel Sánchez', edad: '9 años', carril: 2 },
-    { id: 'a9', nombre: 'Lucía Vargas', edad: '12 años', carril: 2 }
-  ],
-  'avanzado-lv-1700': [
-    { id: 'a10', nombre: 'Alejandro Ruiz', edad: '14 años', carril: 3 },
-    { id: 'a11', nombre: 'Daniela Morales', edad: '15 años', carril: 3 },
-    { id: 'a12', nombre: 'Sebastián Castro', edad: '13 años', carril: 3 },
-    { id: 'a13', nombre: 'Gabriela Jiménez', edad: '16 años', carril: 3 },
-    { id: 'a14', nombre: 'Nicolás Herrera', edad: '14 años', carril: 3 },
-    { id: 'a15', nombre: 'Valeria Medina', edad: '15 años', carril: 3 }
-  ],
-  'adultos-lv-1800': [
-    { id: 'a16', nombre: 'Carlos Mendoza', edad: '35 años', carril: 4 },
-    { id: 'a17', nombre: 'Ana Suárez', edad: '28 años', carril: 4 },
-    { id: 'a18', nombre: 'Roberto Díaz', edad: '42 años', carril: 4 }
-  ]
+const ALUMNOS_DEMO = {};
+
+async function cargarAlumnosReales(claseKey) {
+  const nivel = claseKey.split('-')[0];
+  const horarioMap = {
+    'iniciacion-sab-900':  'sabatino 2h niños',
+    'iniciacion-lv-1500':  'lunes-viernes 5pm',
+    'iniciacion-lv-1600':  'lunes-viernes 6pm',
+    'intermedio-sab-1000': 'sabatino 2h niños',
+    'intermedio-lv-1600':  'lunes-viernes 6pm',
+    'avanzado-sab-800':    'sabatino adulto 8am',
+    'avanzado-lv-1700':    'lunes-viernes 6pm',
+    'adultos-lv-1700':     'lunes-viernes 5pm',
+    'adultos-lv-1800':     'lunes-viernes 6pm',
+    'burbuja-sab-11':      'sabatino 1h niños',
+  };
+
+  const horario = horarioMap[claseKey] || nivel;
+
+  try {
+    const url = `${SHEETS_URL}?action=obtenerAlumnos&horario=${encodeURIComponent(horario)}`;
+    const res  = await fetch(url);
+    const data = await res.json();
+    return (data.alumnos || []).map((a, i) => ({
+      id: a.id,
+      nombre: a.nombre,
+      edad: a.nivel,
+      carril: (i % 6) + 1
+    }));
+  } catch(e) {
+    console.error('Error cargando alumnos:', e);
+    return generateDemoStudents(nivel);
+  }
 };
 
 // ═══════════════════════════════════════════════════════
