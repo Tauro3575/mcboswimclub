@@ -3,14 +3,23 @@ exports.handler = async (event) => {
 
   try {
     if (event.httpMethod === 'GET') {
-      const params = new URLSearchParams(event.queryStringParameters || {});
-      const url = `${APPS_SCRIPT_URL}?${params.toString()}`;
-      const response = await fetch(url);
-      const data = await response.json();
+      const qs = event.queryStringParameters || {};
+      const params = Object.keys(qs)
+        .map(k => `${encodeURIComponent(k)}=${encodeURIComponent(qs[k])}`)
+        .join('&');
+      const url = params ? `${APPS_SCRIPT_URL}?${params}` : APPS_SCRIPT_URL;
+      const response = await fetch(url, {
+        method: 'GET',
+        redirect: 'follow'
+      });
+      const text = await response.text();
       return {
         statusCode: 200,
-        headers: { 'Access-Control-Allow-Origin': '*' },
-        body: JSON.stringify(data)
+        headers: { 
+          'Access-Control-Allow-Origin': '*',
+          'Content-Type': 'application/json'
+        },
+        body: text
       };
     }
 
@@ -18,13 +27,17 @@ exports.handler = async (event) => {
       const response = await fetch(APPS_SCRIPT_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: event.body
+        body: event.body,
+        redirect: 'follow'
       });
-      const data = await response.json();
+      const text = await response.text();
       return {
         statusCode: 200,
-        headers: { 'Access-Control-Allow-Origin': '*' },
-        body: JSON.stringify(data)
+        headers: { 
+          'Access-Control-Allow-Origin': '*',
+          'Content-Type': 'application/json'
+        },
+        body: text
       };
     }
 
