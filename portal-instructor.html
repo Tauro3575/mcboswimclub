@@ -774,18 +774,19 @@ const ALUMNOS_DEMO = {};
 async function cargarAlumnosReales(claseKey) {
   const nivel = claseKey.split('-')[0];
   const horarioMap = {
-    'iniciacion-sab-900':  'sabatino 2h niños',
-    'iniciacion-lv-1500':  'lunes-viernes 5pm',
-    'iniciacion-lv-1600':  'lunes-viernes 6pm',
-    'intermedio-sab-1000': 'sabatino 2h niños',
-    'intermedio-lv-1600':  'lunes-viernes 6pm',
-    'avanzado-sab-800':    'sabatino adulto 8am',
-    'avanzado-lv-1700':    'lunes-viernes 6pm',
-    'adultos-lv-1700':     'lunes-viernes 5pm',
-    'adultos-lv-1800':     'lunes-viernes 6pm',
-    'burbuja-sab-11':      'sabatino 1h niños',
+    'iniciacion-sab-900':  'sabatino',
+    'iniciacion-lv-1500':  'viernes 5pm',
+    'iniciacion-lv-1600':  'viernes 6pm',
+    'intermedio-sab-1000': 'sabatino',
+    'intermedio-lv-1600':  'viernes 6pm',
+    'avanzado-sab-800':    'sabatino adulto',
+    'avanzado-lv-1700':    'viernes 6pm',
+    'adultos-lv-1700':     'viernes 5pm',
+    'adultos-lv-1800':     'viernes 6pm',
+    'adultos-lv-1900':     'viernes 7pm',
+    'burbuja-sab-11':      'sabatino 1 hora',
+    'privada-lv-1400':     'privada',
   };
-
   const horario = horarioMap[claseKey] || nivel;
 
   try {
