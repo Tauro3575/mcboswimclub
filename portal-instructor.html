@@ -1112,11 +1112,19 @@ async function loadHistory() {
     const params = new URLSearchParams();
     params.append('action', 'obtenerHistorial');
     if (nivel) params.append('nivel', nivel);
-    if (mes)   params.append('mes', mes.split('-')[1] + '/' + mes.split('-')[0]);
 
     const res  = await fetch(`${SHEETS_URL}?${params.toString()}`);
     const data = await res.json();
-    const reportes = data.reportes || [];
+    let reportes = data.reportes || [];
+
+    // Filtrar por mes en el navegador
+    if (mes) {
+      const [anio, mesNum] = mes.split('-');
+      reportes = reportes.filter(r => {
+        const fecha = new Date(r.fecha);
+        return fecha.getFullYear() == anio && (fecha.getMonth() + 1) == parseInt(mesNum);
+      });
+    }
 
     if (reportes.length === 0) {
       list.innerHTML = `<div style="text-align:center;padding:3rem;color:var(--gray);">
@@ -1126,10 +1134,13 @@ async function loadHistory() {
       return;
     }
 
-    list.innerHTML = reportes.map(r => `
+    list.innerHTML = reportes.map(r => {
+      const fecha = new Date(r.fecha);
+      const fechaStr = fecha.toLocaleDateString('es-VE', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+      return `
       <div class="history-card">
         <div class="history-card-header">
-          <span class="hc-date">📅 ${r.fecha}</span>
+          <span class="hc-date">📅 ${fechaStr}</span>
           <span class="hc-class">${r.clase}</span>
         </div>
         <div class="hc-stats">
@@ -1139,8 +1150,8 @@ async function loadHistory() {
           ${r.notas ? `<span class="hc-stat">📝 ${r.notas.substring(0,50)}${r.notas.length>50?'...':''}</span>` : ''}
         </div>
         <div style="font-size:.78rem;color:var(--gray);margin-top:.5rem;">👨‍🏫 ${r.instructor}</div>
-      </div>
-    `).join('');
+      </div>`;
+    }).join('');
 
   } catch(e) {
     list.innerHTML = `<div style="text-align:center;padding:3rem;color:var(--danger);">
