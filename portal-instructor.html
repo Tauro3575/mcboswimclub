@@ -1240,6 +1240,25 @@ function showLoading(msg) {
 }
 function hideLoading() { document.getElementById('loading').classList.remove('active'); }
 
+  function doLogout() {
+  currentInstructor = null;
+  currentClass = null;
+  currentStudents = [];
+  attendance = {};
+  evaluations = {};
+  escalados = {};
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-pass').value = '';
+  document.getElementById('login-instructor').value = '';
+  document.getElementById('class-select').value = '';
+  document.getElementById('class-info-card').style.display = 'none';
+  document.getElementById('attendance-card').style.display = 'none';
+  document.getElementById('objectives-card').style.display = 'none';
+  document.getElementById('submit-section').style.display = 'none';
+  document.getElementById('class-notes').value = '';
+}
+  
 function showToast(icon, title, sub) {
   const t = document.getElementById('toast');
   document.getElementById('toast').querySelector('.toast-icon').textContent = icon;
