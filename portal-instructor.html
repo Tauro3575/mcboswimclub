@@ -1172,65 +1172,111 @@ async function loadHistory() {
   }
 }
 // ═══════════════════════════════════════════════════════
-// PROGRESO ALUMNOS (demo)
+// PROGRESO ALUMNOS — REAL DESDE SHEETS
 // ═══════════════════════════════════════════════════════
-function populateStudentSelect() {
+async function populateStudentSelect() {
   const sel = document.getElementById('student-select');
-  const all = Object.values(ALUMNOS_DEMO).flat();
-  all.forEach(s => {
-    const opt = document.createElement('option');
-    opt.value = s.id; opt.textContent = s.nombre;
-    sel.appendChild(opt);
-  });
+  sel.innerHTML = '<option value="">— Cargando alumnos... —</option>';
+
+  try {
+    const res  = await fetch(`${SHEETS_URL}?action=obtenerAlumnos&horario=todos`);
+    const data = await res.json();
+    const alumnos = data.alumnos || [];
+
+    sel.innerHTML = '<option value="">— Selecciona un alumno —</option>';
+    alumnos.forEach(a => {
+      const opt = document.createElement('option');
+      opt.value   = a.nombre;
+      opt.dataset.nivel   = a.nivel;
+      opt.dataset.horario = a.horario;
+      opt.textContent = `${a.nombre} (${a.nivel})`;
+      sel.appendChild(opt);
+    });
+  } catch(e) {
+    sel.innerHTML = '<option value="">— Error cargando alumnos —</option>';
+  }
 }
 
-function loadStudentProgress() {
-  const id = document.getElementById('student-select').value;
-  if (!id) return;
-  const all = Object.values(ALUMNOS_DEMO).flat();
-  const student = all.find(s => s.id === id);
-  if (!student) return;
+async function loadStudentProgress() {
+  const sel    = document.getElementById('student-select');
+  const nombre = sel.value;
+  const nivel  = sel.options[sel.selectedIndex]?.dataset?.nivel || '';
+  const content = document.getElementById('student-progress-content');
 
-  const initials = student.nombre.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
-  const nivel = id.startsWith('a1') ? 'avanzado' : id.startsWith('a6')||id.startsWith('a7')||id.startsWith('a8')||id.startsWith('a9') ? 'intermedio' : 'iniciacion';
-  const objs = OBJETIVOS[nivel] || [];
-  const demoEvals = ['logro','en-proceso','logro','no-logro','en-proceso','logro','en-proceso','logro'];
-  const evalLabels = { 'logro':'✅ Logró', 'en-proceso':'🔄 En Proceso', 'no-logro':'❌ No Logró', 'sin-eval':'— Sin Evaluar' };
-  const widths = { 'logro':100, 'en-proceso':50, 'no-logro':15, 'sin-eval':0 };
+  if (!nombre) return;
 
-  document.getElementById('student-progress-content').innerHTML = `
-    <div class="progress-card">
-      <div class="progress-card-header">
-        <div class="prog-avatar">${initials}</div>
-        <div class="prog-info">
-          <strong>${student.nombre}</strong>
-          <span>${student.edad}</span>
-          <div class="prog-badges">
-            <span class="prog-badge">🏊 ${nivel.charAt(0).toUpperCase()+nivel.slice(1)}</span>
-            <span class="prog-badge">📅 Activo</span>
+  content.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--gray);">⏳ Cargando progreso...</div>';
+
+  try {
+    const res  = await fetch(`${SHEETS_URL}?action=obtenerProgreso&nombre=${encodeURIComponent(nombre)}`);
+    const data = await res.json();
+
+    if (data.error) {
+      content.innerHTML = `<div style="text-align:center;padding:2rem;color:var(--danger);">❌ ${data.error}</div>`;
+      return;
+    }
+
+    const alumno = data.alumno || {};
+    const evalMap = data.evaluaciones || {};
+    const nivelKey = String(alumno.nivel || nivel).toLowerCase()
+      .replace('iniciación','iniciacion')
+      .replace('intermedio','intermedio')
+      .replace('avanzado','avanzado')
+      .replace('adultos','adultos')
+      .replace('burbuja','burbuja');
+    const objs = OBJETIVOS[nivelKey] || OBJETIVOS['iniciacion'];
+
+    const evalLabels = { 'logro':'✅ Logró', 'en-proceso':'🔄 En Proceso', 'no-logro':'❌ No Logró' };
+    const widths     = { 'logro':100, 'en-proceso':50, 'no-logro':15 };
+
+    const logros    = Object.values(evalMap).filter(e => e.resultado === 'logro').length;
+    const enProceso = Object.values(evalMap).filter(e => e.resultado === 'en-proceso').length;
+    const noLogro   = Object.values(evalMap).filter(e => e.resultado === 'no-logro').length;
+    const total     = objs.length;
+    const pctLogro  = total > 0 ? Math.round(logros / total * 100) : 0;
+
+    const initials = nombre.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+
+    content.innerHTML = `
+      <div class="progress-card">
+        <div class="progress-card-header">
+          <div class="prog-avatar">${initials}</div>
+          <div class="prog-info">
+            <strong>${alumno.nombre || nombre}</strong>
+            <span>${alumno.horario || ''}</span>
+            <div class="prog-badges">
+              <span class="prog-badge">🏊 ${alumno.nivel || nivel}</span>
+              <span class="prog-badge">✅ ${logros}/${total} objetivos</span>
+              <span class="prog-badge">📊 ${pctLogro}% completado</span>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="objectives-progress">
-        <p style="font-size:.82rem;color:var(--gray);margin-bottom:1.2rem;">Progreso por objetivo — última evaluación registrada</p>
-        ${objs.map((obj, i) => {
-          const ev = demoEvals[i] || 'sin-eval';
-          return `
-          <div class="obj-progress-item">
-            <div class="obj-progress-header">
-              <span>${obj.titulo}</span>
-              <span class="obj-eval-badge ${ev}">${evalLabels[ev]}</span>
-            </div>
-            <div class="progress-bar-bg">
-              <div class="progress-bar-fill ${ev}" style="width:${widths[ev]}%"></div>
-            </div>
-          </div>`;
-        }).join('')}
-      </div>
-    </div>
-  `;
-}
+        <div class="objectives-progress">
+          <p style="font-size:.82rem;color:var(--gray);margin-bottom:1.2rem;">Progreso por objetivo — última evaluación registrada</p>
+          ${objs.map(obj => {
+            const ev = evalMap[obj.id];
+            const resultado = ev ? ev.resultado : 'sin-eval';
+            const label = evalLabels[resultado] || '— Sin Evaluar';
+            const width = widths[resultado] || 0;
+            const fecha = ev ? `<span style="font-size:.72rem;color:var(--gray);margin-left:.5rem;">${String(ev.fecha).substring(0,10)}</span>` : '';
+            return `
+            <div class="obj-progress-item">
+              <div class="obj-progress-header">
+                <span>${obj.titulo}${fecha}</span>
+                <span class="obj-eval-badge ${resultado}">${label}</span>
+              </div>
+              <div class="progress-bar-bg">
+                <div class="progress-bar-fill ${resultado}" style="width:${width}%"></div>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>`;
 
+  } catch(e) {
+    content.innerHTML = `<div style="text-align:center;padding:2rem;color:var(--danger);">❌ Error cargando progreso.</div>`;
+  }
+}
 // ═══════════════════════════════════════════════════════
 // UI HELPERS
 // ═══════════════════════════════════════════════════════
