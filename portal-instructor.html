@@ -472,14 +472,10 @@
     </div>
     <h2 class="login-title">Acceso</h2>
     <p class="login-sub">Ingresa tus credenciales para continuar</p>
-    <div class="form-group">
-      <label>Instructor</label>
-      <select id="login-instructor">
-        <option value="">— Selecciona tu nombre —</option>
-        <option value="Walter Pérez">Walter Pérez</option>
-        <option value="Instructor Demo">Instructor Demo</option>
-      </select>
-    </div>
+<div class="form-group">
+  <label>Email</label>
+  <input type="email" id="login-instructor" placeholder="tu@email.com"/>
+</div>
     <div class="form-group">
       <label>Contraseña</label>
       <input type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/>
@@ -828,29 +824,45 @@ let escalados = {};
 // ═══════════════════════════════════════════════════════
 // LOGIN
 // ═══════════════════════════════════════════════════════
-function doLogin() {
+async function doLogin() {
   const name = document.getElementById('login-instructor').value;
   const pass = document.getElementById('login-pass').value;
   const err  = document.getElementById('login-error');
   err.style.display = 'none';
-  if (!name || !INSTRUCTORS[name] || INSTRUCTORS[name] !== pass) {
+
+  if (!name || !pass) {
+    err.textContent = '❌ Por favor completa todos los campos.';
     err.style.display = 'block';
     return;
   }
-  currentInstructor = name;
-  document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
-  document.getElementById('topbar-name').textContent = name;
-  initDate();
-  populateStudentSelect();
-}
 
-function doLogout() {
-  currentInstructor = null;
-  document.getElementById('login-screen').style.display = 'flex';
-  document.getElementById('app').style.display = 'none';
-  document.getElementById('login-pass').value = '';
-  document.getElementById('login-instructor').value = '';
+  try {
+    const res  = await fetch(SHEETS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        accion:   'loginInstructor',
+        email:    name,
+        password: pass
+      })
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      currentInstructor = data.nombre;
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      document.getElementById('topbar-name').textContent = data.nombre;
+      initDate();
+      populateStudentSelect();
+    } else {
+      err.textContent = '❌ ' + (data.error || 'Credenciales incorrectas.');
+      err.style.display = 'block';
+    }
+  } catch(e) {
+    err.textContent = '❌ Error de conexión. Intenta de nuevo.';
+    err.style.display = 'block';
+  }
 }
 
 // ═══════════════════════════════════════════════════════
