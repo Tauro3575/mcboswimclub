@@ -1179,7 +1179,7 @@ async function populateStudentSelect() {
   sel.innerHTML = '<option value="">— Cargando alumnos... —</option>';
 
   try {
-    const res  = await fetch(`${SHEETS_URL}?action=obtenerAlumnos&horario=todos`);
+    const res = await fetch(`${SHEETS_URL}?action=obtenerTodosAlumnos`);
     const data = await res.json();
     const alumnos = data.alumnos || [];
 
