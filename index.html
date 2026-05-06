@@ -20,7 +20,6 @@
     html { scroll-behavior: smooth; }
     body { font-family: 'Outfit', sans-serif; background: var(--white); color: var(--navy); overflow-x: hidden; }
 
-    /* NAV */
     nav {
       position: fixed; top: 0; width: 100%; z-index: 200;
       display: flex; justify-content: space-between; align-items: center;
@@ -28,11 +27,7 @@
       background: rgba(3,29,58,0.96); backdrop-filter: blur(12px);
     }
     .logo { display: flex; align-items: center; gap: .7rem; text-decoration: none; }
-    .logo-icon {
-      width: 42px; height: 42px; background: var(--cyan);
-      border-radius: 10px; display: flex; align-items: center; justify-content: center;
-      font-size: 1.4rem;
-    }
+    .logo-icon { width: 42px; height: 42px; background: var(--cyan); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; }
     .logo-text { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; color: var(--white); letter-spacing: .08em; line-height: 1.1; }
     .logo-sub { font-size: .65rem; color: var(--cyan); letter-spacing: .14em; display: block; }
     .nav-links { display: flex; gap: 2rem; list-style: none; }
@@ -41,7 +36,6 @@
     .nav-cta { background: var(--gold); color: var(--navy) !important; padding: .5rem 1.3rem; border-radius: 50px; font-weight: 600; }
     .nav-cta:hover { background: #ffd166 !important; }
 
-    /* HERO */
     .hero {
       min-height: 100vh;
       background: linear-gradient(150deg, rgba(3,29,58,0.75) 0%, rgba(5,46,94,0.65) 40%, rgba(3,29,58,0.8) 100%),
@@ -49,26 +43,12 @@
       display: flex; align-items: center; padding: 7rem 5% 5rem;
       position: relative; overflow: hidden;
     }
-    .hero-bg-circle {
-      position: absolute; border-radius: 50%; opacity: .07;
-      background: var(--cyan);
-    }
+    .hero-bg-circle { position: absolute; border-radius: 50%; opacity: .07; background: var(--cyan); }
     .hero-bg-circle.c1 { width: 700px; height: 700px; top: -200px; right: -150px; }
     .hero-bg-circle.c2 { width: 400px; height: 400px; bottom: -100px; left: -100px; }
     .hero-content { position: relative; z-index: 2; max-width: 700px; }
-    .hero-badge {
-      display: inline-flex; align-items: center; gap: .5rem;
-      background: rgba(0,180,216,.15); border: 1px solid rgba(0,180,216,.35);
-      color: var(--cyan); border-radius: 50px;
-      padding: .4rem 1rem; font-size: .8rem; letter-spacing: .1em; text-transform: uppercase;
-      margin-bottom: 1.5rem; animation: fadeUp .6s .1s both;
-    }
-    .hero h1 {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: clamp(3.5rem, 8vw, 7rem); color: var(--white);
-      line-height: .95; letter-spacing: .03em; margin-bottom: 1.5rem;
-      animation: fadeUp .6s .25s both;
-    }
+    .hero-badge { display: inline-flex; align-items: center; gap: .5rem; background: rgba(0,180,216,.15); border: 1px solid rgba(0,180,216,.35); color: var(--cyan); border-radius: 50px; padding: .4rem 1rem; font-size: .8rem; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 1.5rem; animation: fadeUp .6s .1s both; }
+    .hero h1 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(3.5rem, 8vw, 7rem); color: var(--white); line-height: .95; letter-spacing: .03em; margin-bottom: 1.5rem; animation: fadeUp .6s .25s both; }
     .hero h1 em { color: var(--cyan); font-style: normal; }
     .hero h1 .gold { color: var(--gold); }
     .hero p { font-size: 1.1rem; color: rgba(255,255,255,.72); line-height: 1.75; max-width: 500px; margin-bottom: 2.5rem; animation: fadeUp .6s .4s both; }
@@ -80,26 +60,20 @@
     .wave-bottom { position: absolute; bottom: 0; left: 0; width: 100%; }
     .wave-bottom svg { display: block; }
 
-    /* STATS */
     .stats { background: var(--white); display: flex; flex-wrap: wrap; border-bottom: 1px solid rgba(3,29,58,.08); }
     .stat { flex: 1; min-width: 150px; padding: 2rem; text-align: center; border-right: 1px solid rgba(3,29,58,.08); }
     .stat:last-child { border-right: none; }
     .stat-n { font-family: 'Bebas Neue', sans-serif; font-size: 3rem; color: var(--blue); letter-spacing: .04em; }
     .stat-l { font-size: .8rem; color: var(--gray); text-transform: uppercase; letter-spacing: .08em; }
 
-    /* SECTIONS */
     .section { padding: 6rem 5%; }
     .section-inner { max-width: 1100px; margin: 0 auto; }
     .tag { display: inline-block; color: var(--cyan); font-size: .78rem; letter-spacing: .14em; text-transform: uppercase; font-weight: 600; margin-bottom: .7rem; }
     .title { font-family: 'Bebas Neue', sans-serif; font-size: clamp(2.2rem, 4vw, 3.5rem); letter-spacing: .04em; line-height: 1; margin-bottom: 1rem; }
     .sub { color: var(--gray); font-size: 1.05rem; line-height: 1.7; max-width: 540px; }
 
-    /* PROGRAMAS */
     .prog-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap: 1.5rem; margin-top: 3rem; }
-    .prog-card {
-      background: var(--surface); border-radius: 18px; padding: 2rem;
-      border: 1.5px solid rgba(0,87,168,.1); transition: all .3s; position: relative; overflow: hidden;
-    }
+    .prog-card { background: var(--surface); border-radius: 18px; padding: 2rem; border: 1.5px solid rgba(0,87,168,.1); transition: all .3s; position: relative; overflow: hidden; }
     .prog-card::after { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(0,180,216,.06), transparent); opacity: 0; transition: opacity .3s; }
     .prog-card:hover { transform: translateY(-5px); box-shadow: 0 16px 40px rgba(0,87,168,.14); border-color: var(--cyan); }
     .prog-card:hover::after { opacity: 1; }
@@ -109,7 +83,6 @@
     .prog-price { display: inline-block; margin-top: 1.2rem; background: var(--navy); color: var(--gold); font-weight: 700; font-size: .9rem; padding: .35rem .9rem; border-radius: 50px; }
     .prog-age { display: inline-block; margin-top: .5rem; margin-left: .4rem; background: rgba(0,180,216,.12); color: var(--blue); font-size: .8rem; padding: .3rem .8rem; border-radius: 50px; }
 
-    /* MODALIDADES */
     .mod-section { background: var(--navy); }
     .mod-section .title { color: var(--white); }
     .mod-section .sub { color: rgba(255,255,255,.55); }
@@ -121,30 +94,25 @@
     .mod-card p { color: rgba(255,255,255,.6); line-height: 1.7; }
     .mod-card ul { list-style: none; margin-top: 1rem; }
     .mod-card ul li { color: rgba(255,255,255,.7); font-size: .92rem; padding: .4rem 0; border-bottom: 1px solid rgba(255,255,255,.06); display: flex; align-items: center; gap: .6rem; }
-    .mod-card ul li::before { content: '✓'; color: var(--cyan); font-weight: 700; }
+    .mod-card ul li::before { content: 'v'; color: var(--cyan); font-weight: 700; }
 
-    /* UBICACION */
     .map-section { background: var(--surface); }
     .map-wrap { border-radius: 20px; overflow: hidden; box-shadow: 0 10px 40px rgba(3,29,58,.12); margin-top: 2.5rem; }
     .map-wrap iframe { display: block; width: 100%; height: 420px; border: none; }
     .map-info { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-top: 1.5rem; }
     .map-chip { display: flex; align-items: center; gap: .6rem; background: var(--white); border: 1px solid rgba(3,29,58,.1); border-radius: 50px; padding: .6rem 1.2rem; font-size: .9rem; color: var(--navy); }
-    .map-chip span { font-size: 1.1rem; }
 
-    /* PROCESO */
     .process-steps { display: flex; gap: 1rem; margin-top: 3rem; flex-wrap: wrap; }
     .p-step { flex: 1; min-width: 180px; background: var(--surface); border-radius: 18px; padding: 1.8rem; text-align: center; border: 1.5px solid rgba(0,87,168,.08); position: relative; }
-    .p-step::after { content: '→'; position: absolute; right: -1.3rem; top: 50%; transform: translateY(-50%); color: var(--cyan); font-size: 1.4rem; font-weight: 700; }
+    .p-step::after { content: 'r'; position: absolute; right: -1.3rem; top: 50%; transform: translateY(-50%); color: var(--cyan); font-size: 1.4rem; font-weight: 700; }
     .p-step:last-child::after { display: none; }
     .p-num { width: 3.5rem; height: 3.5rem; background: linear-gradient(135deg,var(--blue),var(--cyan)); border-radius: 50%; color: white; font-family: 'Bebas Neue',sans-serif; font-size: 1.6rem; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; box-shadow: 0 4px 14px rgba(0,87,168,.3); }
     .p-step h4 { font-family: 'Bebas Neue',sans-serif; font-size: 1.2rem; letter-spacing: .05em; margin-bottom: .4rem; }
     .p-step p { font-size: .85rem; color: var(--gray); line-height: 1.6; }
 
-    /* FOOTER */
     footer { background: var(--navy); color: rgba(255,255,255,.45); text-align: center; padding: 2rem 5%; font-size: .85rem; }
     footer strong { color: var(--cyan); }
 
-    /* ── CHATBOT ── */
     #chat-fab {
       position: fixed; bottom: 2rem; right: 2rem; z-index: 999;
       width: 62px; height: 62px; border-radius: 50%;
@@ -160,12 +128,7 @@
       0%,100% { box-shadow: 0 6px 28px rgba(0,87,168,.5); }
       50%      { box-shadow: 0 6px 40px rgba(0,180,216,.7); }
     }
-    #chat-fab .badge {
-      position: absolute; top: 0; right: 0;
-      width: 18px; height: 18px; background: var(--gold); border-radius: 50%;
-      border: 2px solid white; font-size: .65rem; font-weight: 700; color: var(--navy);
-      display: flex; align-items: center; justify-content: center;
-    }
+    #chat-fab .badge { position: absolute; top: 0; right: 0; width: 18px; height: 18px; background: var(--gold); border-radius: 50%; border: 2px solid white; font-size: .65rem; font-weight: 700; color: var(--navy); display: flex; align-items: center; justify-content: center; }
     #chat-window {
       position: fixed; bottom: 6.5rem; right: 2rem; z-index: 998;
       width: 380px; max-width: calc(100vw - 2rem);
@@ -178,30 +141,20 @@
       max-height: 540px;
     }
     #chat-window.open { transform: scale(1) translateY(0); opacity: 1; pointer-events: all; }
-    .chat-header {
-      background: linear-gradient(135deg,var(--navy),var(--blue));
-      padding: 1.1rem 1.4rem; display: flex; align-items: center; gap: .8rem;
-    }
+    .chat-header { background: linear-gradient(135deg,var(--navy),var(--blue)); padding: 1.1rem 1.4rem; display: flex; align-items: center; gap: .8rem; }
     .chat-avatar { width: 38px; height: 38px; background: var(--cyan); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
     .chat-header-info { flex: 1; }
     .chat-header-info strong { color: white; font-size: .95rem; display: block; }
     .chat-header-info span { color: rgba(255,255,255,.6); font-size: .75rem; }
     .chat-close { background: none; border: none; color: rgba(255,255,255,.6); font-size: 1.3rem; cursor: pointer; padding: 0 .3rem; line-height: 1; }
     .chat-close:hover { color: white; }
-    #chat-messages {
-      flex: 1; overflow-y: auto; padding: 1.2rem;
-      display: flex; flex-direction: column; gap: .8rem;
-      min-height: 280px; max-height: 340px;
-    }
+    #chat-messages { flex: 1; overflow-y: auto; padding: 1.2rem; display: flex; flex-direction: column; gap: .8rem; min-height: 280px; max-height: 340px; }
     #chat-messages::-webkit-scrollbar { width: 4px; }
     #chat-messages::-webkit-scrollbar-thumb { background: rgba(3,29,58,.15); border-radius: 2px; }
     .msg { display: flex; gap: .6rem; animation: msgIn .25s ease; }
     .msg.user { flex-direction: row-reverse; }
     @keyframes msgIn { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform: translateY(0); } }
-    .msg-bubble {
-      max-width: 80%; padding: .7rem 1rem; border-radius: 16px;
-      font-size: .88rem; line-height: 1.55;
-    }
+    .msg-bubble { max-width: 80%; padding: .7rem 1rem; border-radius: 16px; font-size: .88rem; line-height: 1.55; }
     .msg.bot .msg-bubble { background: var(--surface); color: var(--navy); border-bottom-left-radius: 4px; }
     .msg.user .msg-bubble { background: var(--blue); color: white; border-bottom-right-radius: 4px; }
     .msg-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--cyan); display: flex; align-items: center; justify-content: center; font-size: .85rem; flex-shrink: 0; align-self: flex-end; }
@@ -210,103 +163,41 @@
     .typing span:nth-child(2) { animation-delay: .2s; }
     .typing span:nth-child(3) { animation-delay: .4s; }
     @keyframes dot { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-5px); } }
-    .quick-replies { display: flex; flex-wrap: wrap; gap: .5rem; padding: 0 1.2rem .8rem; }
-    .qr-btn {
-      background: var(--surface); border: 1.5px solid rgba(0,87,168,.2);
-      color: var(--blue); border-radius: 50px; padding: .38rem .85rem;
-      font-size: .8rem; font-weight: 500; cursor: pointer; transition: all .2s;
-      font-family: 'Outfit', sans-serif;
-    }
-    .qr-btn:hover { background: var(--blue); color: white; border-color: var(--blue); }
     .chat-input-row { display: flex; gap: .5rem; padding: .8rem 1rem; border-top: 1px solid rgba(3,29,58,.07); }
-    #chat-input {
-      flex: 1; padding: .65rem 1rem; border: 1.5px solid rgba(3,29,58,.12);
-      border-radius: 50px; font-family: 'Outfit', sans-serif; font-size: .88rem;
-      outline: none; transition: border-color .2s;
-    }
+    #chat-input { flex: 1; padding: .65rem 1rem; border: 1.5px solid rgba(3,29,58,.12); border-radius: 50px; font-family: 'Outfit', sans-serif; font-size: .88rem; outline: none; transition: border-color .2s; }
     #chat-input:focus { border-color: var(--cyan); }
-    #chat-send {
-      width: 38px; height: 38px; background: var(--blue); border: none;
-      border-radius: 50%; color: white; cursor: pointer; display: flex;
-      align-items: center; justify-content: center; font-size: 1rem;
-      transition: background .2s; flex-shrink: 0;
-    }
+    #chat-send { width: 38px; height: 38px; background: var(--blue); border: none; border-radius: 50%; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; transition: background .2s; flex-shrink: 0; }
     #chat-send:hover { background: var(--cyan); }
 
-    /* GALERÍA */
     .galeria { background: var(--navy); padding: 5rem 5%; }
     .galeria .title { color: var(--white); }
     .galeria .sub { color: rgba(255,255,255,.55); }
-    .gallery-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      grid-template-rows: auto;
-      gap: 1rem; margin-top: 2.5rem;
-    }
-    .gallery-item {
-      overflow: hidden; border-radius: 14px; position: relative;
-      cursor: pointer;
-    }
-    .gallery-item.featured {
-      grid-column: span 2;
-      grid-row: span 2;
-    }
-    .gallery-item img {
-      width: 100%; height: 100%; object-fit: cover;
-      transition: transform .5s ease;
-      display: block; min-height: 200px;
-    }
+    .gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: auto; gap: 1rem; margin-top: 2.5rem; }
+    .gallery-item { overflow: hidden; border-radius: 14px; position: relative; cursor: pointer; }
+    .gallery-item.featured { grid-column: span 2; grid-row: span 2; }
+    .gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform .5s ease; display: block; min-height: 200px; }
     .gallery-item.featured img { min-height: 420px; }
     .gallery-item:hover img { transform: scale(1.06); }
-    .gallery-item::after {
-      content: ''; position: absolute; inset: 0;
-      background: linear-gradient(to top, rgba(3,29,58,.5) 0%, transparent 50%);
-      opacity: 0; transition: opacity .3s;
-    }
+    .gallery-item::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(3,29,58,.5) 0%, transparent 50%); opacity: 0; transition: opacity .3s; }
     .gallery-item:hover::after { opacity: 1; }
 
-    /* LIGHTBOX */
-    #lightbox {
-      display: none; position: fixed; inset: 0; z-index: 9000;
-      background: rgba(3,29,58,.95); align-items: center; justify-content: center;
-    }
+    #lightbox { display: none; position: fixed; inset: 0; z-index: 9000; background: rgba(3,29,58,.95); align-items: center; justify-content: center; }
     #lightbox.active { display: flex; }
     #lightbox img { max-width: 90vw; max-height: 88vh; border-radius: 12px; object-fit: contain; }
-    #lightbox-close {
-      position: absolute; top: 1.5rem; right: 1.5rem;
-      background: rgba(255,255,255,.1); border: none; color: white;
-      width: 44px; height: 44px; border-radius: 50%; font-size: 1.4rem;
-      cursor: pointer; display: flex; align-items: center; justify-content: center;
-    }
+    #lightbox-close { position: absolute; top: 1.5rem; right: 1.5rem; background: rgba(255,255,255,.1); border: none; color: white; width: 44px; height: 44px; border-radius: 50%; font-size: 1.4rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
     #lightbox-close:hover { background: var(--cyan); }
 
-    /* ANIMATIONS */
     @keyframes fadeUp { from { opacity:0; transform:translateY(22px); } to { opacity:1; transform:translateY(0); } }
-    #wa-btn {
-      position: fixed; bottom: 7.5rem; right: 2rem; z-index: 998;
-      width: 50px; height: 50px; background: #25d366; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 4px 20px rgba(37,211,102,.5);
-      text-decoration: none; font-size: 1.5rem;
-      transition: transform .2s;
-    }
+    #wa-btn { position: fixed; bottom: 7.5rem; right: 2rem; z-index: 998; width: 50px; height: 50px; background: #25d366; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(37,211,102,.5); text-decoration: none; font-size: 1.5rem; transition: transform .2s; }
     #wa-btn:hover { transform: scale(1.1); }
 
-    /* FOOTER SOCIAL */
     .footer-social { display: flex; justify-content: center; gap: 1rem; margin-bottom: 1rem; }
-    .footer-social a {
-      color: rgba(255,255,255,.5); text-decoration: none; font-size: .85rem;
-      transition: color .2s; display: flex; align-items: center; gap: .4rem;
-    }
+    .footer-social a { color: rgba(255,255,255,.5); text-decoration: none; font-size: .85rem; transition: color .2s; display: flex; align-items: center; gap: .4rem; }
     .footer-social a:hover { color: var(--cyan); }
 
     @media(max-width:768px) {
       .gallery-grid { grid-template-columns: 1fr 1fr; }
       .gallery-item.featured { grid-column: span 2; }
-    }
-
-    /* RESPONSIVE */
-    @media(max-width:768px) {
       .nav-links { display: none; }
       .mod-grid { grid-template-columns: 1fr; }
       .process-steps { flex-direction: column; }
@@ -317,35 +208,33 @@
 </head>
 <body>
 
-<!-- NAV -->
 <nav>
   <a class="logo" href="#">
     <img src="logo_blanco.jpg" alt="Maracaibo Swimming Club" style="height:48px; border-radius:8px;"/>
     <div style="display:flex; flex-direction:column;">
       <span class="logo-text">Maracaibo Swimming Club</span>
-      <span class="logo-sub">Somos Familia Acuática</span>
+      <span class="logo-sub">Somos Familia Acuatica</span>
     </div>
   </a>
   <ul class="nav-links">
     <li><a href="#programas">Programas</a></li>
     <li><a href="#modalidades">Modalidades</a></li>
-    <li><a href="#galeria">Galería</a></li>
-    <li><a href="#ubicacion">Ubicación</a></li>
+    <li><a href="#galeria">Galeria</a></li>
+    <li><a href="#ubicacion">Ubicacion</a></li>
     <li><a href="#" onclick="openChat()" class="nav-cta">Inscribirse</a></li>
   </ul>
 </nav>
 
-<!-- HERO -->
 <section class="hero">
   <div class="hero-bg-circle c1"></div>
   <div class="hero-bg-circle c2"></div>
   <div class="hero-content">
-    <div class="hero-badge">🏆 Escuela de Natación — Maracaibo, Venezuela</div>
-    <h1>SOMOS <em>FAMILIA</em><br><span class="gold">ACUÁTICA</span></h1>
-    <p>Clases profesionales de natación para bebés, niños, jóvenes y adultos. Todos los niveles · Cupos limitados · Sin pago de inscripción.</p>
+    <div class="hero-badge">Escuela de Natacion - Maracaibo, Venezuela</div>
+    <h1>SOMOS <em>FAMILIA</em><br><span class="gold">ACUATICA</span></h1>
+    <p>Clases profesionales de natacion para bebes, ninos, jovenes y adultos. Todos los niveles. Cupos limitados. Sin pago de inscripcion.</p>
     <div class="hero-btns">
-      <a href="#" class="btn-gold" onclick="openChat()">💬 Quiero inscribirme</a>
-      <a href="#programas" class="btn-outline">Ver programas →</a>
+      <a href="#" class="btn-gold" onclick="openChat()">Quiero inscribirme</a>
+      <a href="#programas" class="btn-outline">Ver programas</a>
     </div>
   </div>
   <div class="wave-bottom">
@@ -355,97 +244,63 @@
   </div>
 </section>
 
-<!-- STATS -->
 <div class="stats">
-  <div class="stat"><div class="stat-n">6</div><div class="stat-l">Niveles de enseñanza</div></div>
-  <div class="stat"><div class="stat-n">10+</div><div class="stat-l">Años de experiencia</div></div>
-  <div class="stat"><div class="stat-n">$0</div><div class="stat-l">Sin pago de inscripción</div></div>
-  <div class="stat"><div class="stat-n">100%</div><div class="stat-l">Atención personalizada</div></div>
+  <div class="stat"><div class="stat-n">6</div><div class="stat-l">Niveles de ensenanza</div></div>
+  <div class="stat"><div class="stat-n">10+</div><div class="stat-l">Anos de experiencia</div></div>
+  <div class="stat"><div class="stat-n">$0</div><div class="stat-l">Sin pago de inscripcion</div></div>
+  <div class="stat"><div class="stat-n">100%</div><div class="stat-l">Atencion personalizada</div></div>
 </div>
 
-<!-- PROGRAMAS -->
 <section class="section" id="programas">
   <div class="section-inner">
     <span class="tag">Nuestros Programas</span>
     <h2 class="title">Un nivel para cada etapa</h2>
-    <p class="sub">Metodología progresiva, grupos reducidos y atención personalizada. Habla con nuestro asistente para conocer horarios y precios.</p>
+    <p class="sub">Metodologia progresiva, grupos reducidos y atencion personalizada.</p>
     <div class="prog-grid">
-      <div class="prog-card">
-        <div class="prog-emoji">🫧</div>
-        <h3>Nivel Burbuja</h3>
-        <p>Adaptación al medio acuático con la participación del representante en el agua junto al entrenador.</p>
-        <span class="prog-price">Consultar</span><span class="prog-age">1 – 3 años</span>
-      </div>
-      <div class="prog-card">
-        <div class="prog-emoji">🎒</div>
-        <h3>Nivel Iniciación</h3>
-        <p>Dominio de los principios básicos de supervivencia acuática con asistencia del entrenador en el agua.</p>
-        <span class="prog-price">Consultar</span><span class="prog-age">4 – 8 años</span>
-      </div>
-      <div class="prog-card">
-        <div class="prog-emoji">🏊</div>
-        <h3>Nivel Intermedio</h3>
-        <p>Para quienes dominan lo básico de los estilos Libre y Espalda y quieren seguir progresando.</p>
-        <span class="prog-price">Consultar</span><span class="prog-age">8+ años</span>
-      </div>
-      <div class="prog-card">
-        <div class="prog-emoji">🏅</div>
-        <h3>Nivel Avanzado</h3>
-        <p>Perfeccionamiento técnico de los 4 estilos con trabajo de carga y alto rendimiento competitivo.</p>
-        <span class="prog-price">Consultar</span><span class="prog-age">6 – 18 años</span>
-      </div>
-      <div class="prog-card">
-        <div class="prog-emoji">🌊</div>
-        <h3>Nivel Adultos</h3>
-        <p>Aprende a nadar o practica como ejercicio, disciplina deportiva, salud y bienestar general.</p>
-        <span class="prog-price">Consultar</span><span class="prog-age">15+ años</span>
-      </div>
-      <div class="prog-card">
-        <div class="prog-emoji">⭐</div>
-        <h3>Clases Privadas</h3>
-        <p>Para personas con condición especial o discapacidad física que requieren atención individualizada en el agua.</p>
-        <span class="prog-price">Consultar</span><span class="prog-age">Todas las edades</span>
-      </div>
+      <div class="prog-card"><div class="prog-emoji">&#x1F9EB;</div><h3>Nivel Burbuja</h3><p>Adaptacion al medio acuatico con la participacion del representante en el agua.</p><span class="prog-price">Consultar</span><span class="prog-age">1 - 3 anos</span></div>
+      <div class="prog-card"><div class="prog-emoji">&#x1F392;</div><h3>Nivel Iniciacion</h3><p>Dominio de los principios basicos de supervivencia acuatica.</p><span class="prog-price">Consultar</span><span class="prog-age">4 - 8 anos</span></div>
+      <div class="prog-card"><div class="prog-emoji">&#x1F3CA;</div><h3>Nivel Intermedio</h3><p>Para quienes dominan lo basico y quieren seguir progresando.</p><span class="prog-price">Consultar</span><span class="prog-age">8+ anos</span></div>
+      <div class="prog-card"><div class="prog-emoji">&#x1F3C5;</div><h3>Nivel Avanzado</h3><p>Perfeccionamiento tecnico de los 4 estilos con alto rendimiento.</p><span class="prog-price">Consultar</span><span class="prog-age">6 - 18 anos</span></div>
+      <div class="prog-card"><div class="prog-emoji">&#x1F30A;</div><h3>Nivel Adultos</h3><p>Aprende a nadar o practica como ejercicio y bienestar general.</p><span class="prog-price">Consultar</span><span class="prog-age">15+ anos</span></div>
+      <div class="prog-card"><div class="prog-emoji">&#x2B50;</div><h3>Clases Privadas</h3><p>Para personas con condicion especial que requieren atencion individualizada.</p><span class="prog-price">Consultar</span><span class="prog-age">Todas las edades</span></div>
     </div>
-    <!-- PAGOS -->
     <div style="margin-top:2.5rem; background:var(--surface); border-radius:18px; padding:1.8rem 2rem; border:1.5px solid rgba(0,87,168,.1);">
-      <p style="font-weight:600; color:var(--navy); margin-bottom:.8rem;">💳 Aceptamos todas las formas de pago:</p>
+      <p style="font-weight:600; color:var(--navy); margin-bottom:.8rem;">Aceptamos todas las formas de pago:</p>
       <div style="display:flex; flex-wrap:wrap; gap:.6rem;">
-        <span style="background:var(--navy);color:white;padding:.35rem .9rem;border-radius:50px;font-size:.85rem;">💵 Efectivo USD</span>
-        <span style="background:var(--navy);color:white;padding:.35rem .9rem;border-radius:50px;font-size:.85rem;">🏦 Zelle</span>
-        <span style="background:var(--navy);color:white;padding:.35rem .9rem;border-radius:50px;font-size:.85rem;">📱 Pago Móvil</span>
-        <span style="background:var(--navy);color:white;padding:.35rem .9rem;border-radius:50px;font-size:.85rem;">🅿️ PayPal</span>
-        <span style="background:var(--navy);color:white;padding:.35rem .9rem;border-radius:50px;font-size:.85rem;">₿ Binance</span>
+        <span style="background:var(--navy);color:white;padding:.35rem .9rem;border-radius:50px;font-size:.85rem;">Efectivo USD</span>
+        <span style="background:var(--navy);color:white;padding:.35rem .9rem;border-radius:50px;font-size:.85rem;">Zelle</span>
+        <span style="background:var(--navy);color:white;padding:.35rem .9rem;border-radius:50px;font-size:.85rem;">Pago Movil</span>
+        <span style="background:var(--navy);color:white;padding:.35rem .9rem;border-radius:50px;font-size:.85rem;">PayPal</span>
+        <span style="background:var(--navy);color:white;padding:.35rem .9rem;border-radius:50px;font-size:.85rem;">Binance</span>
       </div>
-      <p style="margin-top:1rem; font-size:.9rem; color:var(--gray);">✅ <strong>Sin pago de inscripción</strong> — Reserva solo con el pago de la mensualidad · Cupos limitados</p>
+      <p style="margin-top:1rem; font-size:.9rem; color:var(--gray);">Sin pago de inscripcion - Reserva solo con el pago de la mensualidad. Cupos limitados.</p>
     </div>
   </div>
 </section>
 
-<!-- MODALIDADES -->
 <section class="section mod-section" id="modalidades">
   <div class="section-inner">
     <span class="tag">Modalidades</span>
-    <h2 class="title">Donde tú lo necesites</h2>
-    <p class="sub">Nos adaptamos a tu vida. Elige la opción que mejor se ajuste a tu horario y ubicación.</p>
+    <h2 class="title">Donde tu lo necesites</h2>
+    <p class="sub">Nos adaptamos a tu vida.</p>
     <div class="mod-grid">
       <div class="mod-card">
-        <div class="mod-icon">🏊‍♂️</div>
+        <div class="mod-icon">&#x1F3CA;&#x200D;&#x2642;&#xFE0F;</div>
         <h3>En Nuestra Piscina</h3>
-        <p>Calle 62 (Av. Universidad) entre Av. 2A y 2C, Piscina del Colegio de Ingenieros del Estado Zulia, Maracaibo.</p>
+        <p>Calle 62 (Av. Universidad) entre Av. 2A y 2C, Piscina del CIDEZ, Maracaibo.</p>
         <ul>
-          <li>Piscina semiolímpica</li>
-          <li>Grupos reducidos (máx. 6 alumnos)</li>
-          <li>Horarios mañana, tarde y noche</li>
+          <li>Piscina semiolimpica</li>
+          <li>Grupos reducidos (max. 6 alumnos)</li>
+          <li>Horarios manana, tarde y noche</li>
           <li>Vestuarios y duchas disponibles</li>
         </ul>
       </div>
       <div class="mod-card">
-        <div class="mod-icon">🚗</div>
+        <div class="mod-icon">&#x1F697;</div>
         <h3>A Domicilio</h3>
-        <p>Llevamos la clase hasta tu piscina privada, club o comunidad. Comodidad total.</p>
+        <p>Llevamos la clase hasta tu piscina privada, club o comunidad.</p>
         <ul>
-          <li>Disponible en toda el área metropolitana</li>
+          <li>Disponible en toda el area metropolitana</li>
           <li>Clases individuales o grupales</li>
           <li>Horario totalmente flexible</li>
           <li>Equipos e implementos incluidos</li>
@@ -455,346 +310,108 @@
   </div>
 </section>
 
-<!-- PROCESO -->
 <section class="section" id="proceso">
   <div class="section-inner">
-    <span class="tag">¿Cómo funciona?</span>
+    <span class="tag">Como funciona?</span>
     <h2 class="title">Empieza en 4 pasos</h2>
-    <p class="sub">Simple, rápido y sin compromisos. Te acompañamos desde el primer mensaje.</p>
+    <p class="sub">Simple, rapido y sin compromisos.</p>
     <div class="process-steps">
-      <div class="p-step"><div class="p-num">1</div><h4>Contáctanos</h4><p>Escríbenos por el chat o WhatsApp. Atención inmediata.</p></div>
-      <div class="p-step"><div class="p-num">2</div><h4>Evaluación</h4><p>Valoración gratuita del nivel y necesidades del alumno.</p></div>
-      <div class="p-step"><div class="p-num">3</div><h4>Tu Plan</h4><p>Programa personalizado según objetivos y disponibilidad.</p></div>
-      <div class="p-step"><div class="p-num">4</div><h4>¡A Nadar!</h4><p>Clases con seguimiento y reportes de progreso.</p></div>
+      <div class="p-step"><div class="p-num">1</div><h4>Contactanos</h4><p>Escribenos por el chat o WhatsApp.</p></div>
+      <div class="p-step"><div class="p-num">2</div><h4>Evaluacion</h4><p>Valoracion gratuita del nivel del alumno.</p></div>
+      <div class="p-step"><div class="p-num">3</div><h4>Tu Plan</h4><p>Programa personalizado segun objetivos.</p></div>
+      <div class="p-step"><div class="p-num">4</div><h4>A Nadar!</h4><p>Clases con seguimiento y reportes de progreso.</p></div>
     </div>
   </div>
 </section>
 
-<!-- UBICACIÓN -->
 <section class="section map-section" id="ubicacion">
   <div class="section-inner">
-    <span class="tag">Nuestra Ubicación</span>
-    <h2 class="title">Encuéntranos en Maracaibo</h2>
-    <p class="sub">Estamos en las instalaciones del Colegio de Ingenieros del Estado Zulia, Calle 62 (Av. Universidad) entre Av. 2A y 2C, Maracaibo.</p>
+    <span class="tag">Nuestra Ubicacion</span>
+    <h2 class="title">Encuentranos en Maracaibo</h2>
+    <p class="sub">Estamos en las instalaciones del CIDEZ, Calle 62 (Av. Universidad) entre Av. 2A y 2C, Maracaibo.</p>
     <div class="map-wrap">
-      <iframe
-        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3893.5!2d-71.59538!3d10.6788!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8e89982f6a7d8f0f%3A0x1!2sColegio+de+Ingenieros+del+Estado+Zulia%2C+Av.+Universidad%2C+Maracaibo%2C+Venezuela!5e0!3m2!1ses!2sve!4v1"
-        allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade">
-      </iframe>
+      <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3893.5!2d-71.59538!3d10.6788!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8e89982f6a7d8f0f%3A0x1!2sColegio+de+Ingenieros+del+Estado+Zulia!5e0!3m2!1ses!2sve!4v1" allowfullscreen loading="lazy"></iframe>
     </div>
     <div class="map-info">
-      <div class="map-chip"><span>📍</span> Calle 62 (Av. Universidad) entre Av. 2A y 2C, Colegio de Ingenieros del Estado Zulia, Maracaibo</div>
-      <div class="map-chip"><span>🕐</span> Lunes a Sábado · 6:00am – 8:00pm</div>
-      <div class="map-chip"><span>📱</span> 0414-6004468</div>
-      <div class="map-chip"><span>📸</span> @mcboswimclub</div>
-      <div class="map-chip"><span>🏊</span> Estacionamiento disponible</div>
+      <div class="map-chip"><span>&#x1F4CD;</span> Calle 62 (Av. Universidad) entre Av. 2A y 2C, CIDEZ, Maracaibo</div>
+      <div class="map-chip"><span>&#x1F550;</span> Lunes a Sabado - 6:00am a 8:00pm</div>
+      <div class="map-chip"><span>&#x1F4F1;</span> 0414-6004468</div>
+      <div class="map-chip"><span>&#x1F4F8;</span> @mcboswimclub</div>
     </div>
   </div>
 </section>
 
-<!-- GALERÍA -->
 <section class="galeria" id="galeria">
   <div class="section-inner">
     <span class="tag">Nuestras Instalaciones</span>
     <h2 class="title">Conoce el MSC</h2>
-    <p class="sub">Piscina semiolímpica con iluminación nocturna, carriles profesionales y ambiente de campeones.</p>
+    <p class="sub">Piscina semiolimpica con iluminacion nocturna y ambiente de campeones.</p>
     <div class="gallery-grid">
-      <div class="gallery-item featured" onclick="openLightbox('img_atardecer1.jpg')">
-        <img src="img_atardecer1.jpg" alt="Piscina MSC al atardecer"/>
-      </div>
-      <div class="gallery-item" onclick="openLightbox('img_atardecer2.jpg')">
-        <img src="img_atardecer2.jpg" alt="Cielo naranja sobre la piscina"/>
-      </div>
-      <div class="gallery-item" onclick="openLightbox('img_accion.jpg')">
-        <img src="img_accion.jpg" alt="Alumnos nadando en clase"/>
-      </div>
-      <div class="gallery-item" onclick="openLightbox('img_nocturna.jpg')">
-        <img src="img_nocturna.jpg" alt="Piscina MSC de noche"/>
-      </div>
-      <div class="gallery-item" onclick="openLightbox('img_nadador.jpg')">
-        <img src="img_nadador.jpg" alt="Nadador en entrenamiento"/>
-      </div>
-      <div class="gallery-item" onclick="openLightbox('img_tarde.jpg')">
-        <img src="img_tarde.jpg" alt="Piscina al atardecer"/>
-      </div>
-      <div class="gallery-item" onclick="openLightbox('img_aerea.jpg')">
-        <img src="img_aerea.jpg" alt="Vista aérea piscina MSC"/>
-      </div>
-      <div class="gallery-item" onclick="openLightbox('img_alumnos.jpg')">
-        <img src="img_alumnos.jpg" alt="Alumnos en piscina"/>
-      </div>
+      <div class="gallery-item featured" onclick="openLightbox('img_atardecer1.jpg')"><img src="img_atardecer1.jpg" alt="Piscina MSC"/></div>
+      <div class="gallery-item" onclick="openLightbox('img_atardecer2.jpg')"><img src="img_atardecer2.jpg" alt="Piscina MSC"/></div>
+      <div class="gallery-item" onclick="openLightbox('img_accion.jpg')"><img src="img_accion.jpg" alt="Alumnos nadando"/></div>
+      <div class="gallery-item" onclick="openLightbox('img_nocturna.jpg')"><img src="img_nocturna.jpg" alt="Piscina de noche"/></div>
+      <div class="gallery-item" onclick="openLightbox('img_nadador.jpg')"><img src="img_nadador.jpg" alt="Nadador"/></div>
+      <div class="gallery-item" onclick="openLightbox('img_tarde.jpg')"><img src="img_tarde.jpg" alt="Piscina tarde"/></div>
+      <div class="gallery-item" onclick="openLightbox('img_aerea.jpg')"><img src="img_aerea.jpg" alt="Vista aerea"/></div>
+      <div class="gallery-item" onclick="openLightbox('img_alumnos.jpg')"><img src="img_alumnos.jpg" alt="Alumnos"/></div>
     </div>
   </div>
 </section>
 
-<!-- LIGHTBOX -->
 <div id="lightbox" onclick="closeLightbox()">
-  <button id="lightbox-close" onclick="closeLightbox()">✕</button>
+  <button id="lightbox-close" onclick="closeLightbox()">X</button>
   <img id="lightbox-img" src="" alt=""/>
 </div>
 
-<!-- WHATSAPP BUTTON -->
-<a id="wa-btn" href="https://wa.me/584146004468" target="_blank" title="Escríbenos por WhatsApp">💬</a>
+<a id="wa-btn" href="https://wa.me/584146004468" target="_blank" title="WhatsApp">&#x1F4AC;</a>
 
-<!-- FOOTER -->
 <footer>
   <div class="footer-social">
-    <a href="https://wa.me/584146004468" target="_blank">📱 0414-6004468</a>
-    <a href="https://instagram.com/mcboswimclub" target="_blank">📸 @mcboswimclub</a>
+    <a href="https://wa.me/584146004468" target="_blank">&#x1F4F1; 0414-6004468</a>
+    <a href="https://instagram.com/mcboswimclub" target="_blank">&#x1F4F8; @mcboswimclub</a>
   </div>
   <div style="margin-bottom:.8rem;">
-  <a href="/portal-instructor.html" style="color:rgba(255,255,255,.2); font-size:.75rem; text-decoration:none; letter-spacing:.08em;" onmouseover="this.style.color='rgba(0,180,216,.5)'" onmouseout="this.style.color='rgba(255,255,255,.2)'">
-    🏊 Portal Instructores
-  </a>
-</div>
-  <p>© 2025 <strong>Maracaibo Swimming Club</strong> · Calle 62 (Av. Universidad) entre Av. 2A y 2C, Colegio de Ingenieros del Estado Zulia, Maracaibo, Venezuela · Todos los derechos reservados</p>
+    <a href="/portal-instructor.html" style="color:rgba(255,255,255,.2); font-size:.75rem; text-decoration:none; letter-spacing:.08em;">Portal Instructores</a>
+  </div>
+  <p>2025 <strong>Maracaibo Swimming Club</strong> - Calle 62 (Av. Universidad) entre Av. 2A y 2C, CIDEZ, Maracaibo, Venezuela</p>
 </footer>
 
-<!-- CHATBOT FAB -->
 <button id="chat-fab" onclick="toggleChat()" title="Habla con nosotros">
-  🏊
+  &#x1F30A;
   <div class="badge">1</div>
 </button>
 
-<!-- CHAT WINDOW -->
 <div id="chat-window">
   <div class="chat-header">
-    <div class="chat-avatar">🌊</div>
+    <div class="chat-avatar">&#x1F30A;</div>
     <div class="chat-header-info">
-      <strong>Chinita 🌊</strong>
-      <span>Asistente del Maracaibo Swimming Club · En línea</span>
+      <strong>Chinita &#x1F30A;</strong>
+      <span>Asistente del MSC - En linea</span>
     </div>
-    <button class="chat-close" onclick="toggleChat()">✕</button>
+    <button class="chat-close" onclick="toggleChat()">X</button>
   </div>
   <div id="chat-messages"></div>
-  <div id="quick-replies" class="quick-replies"></div>
   <div class="chat-input-row">
     <input id="chat-input" type="text" placeholder="Escribe tu mensaje..." autocomplete="off"/>
-    <button id="chat-send" onclick="sendMessage()">➤</button>
+    <button id="chat-send" onclick="sendMessage()">&#x27A4;</button>
   </div>
 </div>
 
 <script>
-// ── CONFIG ──────────────────────────────────────────────
-// INSTRUCCIONES: Reemplaza estos valores con los tuyos reales
-const GOOGLE_SHEET_URL = "/.netlify/functions/sheets";
-const ANTHROPIC_PROXY = "/.netlify/functions/chat";
+var GOOGLE_SHEET_URL = "/.netlify/functions/sheets";
+var ANTHROPIC_PROXY = "/.netlify/functions/chat";
 
-// ── ESTADO ──────────────────────────────────────────────
-let chatOpen = false;
-let chatHistory = [];
-let collectingData = false;
-let userData = {};
+var chatOpen = false;
+var chatHistory = [];
+var userData = {};
 
-const SYSTEM_PROMPT = `Eres Chinita 🌊, la asistente virtual de Maracaibo Swimming Club (MSC). Eres marabina, cálida, directa y energética. Tu misión es atender a los clientes, registrar su información y agendar clases.
+var SYSTEM_PROMPT = "Eres Chinita, la asistente virtual del Maracaibo Swimming Club (MSC). Eres marabina, calida, directa y energetica. Tu mision es atender a los clientes, registrar su informacion y agendar clases.\n\nPERSONALIDAD:\n- Respuestas cortas, maximo 3 lineas por mensaje\n- Una pregunta a la vez, nunca des toda la info de golpe\n- Tono cercano y entusiasta, como alguien de la familia\n- NUNCA des un menu de opciones, conversa naturalmente\n\nNIVELES:\n- Burbuja: bebes 1-3 anos con representante. Sab 11am\n- Iniciacion: ninos 4-8 anos. Lun-Vie 3-5pm / Sab 9-11am\n- Intermedio: 8+ anos. Lun-Vie 4-5pm / Sab 10am-12m\n- Avanzado: 6-18 anos. Lun-Vie 5-6pm / Sab 8-9am\n- Adultos: 15+ anos. Lun-Vie 5-8pm / Sab 8-9am\n- Privadas: todas las edades. Lun-Vie 2pm / Sab 8am\n\nPRECIOS (dar SOLO cuando pregunten):\n- Burbuja: $50/mes Lun-Vie, $30 solo Sab\n- Iniciacion 2h: $80/mes, 1h: $50/mes, Sab: $40/$30\n- Intermedio: $50/mes, Sab: $40/$30\n- Avanzado: $50/mes\n- Adultos: $50/mes Lun-Vie, $30 solo Sab\n- Privadas: $15 por clase\n\nCLASE DE PRUEBA GRATUITA:\n- Solo Lunes y Miercoles. Ninos 3pm. Adultos 6pm. 30 min. Solo en el CIDEZ\n- Maximo 10 por mes. Una por persona\n\nESTRATEGIA:\n1. Primero pregunta para quien es la clase y la edad\n2. Recomienda el nivel adecuado\n3. Ofrece la clase de prueba gratuita\n4. Recoge datos UNO POR UNO\n5. Da el precio solo cuando pregunten\n\nDATOS A RECOPILAR (uno por mensaje):\n1. Nombre completo\n2. Fecha de nacimiento\n3. Telefono/WhatsApp\n4. Email\n5. Programa de interes\n6. Modalidad (solo clases regulares)\n7. Dia y horario preferido\n\nPOLITICAS CLAVE:\n- Sin reembolsos\n- Clases no acumulables ni transferibles\n- Sin inscripcion, solo mensualidad\n- Ausencia por enfermedad: notificar 24h antes con justificacion medica\n\nCUANDO TENGAS TODOS LOS DATOS di exactamente:\n[REGISTRO_COMPLETO: nombre=X, fechanac=X, telefono=X, email=X, programa=X, modalidad=X, horario=X, tipo=X]\n\nCONTACTO:\nWhatsApp: 0414-6004468. Piscina CIDEZ, Calle 62 entre Av. 2A y 2C, Maracaibo\nInstagram: @mcboswimclub. Web: mcboswimclub.com";
 
-FECHA DE HOY: ${new Date().toLocaleDateString('es-VE', {weekday:'long', year:'numeric', month:'long', day:'numeric'})}
-
-PRÓXIMAS FECHAS PARA CLASES DE PRUEBA:
-${(() => {
-  const hoy = new Date();
-  const dias = [];
-  for (let i = 1; i <= 14; i++) {
-    const d = new Date(hoy);
-    d.setDate(hoy.getDate() + i);
-    const dia = d.getDay();
-    if (dia === 1 || dia === 3) {
-      dias.push(d.toLocaleDateString('es-VE', {weekday:'long', day:'numeric', month:'long'}));
-    }
-    if (dias.length >= 3) break;
-  }
-  return dias.map((f,i) => `• ${f}`).join('\n');
-})()}
-
-PERSONALIDAD:
-- Respuestas cortas — máximo 3 líneas por mensaje
-- Una pregunta a la vez — nunca des toda la info de golpe
-- Tono: cercano, entusiasta, como alguien de la familia
-- Usa emojis con moderación — solo cuando aporten
-- NUNCA des el menú de opciones — conversa naturalmente
-- Si te preguntan algo específico → responde directo y conciso
-
-NIVELES:
-- 🫧 Burbuja: bebés 1-3 años con representante · Sáb 11am
-- 🎒 Iniciación: niños 4-8 años · Lun-Vie 3-5pm / Sáb 9-11am
-- 🏊 Intermedio: 8+ años · Lun-Vie 4-5pm / Sáb 10am-12m
-- 🏅 Avanzado: 6-18 años · Lun-Vie 5-6pm / Sáb 8-9am
-- 🌊 Adultos: 15+ años · Lun-Vie 5-8pm / Sáb 8-9am
-- ⭐ Privadas: todas las edades · Lun-Vie 2pm / Sáb 8am
-
-PRECIOS (dar SOLO cuando pregunten directamente):
-- Burbuja: $50/mes Lun-Vie · $30 solo Sáb
-- Iniciación 2h: $80/mes · 1h: $50/mes · Sáb: $40/$30
-- Intermedio: $50/mes · Sáb: $40/$30
-- Avanzado: $50/mes
-- Adultos: $50/mes Lun-Vie · $30 solo Sáb
-- Privadas: $15 por clase
-
-CLASE DE PRUEBA GRATUITA:
-- Solo Lunes y Miércoles · Niños 3pm · Adultos 6pm · 30 min · Solo en el CIDEZ
-- Máximo 10 por mes · Una por persona
-- Siempre confirma con fecha exacta
-
-ESTRATEGIA:
-1. Primero pregunta para quién es la clase y la edad
-2. Recomienda el nivel adecuado
-3. Ofrece la clase de prueba gratuita
-4. Recoge los datos UNO A UNO — nunca pidas varios a la vez
-5. Da el precio solo cuando pregunten
-
-DATOS A RECOPILAR (uno por mensaje):
-1. Nombre completo
-2. Fecha de nacimiento
-3. Teléfono/WhatsApp
-4. Email
-5. Programa de interés
-6. Modalidad (solo clases regulares)
-7. Día y horario preferido
-
-POLÍTICAS CLAVE:
-- Sin reembolsos
-- Clases no acumulables ni transferibles
-- Sin inscripción — solo mensualidad
-- Ausencia por enfermedad: notificar 24h antes con justificación médica
-
-CUANDO TENGAS TODOS LOS DATOS di exactamente:
-[REGISTRO_COMPLETO: nombre=X, fechanac=X, telefono=X, email=X, programa=X, modalidad=X, horario=X, tipo=X]
-
-CONTACTO:
-📱 WhatsApp: 0414-6004468 · 📍 Piscina CIDEZ, Calle 62 (Av. Universidad) entre Av. 2A y 2C, Maracaibo
-📸 @mcboswimclub · 🌐 mcboswimclub.com;
-
-═══════════════════════════════════
-NIVELES Y PROGRAMAS
-═══════════════════════════════════
-- 🫧 BURBUJA: Bebés 1-3 años. Con representante en el agua. Lun-Vie 3-4pm / Sáb 11am-12m
-- 🎒 INICIACIÓN: Niños 4-8 años. Lun-Vie 3-5pm (2h) o 3-4pm (1h) / Sáb 9-11am o 9-10am
-- 🏊 INTERMEDIO: Mayores 8 años. Lun-Vie 4-5pm / Sáb 10am-12m o 10-11am
-- 🏅 AVANZADO: 6-18 años. Lun-Vie 5-6pm / Sáb 8-9am
-- 🌊 ADULTOS: Mayores 15 años. Lun-Vie 5-6pm / 6-7pm / 7-8pm / Sáb 8-9am
-- ⭐ CLASES PRIVADAS: Todas las edades. Lun-Vie 2-2:50pm / Sáb 8-8:50am
-
-═══════════════════════════════════
-CLASES DE PRUEBA GRATUITAS (máx. 10 por mes)
-═══════════════════════════════════
-- Niños: $0 · 30 min · Solo Lunes y Miércoles · 3:00 PM
-- Adultos: $0 · 30 min · Solo Lunes y Miércoles · 6:00 PM
-- EXCLUSIVAMENTE en la Piscina del CIDEZ · NO se ofrecen fuera de las instalaciones
-- El entrenador evalúa y define el nivel del alumno
-- Máximo 10 pruebas gratuitas por mes
-- Si los cupos están llenos → ofrecer clase de prueba de pago o lista de espera para el próximo mes
-
-═══════════════════════════════════
-CLASES PRIVADAS — DENTRO DEL CIDEZ
-═══════════════════════════════════
-- Individual: $10 · 45 min · Horario preferible 3PM · A elegir
-- Individual Especial (*): $20 · 45 min · Horario preferible 3PM · A elegir
-(*) Especial: personas con condición médica, discapacidad física o necesidades particulares de aprendizaje
-
-SERVICIOS FUERA DEL CIDEZ:
-Solo se contratan por teléfono 0414-6004468 o email maracaiboswimmingclub@gmail.com
-
-═══════════════════════════════════
-MENSUALIDADES
-═══════════════════════════════════
-- Burbuja: $50/mes Lun-Vie · $30 solo Sábados
-- Iniciación 2h: $80/mes · 1h: $50/mes · Sáb 2h: $40 · Sáb 1h: $30
-- Intermedio 1h: $50/mes · Sáb 2h: $40 · Sáb 1h: $30
-- Avanzado: $50/mes
-- Adultos: $50/mes Lun-Vie · $30 solo Sábados
-- Clases Privadas: $15 por clase de 50 minutos
-
-═══════════════════════════════════
-POLÍTICAS DEL CLUB — MUY IMPORTANTE
-═══════════════════════════════════
-1. NO HAY REEMBOLSOS bajo ninguna circunstancia
-2. Las clases NO son acumulables ni transferibles
-3. Las clases deben consumirse en el mes de contratación
-4. Sin pago de inscripción — solo mensualidad para reservar cupo
-5. AUSENCIA POR ENFERMEDAD:
-   - Notificar con mínimo 24 horas de anticipación
-   - Presentar justificación médica (reposo o constancia)
-   - La clase se reprograma dentro del mismo mes
-   - Sin disponibilidad en el mes → la clase se pierde
-   - Sin notificación previa → la clase se pierde sin excepción
-6. Las clases privadas son individuales — NO para grupos familiares
-7. Cupos limitados — el pago garantiza el cupo
-
-═══════════════════════════════════
-FORMAS DE PAGO
-═══════════════════════════════════
-Efectivo USD · Zelle · Pago Móvil · PayPal · Binance
-
-═══════════════════════════════════
-REQUISITOS
-═══════════════════════════════════
-- Traje de baño de licra, gorro y lentes (obligatorio desde el primer día)
-- Toalla y agua con filtro
-- Documentos: foto carnet, copia CI representante, documento identidad del alumno
-
-═══════════════════════════════════
-ESTRATEGIA DE PRECIOS
-═══════════════════════════════════
-NO des precios de inmediato. Primero conoce al cliente:
-- ¿Para quién es la clase? (edad)
-- ¿Qué nivel busca?
-- ¿Cuántos días por semana?
-LUEGO da el precio correspondiente.
-
-═══════════════════════════════════
-RECOPILACIÓN DE DATOS — uno a la vez
-═══════════════════════════════════
-1. Nombre completo
-2. Fecha de nacimiento (día/mes/año)
-3. Teléfono/WhatsApp
-4. Correo electrónico
-5. Nivel o tipo de clase de interés
-6. Modalidad (piscina o domicilio) — SOLO para clases regulares, NO para pruebas ni privadas
-7. Día y horario preferido
-
-NOTA IMPORTANTE: Las clases de prueba y clases privadas son EXCLUSIVAMENTE en el CIDEZ. Si alguien pide servicios fuera del CIDEZ indícale que debe contactarnos por WhatsApp 0414-6004468 o email maracaiboswimmingclub@gmail.com
-
-VALIDACIÓN DE PRUEBA GRATUITA:
-- Máximo 10 pruebas gratuitas por mes
-- Una sola prueba gratuita por persona
-- Si ya usó su prueba → ofrecer clase privada individual $10
-- Registra siempre, el administrador verificará
-
-FECHAS EXACTAS:
-Siempre calcula y menciona la fecha exacta.
-Ejemplo: "Te esperamos el lunes 5 de mayo a las 3:00 PM 📅"
-
-TIPOS DE REGISTRO:
-- Clase de prueba gratuita → tipo=prueba
-- Inscripción formal → tipo=inscripcion
-- Clase privada → tipo=privada
-- Clase privada especial → tipo=especial
-
-Cuando tengas TODOS los datos di exactamente:
-[REGISTRO_COMPLETO: nombre=X, fechanac=X, telefono=X, email=X, programa=X, modalidad=X, horario=X, tipo=X]
-
-MENSAJE DE CONFIRMACIÓN — incluir siempre:
-- Nombre del alumno
-- Tipo de clase y costo
-- Fecha y hora exacta
-- Dirección: Piscina CIDEZ, Calle 62 (Av. Universidad) entre Av. 2A y 2C, Maracaibo
-- Qué debe traer
-- Políticas aplicables
-- Que recibirá confirmación por email
-
-CONTACTO:
-- WhatsApp: 0414-6004468
-- Instagram: @mcboswimclub
-- Web: mcboswimclub.com
-- Email: maracaiboswimmingclub@gmail.com
-
-TONO: Cálido, familiar, entusiasta. Somos Familia Acuática. Usa emojis. Responde en español. Respuestas claras y concisas.`;
-
-// ── FUNCIONES CHAT ──────────────────────────────────────
 function toggleChat() {
   chatOpen = !chatOpen;
   document.getElementById('chat-window').classList.toggle('open', chatOpen);
-  const badge = document.querySelector('#chat-fab .badge');
+  var badge = document.querySelector('#chat-fab .badge');
   if (chatOpen) {
     badge.style.display = 'none';
     if (chatHistory.length === 0) initChat();
@@ -806,176 +423,126 @@ function openChat() {
 }
 
 function initChat() {
-  addBotMessage("¡Hola! Soy Chinita 🌊 asistente Virtual de Maracaibo Swimming Club.");
-  setTimeout(() => {
-    addBotMessage("¿Buscas clases para ti o para tu hijo? Cuéntame 😊");
+  addBotMessage("Hola! Soy Chinita, asistente del Maracaibo Swimming Club.");
+  setTimeout(function() {
+    addBotMessage("Buscas clases para ti o para tu hijo? Cuentame!");
   }, 700);
 }
 
 function addBotMessage(text) {
-  const msgs = document.getElementById('chat-messages');
-  const div = document.createElement('div');
+  var msgs = document.getElementById('chat-messages');
+  var div = document.createElement('div');
   div.className = 'msg bot';
-  div.innerHTML = `<div class="msg-avatar">🏊</div><div class="msg-bubble">${text.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}</div>`;
+  div.innerHTML = '<div class="msg-avatar">&#x1F30A;</div><div class="msg-bubble">' + text + '</div>';
   msgs.appendChild(div);
   msgs.scrollTop = msgs.scrollHeight;
 }
 
 function addUserMessage(text) {
-  const msgs = document.getElementById('chat-messages');
-  const div = document.createElement('div');
+  var msgs = document.getElementById('chat-messages');
+  var div = document.createElement('div');
   div.className = 'msg user';
-  div.innerHTML = `<div class="msg-bubble">${text}</div>`;
+  div.innerHTML = '<div class="msg-bubble">' + text + '</div>';
   msgs.appendChild(div);
   msgs.scrollTop = msgs.scrollHeight;
 }
 
 function showTyping() {
-  const msgs = document.getElementById('chat-messages');
-  const div = document.createElement('div');
-  div.className = 'msg bot'; div.id = 'typing-indicator';
-  div.innerHTML = `<div class="msg-avatar">🏊</div><div class="typing"><span></span><span></span><span></span></div>`;
+  var msgs = document.getElementById('chat-messages');
+  var div = document.createElement('div');
+  div.className = 'msg bot';
+  div.id = 'typing-indicator';
+  div.innerHTML = '<div class="msg-avatar">&#x1F30A;</div><div class="typing"><span></span><span></span><span></span></div>';
   msgs.appendChild(div);
   msgs.scrollTop = msgs.scrollHeight;
 }
 
 function hideTyping() {
-  const t = document.getElementById('typing-indicator');
+  var t = document.getElementById('typing-indicator');
   if (t) t.remove();
 }
 
-function setQuickReplies(options) {
-  const qr = document.getElementById('quick-replies');
-  qr.innerHTML = '';
-  options.forEach(opt => {
-    const btn = document.createElement('button');
-    btn.className = 'qr-btn';
-    btn.textContent = opt;
-    btn.onclick = () => { qr.innerHTML = ''; sendMessage(opt); };
-    qr.appendChild(btn);
-  });
-}
-
-async function sendMessage(text) {
-  const input = document.getElementById('chat-input');
-  const msg = text || input.value.trim();
+function sendMessage(text) {
+  var input = document.getElementById('chat-input');
+  var msg = text || input.value.trim();
   if (!msg) return;
   input.value = '';
-  document.getElementById('quick-replies').innerHTML = '';
 
   addUserMessage(msg);
   chatHistory.push({ role: 'user', content: msg });
 
   showTyping();
-  try {
-    const res = await fetch(ANTHROPIC_PROXY, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 1000,
-        system: SYSTEM_PROMPT,
-        messages: chatHistory
-      })
-    });
-    const data = await res.json();
+  fetch(ANTHROPIC_PROXY, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 600,
+      system: SYSTEM_PROMPT,
+      messages: chatHistory
+    })
+  }).then(function(res) {
+    return res.json();
+  }).then(function(data) {
     hideTyping();
-
-    const reply = data.content?.[0]?.text || 'Disculpa, hubo un error. Inténtalo de nuevo.';
+    var reply = (data.content && data.content[0] && data.content[0].text) ? data.content[0].text : 'Disculpa, hubo un error. Intentalo de nuevo.';
     chatHistory.push({ role: 'assistant', content: reply });
 
-    // Detectar registro completo
-    const match = reply.match(/\[REGISTRO_COMPLETO:(.*?)\]/s);
+    var match = reply.match(/\[REGISTRO_COMPLETO:(.*?)\]/);
     if (match) {
-      const clean = reply.replace(/\[REGISTRO_COMPLETO:.*?\]/s, '').trim();
+      var clean = reply.replace(/\[REGISTRO_COMPLETO:.*?\]/, '').trim();
       if (clean) addBotMessage(clean);
-      const campos = await guardarEnSheets(match[1]);
-      const esPrueba = campos.tipo === 'prueba';
-
-      if (esPrueba) {
-        addBotMessage(`✅ ¡Perfecto ${campos.nombre || ''}! Tu clase de evaluación gratuita ha sido agendada. 🎉\n\n📍 **Dónde:** Piscina CIDEZ, Calle 62 (Av. Universidad) entre Av. 2A y 2C\n🕐 **Cuándo:** ${campos.horario || 'según lo acordado'}\n\n**Recuerda traer:**\n👙 Traje de baño de licra\n🥽 Lentes de natación\n🎓 Gorro de natación\n🧴 Filtro solar y agua\n\nTe esperamos. ¡Somos Familia Acuática! 🏊`);
-      } else {
-        addBotMessage(`✅ ¡Registro recibido ${campos.nombre || ''}! 🎉\n\nPara completar tu inscripción realiza el pago de tu mensualidad:\n\n💰 **Formas de pago:**\n• Efectivo USD\n• Zelle\n• Pago Móvil\n• PayPal\n• Binance\n\n📲 **Envía tu comprobante por WhatsApp al 0414-6004468** indicando tu nombre completo.\n\nUna vez verificado el pago recibirás confirmación por email y quedará activada tu inscripción. 🏊`);
-      }
+      guardarEnSheets(match[1]);
+      addBotMessage("Tu registro ha sido recibido. Para completar tu inscripcion realiza el pago de tu mensualidad y envianos el comprobante por WhatsApp al 0414-6004468.");
     } else {
       addBotMessage(reply);
     }
-
-    // Sugerencias contextuales
-    if (reply.toLowerCase().includes('programa') || reply.toLowerCase().includes('precio')) {
-      setTimeout(() => setQuickReplies(["📅 Quiero agendar", "🚗 A domicilio", "❓ Más preguntas"]), 400);
-    } else if (reply.toLowerCase().includes('nombre') || reply.toLowerCase().includes('llamas')) {
-      // Recopilando datos, no mostrar quick replies
-    }
-
-  } catch(e) {
+  }).catch(function() {
     hideTyping();
-    addBotMessage("Hubo un problema de conexión. Por favor intenta de nuevo o contáctanos por WhatsApp. 📱");
-  }
+    addBotMessage("Hubo un problema de conexion. Por favor contactanos por WhatsApp al 0414-6004468.");
+  });
 }
 
-async function guardarEnSheets(dataStr) {
-  const campos = {};
-  try {
-    dataStr.split(',').forEach(par => {
-      const [k, v] = par.split('=').map(s => s.trim());
-      if (k && v) campos[k] = v;
-    });
+function guardarEnSheets(dataStr) {
+  var campos = {};
+  dataStr.split(',').forEach(function(par) {
+    var parts = par.split('=');
+    var k = parts[0] ? parts[0].trim() : '';
+    var v = parts[1] ? parts[1].trim() : '';
+    if (k && v) campos[k] = v;
+  });
 
-    const payload = {
-      timestamp: new Date().toLocaleString('es-VE'),
-      nombre: campos.nombre || '',
-      edad: campos.fechanac || campos.edad || '',
-      telefono: campos.telefono || '',
-      email: campos.email || '',
-      programa: campos.programa || '',
-      modalidad: campos.modalidad || '',
-      horario: campos.horario || '',
-      fuente: campos.tipo === 'prueba' ? 'Prueba Gratuita - Web' : 'Inscripción - Web'
-    };
+  var payload = {
+    nombre: campos.nombre || '',
+    edad: campos.fechanac || '',
+    telefono: campos.telefono || '',
+    email: campos.email || '',
+    programa: campos.programa || '',
+    modalidad: campos.modalidad || '',
+    horario: campos.horario || '',
+    fuente: campos.tipo === 'prueba' ? 'Prueba Gratuita - Web' : 'Inscripcion - Web'
+  };
 
-    const response = await fetch(GOOGLE_SHEET_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    const result = await response.json();
-    console.log('Sheets response:', result);
-  } catch(e) {
-    console.error('Error guardando en Sheets:', e);
-  }
-  return campos;
+  fetch(GOOGLE_SHEET_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  }).catch(function(e) { console.error('Error guardando:', e); });
 }
 
-// ── LIGHTBOX ────────────────────────────────────────────
 function openLightbox(src) {
   document.getElementById('lightbox-img').src = src;
   document.getElementById('lightbox').classList.add('active');
   document.body.style.overflow = 'hidden';
 }
+
 function closeLightbox() {
   document.getElementById('lightbox').classList.remove('active');
   document.body.style.overflow = '';
 }
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
 
-// Enter para enviar
-document.getElementById('chat-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter') sendMessage();
-});
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeLightbox(); });
+document.getElementById('chat-input').addEventListener('keydown', function(e) { if (e.key === 'Enter') sendMessage(); });
 </script>
-
-<!-- GUIA DE CONFIGURACIÓN (visible solo en desarrollo) -->
-<div id="setup-guide" style="display:none; position:fixed; top:80px; left:1rem; right:1rem; background:#fff3cd; border:2px solid #ffc107; border-radius:12px; padding:1.2rem; z-index:9999; font-size:.85rem; max-width:500px;">
-  <strong>⚙️ Pasos para activar Google Sheets:</strong><br/><br/>
-  1. Abre <a href="https://sheets.google.com" target="_blank">Google Sheets</a> y crea una hoja nueva<br/>
-  2. Agrega columnas: Timestamp, Nombre, Edad, Teléfono, Programa, Modalidad, Horario, Fuente<br/>
-  3. Ve a <strong>Extensiones → Apps Script</strong><br/>
-  4. Pega el código del Apps Script (te lo doy si lo pides)<br/>
-  5. Despliega como aplicación web y copia la URL<br/>
-  6. Reemplaza <code>TU_SCRIPT_ID_AQUI</code> en el código del chatbot<br/><br/>
-  <button onclick="document.getElementById('setup-guide').style.display='none'" style="background:#ffc107;border:none;padding:.3rem .8rem;border-radius:6px;cursor:pointer;">Cerrar</button>
-</div>
-
 </body>
 </html>
