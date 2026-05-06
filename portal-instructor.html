@@ -815,6 +815,7 @@ async function cargarAlumnosReales(claseKey) {
 // ESTADO
 // ═══════════════════════════════════════════════════════
 let currentInstructor = null;
+let currentClases = [];
 let currentClass = null;
 let currentStudents = [];
 let attendance = {};
@@ -850,6 +851,7 @@ async function doLogin() {
 
     if (data.success) {
       currentInstructor = data.nombre;
+      currentClases = data.clasesAsignadas || [];
       document.getElementById('login-screen').style.display = 'none';
       document.getElementById('app').style.display = 'block';
       document.getElementById('topbar-name').textContent = data.nombre;
@@ -895,6 +897,11 @@ async function loadClass() {
   const val = document.getElementById('class-select').value;
   if (!val) return;
   currentClass = val;
+  if (currentClases.length > 0 && !currentClases.includes(val)) {
+  showToast('⚠️', 'Clase no asignada', 'No tienes permiso para registrar esta clase.');
+  document.getElementById('class-select').value = '';
+  return;
+}
 
   // Determinar nivel
   const nivel = val.split('-')[0];
@@ -1288,6 +1295,7 @@ function hideLoading() { document.getElementById('loading').classList.remove('ac
 
   function doLogout() {
   currentInstructor = null;
+  currentClases = [];
   currentClass = null;
   currentStudents = [];
   attendance = {};
