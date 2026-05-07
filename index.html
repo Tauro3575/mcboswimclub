@@ -519,7 +519,7 @@ footer strong { color: var(--cyan); }
       <strong>Chinita &#x1F30A;</strong>
       <span>Asistente del MSC - En linea</span>
     </div>
-    <button id="mute-btn" onclick="toggleMute()" title="Silenciar voz">🔊</button><button class="chat-close" onclick="toggleChat()">X</button>
+    <button class="chat-close" onclick="toggleChat()">X</button>
   </div>
   <div id="chat-messages"></div>
   <div class="voice-status" id="voice-status">🎙️ Escuchando...</div>
@@ -581,34 +581,104 @@ footer strong { color: var(--cyan); }
 </div>
 
 <script>
-// ===== CHAT =====
+// ===== CHINITA — CHATBOT CONVERSACIONAL MSC =====
 let chatOpen = false;
-const responses = {
-  default: ["Hola! Soy Chinita, asistente del Maracaibo Swimming Club. Como puedo ayudarte?","Para mas informacion puedes escribirnos por WhatsApp al +58 414-6004468 o visitar nuestras instalaciones en el CIDEZ."],
-  precio: ["Nuestras clases mensuales comienzan desde $50. Tenemos plan trimestral con 25% de descuento. Tambien aceptamos Binance Pay!","Sin pago de inscripcion - solo la mensualidad para reservar tu cupo."],
-  horario: ["Atendemos de Lunes a Sabado de 6:00am a 8:00pm. Tenemos turnos de manana, tarde y noche.","Para clases a domicilio el horario es flexible segun tu disponibilidad."],
-  inscripcion: ["Para inscribirte es muy sencillo: 1) Contactanos, 2) Evaluacion gratuita, 3) Elegir tu plan, 4) A nadar!","Puedes pagar con Efectivo USD, Zelle, Pago Movil, PayPal o Binance Pay."],
-  ubicacion: ["Estamos en Calle 62 (Av. Universidad) entre Av. 2A y 2C, Piscina del CIDEZ, Maracaibo.","Tambien ofrecemos clases a domicilio en toda el area metropolitana de Maracaibo."],
-  binance: ["Si! Aceptamos pagos con Binance Pay en USDT, BTC y ETH. Es rapido, seguro y sin comisiones ocultas.","Para pagar con Binance: abre la app, ve a Pay, escanea nuestro QR (User-cebe0) y confirma el monto."]
+
+// ---- Estado de la conversacion ----
+const state = {
+  step: "inicio",
+  nombre: "",
+  telefono: "",
+  interes: "",   // inscripcion | consulta | pago | ubicacion | otro
+  alumno_nombre: "",
+  alumno_edad: "",
+  nivel: ""
 };
+
+// ---- Base de datos local (sessionStorage) ----
+function guardarLead() {
+  const leads = JSON.parse(sessionStorage.getItem("msc_leads") || "[]");
+  leads.push({ ...state, fecha: new Date().toLocaleString("es-VE") });
+  sessionStorage.setItem("msc_leads", JSON.stringify(leads));
+}
+
+// ---- Saludo segun hora ----
+function getSaludo() {
+  const h = new Date().getHours();
+  if (h >= 5 && h < 12) return "¡Buenos días!";
+  if (h >= 12 && h < 18) return "¡Buenas tardes!";
+  return "¡Buenas noches!";
+}
+
+// ---- Toggle chat ----
 function toggleChat() {
   chatOpen = !chatOpen;
   document.getElementById("chat-window").classList.toggle("open", chatOpen);
   if (chatOpen && document.getElementById("chat-messages").children.length === 0) {
-    setTimeout(() => addMsg("bot","Hola! Soy Chinita 🌊 la asistente del Maracaibo Swimming Club. Como puedo ayudarte hoy?"), 400);
+    setTimeout(() => iniciarConversacion(), 400);
   }
 }
 function openChat() { if (!chatOpen) toggleChat(); }
-function addMsg(type, text) {
+
+// ---- Inicio de conversacion ----
+function iniciarConversacion() {
+  addBotMsg(`${getSaludo()} 🌊 Bienvenido al <strong>Maracaibo Swimming Club</strong>.`);
+  setTimeout(() => {
+    addBotMsg(`Mi nombre es <strong>Chinita</strong> 🌊, tu asistente virtual. Estoy aquí para orientarte sobre todo lo que tenemos en nuestra academia de natación.`);
+    setTimeout(() => {
+      addBotMsg(`Antes de comenzar, me gustaría conocerte un poco. ¿Cuál es tu nombre?`);
+      state.step = "esperando_nombre";
+    }, 800);
+  }, 700);
+}
+
+// ---- Agregar mensaje del bot ----
+function addBotMsg(text) {
   const m = document.getElementById("chat-messages");
   const d = document.createElement("div");
-  d.className = "msg " + type;
-  d.innerHTML = type === "bot"
-    ? `<div class="msg-avatar">🌊</div><div class="msg-bubble">${text}</div>`
-    : `<div class="msg-bubble">${text}</div>`;
-  m.appendChild(d); m.scrollTop = m.scrollHeight;
-  if (type === "bot") speakText(text);
+  d.className = "msg bot";
+  d.innerHTML = `<div class="msg-avatar">🌊</div><div class="msg-bubble">${text}</div>`;
+  m.appendChild(d);
+  m.scrollTop = m.scrollHeight;
 }
+
+// ---- Agregar mensaje del usuario ----
+function addUserMsg(text) {
+  const m = document.getElementById("chat-messages");
+  const d = document.createElement("div");
+  d.className = "msg user";
+  d.innerHTML = `<div class="msg-bubble">${text}</div>`;
+  m.appendChild(d);
+  m.scrollTop = m.scrollHeight;
+}
+
+// ---- Mostrar opciones rapidas ----
+function addQuickReplies(opciones) {
+  const m = document.getElementById("chat-messages");
+  const d = document.createElement("div");
+  d.className = "msg bot";
+  d.style.flexDirection = "column";
+  d.style.alignItems = "flex-start";
+  d.style.gap = "6px";
+  d.style.paddingLeft = "36px";
+  let btns = opciones.map(op =>
+    `<button onclick="quickReply('${op}')" style="background:var(--surface);border:1.5px solid var(--cyan);color:var(--navy);border-radius:50px;padding:6px 14px;font-size:.8rem;font-weight:600;cursor:pointer;font-family:Montserrat,sans-serif;transition:all .2s;" onmouseover="this.style.background='var(--cyan)';this.style.color='white'" onmouseout="this.style.background='var(--surface)';this.style.color='var(--navy)'">${op}</button>`
+  ).join("");
+  d.innerHTML = `<div style="display:flex;flex-wrap:wrap;gap:6px;">${btns}</div>`;
+  m.appendChild(d);
+  m.scrollTop = m.scrollHeight;
+}
+
+// ---- Quick reply handler ----
+function quickReply(texto) {
+  // Remove quick reply buttons
+  const btns = document.querySelectorAll("#chat-messages .msg.bot:last-child button");
+  if (btns.length) btns[0].closest(".msg").remove();
+  addUserMsg(texto);
+  procesarRespuesta(texto);
+}
+
+// ---- Typing indicator ----
 function showTyping() {
   const m = document.getElementById("chat-messages");
   const t = document.createElement("div");
@@ -617,26 +687,237 @@ function showTyping() {
   m.appendChild(t); m.scrollTop = m.scrollHeight;
 }
 function removeTyping() { const t = document.getElementById("typing-indicator"); if (t) t.remove(); }
-function getResponse(msg) {
-  const m = msg.toLowerCase();
-  if (m.match(/precio|costo|cuanto|tarifa|mensual|pago/)) return responses.precio;
-  if (m.match(/horario|hora|turno|cuando|schedule/)) return responses.horario;
-  if (m.match(/inscri|registr|como entro|quiero/)) return responses.inscripcion;
-  if (m.match(/donde|ubicacion|direccion|lugar|mapa/)) return responses.ubicacion;
-  if (m.match(/binance|cripto|bitcoin|usdt|eth|pago digital/)) return responses.binance;
-  return responses.default;
+
+// ---- Responder con delay ----
+function botResponder(fn, delay = 700) {
+  showTyping();
+  setTimeout(() => { removeTyping(); fn(); }, delay);
 }
+
+// ---- Motor conversacional ----
+function procesarRespuesta(txt) {
+  const msg = txt.trim();
+
+  switch(state.step) {
+
+    case "esperando_nombre":
+      state.nombre = msg;
+      botResponder(() => {
+        addBotMsg(`Mucho gusto, <strong>${state.nombre}</strong>! 😊`);
+        setTimeout(() => {
+          addBotMsg(`¿Cuál es tu número de teléfono o WhatsApp para poder contactarte si es necesario?`);
+          state.step = "esperando_telefono";
+        }, 600);
+      });
+      break;
+
+    case "esperando_telefono":
+      state.telefono = msg;
+      botResponder(() => {
+        addBotMsg(`Perfecto ${state.nombre}! Anotado ✅`);
+        setTimeout(() => {
+          addBotMsg(`¿En qué puedo ayudarte hoy?`);
+          addQuickReplies(["📋 Quiero inscribirme", "💰 Consultar precios", "📍 Ubicación y horarios", "💳 Info de pagos", "🏊 Ver programas"]);
+          state.step = "esperando_interes";
+        }, 600);
+      });
+      break;
+
+    case "esperando_interes":
+      state.interes = msg;
+      if (msg.includes("inscri") || msg.includes("Inscri")) {
+        botResponder(() => {
+          addBotMsg(`Excelente ${state.nombre}! Me alegra que quieras unirte a nuestra Familia Acuática 🌊`);
+          setTimeout(() => {
+            addBotMsg(`¿El interesado eres tú o es para un familiar?`);
+            addQuickReplies(["Para mí", "Para mi hijo/hija", "Para varios familiares"]);
+            state.step = "esperando_para_quien";
+          }, 600);
+        });
+      } else if (msg.includes("precio") || msg.includes("Precio")) {
+        botResponder(() => responderPrecios());
+      } else if (msg.includes("bicaci") || msg.includes("horario") || msg.includes("Ubicaci")) {
+        botResponder(() => responderUbicacion());
+      } else if (msg.includes("pago") || msg.includes("Pago")) {
+        botResponder(() => responderPagos());
+      } else if (msg.includes("programa") || msg.includes("Programa")) {
+        botResponder(() => responderProgramas());
+      } else {
+        botResponder(() => {
+          addBotMsg(`Entendido ${state.nombre}! Déjame ayudarte con eso.`);
+          addBotMsg(`¿Sobre qué tema específicamente necesitas información?`);
+          addQuickReplies(["📋 Inscripción", "💰 Precios", "📍 Ubicación", "💳 Pagos", "🏊 Programas"]);
+        });
+      }
+      break;
+
+    case "esperando_para_quien":
+      state.interes_detalle = msg;
+      if (msg.includes("hijo") || msg.includes("hija") || msg.includes("familiar")) {
+        botResponder(() => {
+          addBotMsg(`¿Cuál es el nombre del alumno y cuántos años tiene?`);
+          state.step = "esperando_alumno";
+        });
+      } else {
+        botResponder(() => {
+          addBotMsg(`¿Cuántos años tienes ${state.nombre}?`);
+          state.step = "esperando_edad_propia";
+        });
+      }
+      break;
+
+    case "esperando_alumno":
+      state.alumno_nombre = msg;
+      botResponder(() => {
+        addBotMsg(`Perfecto! ¿Cuántos años tiene <strong>${msg.split(" ")[0]}</strong>?`);
+        state.step = "esperando_edad_alumno";
+      });
+      break;
+
+    case "esperando_edad_alumno":
+    case "esperando_edad_propia":
+      state.alumno_edad = msg;
+      guardarLead();
+      botResponder(() => responderNivelPorEdad(parseInt(msg)));
+      break;
+
+    case "esperando_modalidad":
+      state.modalidad = msg;
+      guardarLead();
+      botResponder(() => {
+        addBotMsg(`Excelente elección! 🌟`);
+        setTimeout(() => {
+          addBotMsg(`📋 <strong>Resumen de tu consulta:</strong><br>
+            👤 Nombre: ${state.nombre}<br>
+            📱 Teléfono: ${state.telefono}<br>
+            🏊 Alumno: ${state.alumno_nombre || state.nombre} (${state.alumno_edad} años)<br>
+            📌 Modalidad: ${msg}`);
+          setTimeout(() => {
+            addBotMsg(`Nuestro equipo se pondrá en contacto contigo a la brevedad para confirmar tu cupo. ¡Bienvenido a la Familia Acuática! 🌊☀️`);
+            state.step = "finalizado";
+          }, 800);
+        }, 600);
+      });
+      break;
+
+    case "finalizado":
+      botResponder(() => {
+        addBotMsg(`¿Hay algo más en lo que pueda ayudarte ${state.nombre}?`);
+        addQuickReplies(["💰 Ver precios", "📍 Ver ubicación", "💳 Info de pagos", "🏊 Ver programas"]);
+        state.step = "menu_final";
+      });
+      break;
+
+    case "menu_final":
+      if (msg.includes("precio") || msg.includes("Precio")) botResponder(() => responderPrecios());
+      else if (msg.includes("bicaci") || msg.includes("Ubicaci")) botResponder(() => responderUbicacion());
+      else if (msg.includes("pago") || msg.includes("Pago")) botResponder(() => responderPagos());
+      else if (msg.includes("programa") || msg.includes("Programa")) botResponder(() => responderProgramas());
+      else botResponder(() => addBotMsg(`Para más información contáctanos: WhatsApp +58 414-6004468 o Instagram @McboSwimClub 🌊`));
+      break;
+
+    default:
+      // Deteccion inteligente fuera del flujo
+      const m2 = msg.toLowerCase();
+      if (m2.match(/precio|costo|cuanto|tarifa|mensual/)) botResponder(() => responderPrecios());
+      else if (m2.match(/donde|ubicacion|direccion|horario/)) botResponder(() => responderUbicacion());
+      else if (m2.match(/pago|binance|zelle|transferencia/)) botResponder(() => responderPagos());
+      else if (m2.match(/nivel|programa|edad|nino|adulto/)) botResponder(() => responderProgramas());
+      else botResponder(() => {
+        addBotMsg(`${state.nombre ? state.nombre + ", no" : "No"} entendí bien tu mensaje. ¿En qué puedo ayudarte?`);
+        addQuickReplies(["📋 Inscripción", "💰 Precios", "📍 Ubicación", "💳 Pagos"]);
+      });
+  }
+}
+
+// ---- Respuestas informativas ----
+function responderNivelPorEdad(edad) {
+  let nivel = "", desc = "";
+  if (edad < 4) { nivel = "Nivel Burbuja 🧸"; desc = "Adaptación al medio acuático con el representante en el agua. Edad: 1 a 3 años."; }
+  else if (edad <= 8) { nivel = "Nivel Iniciación 🎒"; desc = "Dominio de principios básicos de supervivencia acuática. Edad: 4 a 8 años."; }
+  else if (edad <= 14) { nivel = "Nivel Intermedio 🏊"; desc = "Progresión técnica para quienes dominan lo básico. Edad: 8 a 14 años."; }
+  else if (edad <= 18) { nivel = "Nivel Avanzado 🏅"; desc = "Perfeccionamiento de los 4 estilos. Edad: 6 a 18 años."; }
+  else { nivel = "Nivel Adultos 🌊"; desc = "Aprende a nadar o practica como ejercicio y bienestar. 15+ años."; }
+
+  addBotMsg(`Basado en la edad, el nivel recomendado es:<br><strong>${nivel}</strong><br>${desc}`);
+  setTimeout(() => {
+    addBotMsg(`¿Prefieres clases en nuestra piscina o a domicilio?`);
+    addQuickReplies(["🏊 En la piscina CIDEZ", "🚗 A domicilio", "💰 Ver precios primero"]);
+    state.step = "esperando_modalidad";
+  }, 800);
+}
+
+function responderPrecios() {
+  addBotMsg(`💰 <strong>Nuestras tarifas:</strong><br><br>
+    🔹 Mensual (lunes a viernes): <strong>desde $50</strong><br>
+    🔹 Plan Sabatino: <strong>a confirmar</strong><br>
+    🔹 Plan Trimestral: <strong>25% de descuento</strong><br>
+    🔹 Promo 2x1 hermanos: <strong>$25 c/u</strong><br><br>
+    ✅ Sin pago de inscripción — solo la mensualidad para reservar tu cupo.`);
+  setTimeout(() => {
+    addBotMsg(`¿Te gustaría inscribirte o tienes alguna otra pregunta?`);
+    addQuickReplies(["📋 Quiero inscribirme", "📍 Ver ubicación", "💳 Métodos de pago"]);
+    state.step = state.nombre ? "menu_final" : "esperando_interes";
+  }, 800);
+}
+
+function responderUbicacion() {
+  addBotMsg(`📍 <strong>Nos encontramos en:</strong><br>
+    Calle 62 (Av. Universidad) entre Av. 2A y 2C<br>
+    Piscina del CIDEZ, Maracaibo, Estado Zulia<br><br>
+    ⏰ <strong>Horarios:</strong><br>
+    Lunes a Sábado: 6:00am — 8:00pm<br>
+    Turnos de mañana, tarde y noche<br><br>
+    🚗 También ofrecemos <strong>clases a domicilio</strong> en toda el área metropolitana.`);
+  setTimeout(() => {
+    addBotMsg(`¿Te gustaría inscribirte o necesitas más información?`);
+    addQuickReplies(["📋 Quiero inscribirme", "💰 Ver precios", "💳 Métodos de pago"]);
+    state.step = state.nombre ? "menu_final" : "esperando_interes";
+  }, 800);
+}
+
+function responderPagos() {
+  addBotMsg(`💳 <strong>Métodos de pago aceptados:</strong><br><br>
+    💵 Efectivo USD<br>
+    📱 Zelle<br>
+    📲 Pago Móvil<br>
+    🌐 PayPal<br>
+    ₿ Binance Pay — USDT, BTC, ETH (cuenta USA)<br><br>
+    Para pagar con Binance: abre la app → Pay → escanea nuestro QR<br>
+    <strong>Binance ID: User-cebe0</strong>`);
+  setTimeout(() => {
+    addBotMsg(`¿Te gustaría inscribirte ahora?`);
+    addQuickReplies(["📋 Sí, quiero inscribirme", "🏊 Ver programas", "📍 Ver ubicación"]);
+    state.step = state.nombre ? "menu_final" : "esperando_interes";
+  }, 800);
+}
+
+function responderProgramas() {
+  addBotMsg(`🏊 <strong>Nuestros programas:</strong><br><br>
+    🧸 <strong>Nivel Burbuja</strong> — 1 a 3 años<br>
+    🎒 <strong>Nivel Iniciación</strong> — 4 a 8 años<br>
+    🏊 <strong>Nivel Intermedio</strong> — 8+ años<br>
+    🏅 <strong>Nivel Avanzado</strong> — 6 a 18 años<br>
+    🌊 <strong>Nivel Adultos</strong> — 15+ años<br>
+    ⭐ <strong>Clases Privadas</strong> — Todas las edades<br><br>
+    Grupos reducidos, máximo 6 alumnos. Atención personalizada.`);
+  setTimeout(() => {
+    addBotMsg(`¿Te gustaría inscribirte en alguno de estos programas?`);
+    addQuickReplies(["📋 Quiero inscribirme", "💰 Ver precios", "📍 Ver ubicación"]);
+    state.step = state.nombre ? "menu_final" : "esperando_interes";
+  }, 800);
+}
+
+// ---- Send message ----
 function sendMessage() {
   const inp = document.getElementById("chat-input");
-  const txt = inp.value.trim(); if (!txt) return;
-  addMsg("user", txt); inp.value = "";
-  showTyping();
-  const resp = getResponse(txt);
-  setTimeout(() => {
-    removeTyping();
-    resp.forEach((r, i) => setTimeout(() => addMsg("bot", r), i * 600));
-  }, 900);
+  const txt = inp.value.trim();
+  if (!txt) return;
+  addUserMsg(txt);
+  inp.value = "";
+  procesarRespuesta(txt);
 }
+
 document.getElementById("chat-input").addEventListener("keydown", e => { if (e.key === "Enter") sendMessage(); });
 
 // ===== WEB SPEECH API — VOZ ENTRADA + SALIDA =====
