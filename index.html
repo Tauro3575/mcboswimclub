@@ -257,6 +257,44 @@ footer strong { color: var(--cyan); }
   .pm-plans { grid-template-columns: 1fr; }
   .pm-row { grid-template-columns: 1fr; }
 }
+
+/* ===== VOICE BUTTON ===== */
+#voice-btn {
+  width: 38px; height: 38px;
+  background: var(--navy); border: none; border-radius: 50%;
+  color: white; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; transition: all .2s; flex-shrink: 0;
+}
+#voice-btn:hover { background: var(--cyan); }
+#voice-btn.listening {
+  background: #EF4444;
+  animation: voicePulse 1s infinite;
+  box-shadow: 0 0 0 0 rgba(239,68,68,0.4);
+}
+@keyframes voicePulse {
+  0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(239,68,68,0); }
+  100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+}
+#voice-btn.listening::after {
+  content: '';
+}
+.voice-status {
+  font-size: .7rem; color: #EF4444; font-weight: 600;
+  text-align: center; padding: 2px 0 4px;
+  display: none; letter-spacing: .04em;
+  font-family: 'Montserrat', sans-serif;
+}
+.voice-status.show { display: block; }
+#mute-btn {
+  position: absolute; top: 12px; right: 50px;
+  background: none; border: none; cursor: pointer;
+  font-size: .75rem; color: rgba(255,255,255,.5);
+  transition: color .2s; padding: 4px;
+}
+#mute-btn:hover { color: var(--gold); }
+#mute-btn.muted { color: var(--gold); }
 </style>
 </head>
 <body>
@@ -481,11 +519,13 @@ footer strong { color: var(--cyan); }
       <strong>Chinita &#x1F30A;</strong>
       <span>Asistente del MSC - En linea</span>
     </div>
-    <button class="chat-close" onclick="toggleChat()">X</button>
+    <button id="mute-btn" onclick="toggleMute()" title="Silenciar voz">🔊</button><button class="chat-close" onclick="toggleChat()">X</button>
   </div>
   <div id="chat-messages"></div>
+  <div class="voice-status" id="voice-status">🎙️ Escuchando...</div>
   <div class="chat-input-row">
-    <input id="chat-input" type="text" placeholder="Escribe tu mensaje..." autocomplete="off"/>
+    <button id="voice-btn" onclick="toggleVoice()" title="Hablar con Chinita">🎙️</button>
+    <input id="chat-input" type="text" placeholder="Escribe o habla con Chinita..." autocomplete="off"/>
     <button id="chat-send" onclick="sendMessage()">&#x27A4;</button>
   </div>
 </div>
@@ -567,6 +607,7 @@ function addMsg(type, text) {
     ? `<div class="msg-avatar">🌊</div><div class="msg-bubble">${text}</div>`
     : `<div class="msg-bubble">${text}</div>`;
   m.appendChild(d); m.scrollTop = m.scrollHeight;
+  if (type === "bot") speakText(text);
 }
 function showTyping() {
   const m = document.getElementById("chat-messages");
@@ -597,6 +638,111 @@ function sendMessage() {
   }, 900);
 }
 document.getElementById("chat-input").addEventListener("keydown", e => { if (e.key === "Enter") sendMessage(); });
+
+// ===== WEB SPEECH API — VOZ ENTRADA + SALIDA =====
+let recognition = null;
+let isListening = false;
+let isMuted = false;
+let synth = window.speechSynthesis;
+let currentUtterance = null;
+
+// Init Speech Recognition
+function initRecognition() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    alert("Tu navegador no soporta reconocimiento de voz. Usa Chrome para esta función.");
+    return null;
+  }
+  const rec = new SpeechRecognition();
+  rec.lang = "es-VE";
+  rec.continuous = false;
+  rec.interimResults = true;
+
+  rec.onstart = () => {
+    isListening = true;
+    document.getElementById("voice-btn").classList.add("listening");
+    document.getElementById("voice-btn").innerHTML = "⏹️";
+    document.getElementById("voice-status").classList.add("show");
+  };
+
+  rec.onresult = (e) => {
+    let interim = "";
+    let final = "";
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) final += e.results[i][0].transcript;
+      else interim += e.results[i][0].transcript;
+    }
+    document.getElementById("chat-input").value = final || interim;
+    if (final) {
+      stopListening();
+      setTimeout(() => sendMessage(), 300);
+    }
+  };
+
+  rec.onerror = (e) => {
+    console.error("Speech error:", e.error);
+    stopListening();
+    if (e.error === "not-allowed") {
+      addMsg("bot", "⚠️ Necesito permiso para usar el micrófono. Por favor permite el acceso en tu navegador.");
+    }
+  };
+
+  rec.onend = () => { stopListening(); };
+  return rec;
+}
+
+function toggleVoice() {
+  if (isListening) { stopListening(); return; }
+  if (!recognition) recognition = initRecognition();
+  if (!recognition) return;
+  // Stop any ongoing speech before listening
+  if (synth.speaking) synth.cancel();
+  try { recognition.start(); }
+  catch(e) { console.error(e); }
+}
+
+function stopListening() {
+  isListening = false;
+  document.getElementById("voice-btn").classList.remove("listening");
+  document.getElementById("voice-btn").innerHTML = "🎙️";
+  document.getElementById("voice-status").classList.remove("show");
+  try { if (recognition) recognition.stop(); } catch(e) {}
+}
+
+// Voz salida — Chinita habla
+function speakText(text) {
+  if (isMuted || !synth) return;
+  if (synth.speaking) synth.cancel();
+  // Clean text — remove emojis for cleaner speech
+  const clean = text.replace(/[\u{1F600}-\u{1F9FF}]/gu, "").replace(/[⚡✅🌊🏊☀️🎙️⚠️]/g, "").trim();
+  if (!clean) return;
+  const utt = new SpeechSynthesisUtterance(clean);
+  utt.lang = "es-VE";
+  utt.rate = 1.05;
+  utt.pitch = 1.1;
+  utt.volume = 1;
+  // Pick a female Spanish voice if available
+  const voices = synth.getVoices();
+  const esVoice = voices.find(v => v.lang.startsWith("es") && v.name.toLowerCase().includes("female"))
+    || voices.find(v => v.lang.startsWith("es"))
+    || null;
+  if (esVoice) utt.voice = esVoice;
+  currentUtterance = utt;
+  synth.speak(utt);
+}
+
+function toggleMute() {
+  isMuted = !isMuted;
+  const btn = document.getElementById("mute-btn");
+  btn.innerHTML = isMuted ? "🔇" : "🔊";
+  btn.classList.toggle("muted", isMuted);
+  if (isMuted && synth.speaking) synth.cancel();
+}
+
+// Load voices on ready
+if (synth) {
+  synth.onvoiceschanged = () => synth.getVoices();
+}
 
 // ===== GALLERY =====
 function openLightbox(src) { document.getElementById("lightbox").classList.add("active"); document.getElementById("lightbox-img").src = src; }
