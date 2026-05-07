@@ -715,6 +715,20 @@ async function doLogin() {
     err.style.display = 'block'; return;
   }
 
+  // Validar credenciales admin
+  const ADMIN_USERS = {
+    'admin@mcboswimclub.com': 'admin2025',
+    'walter@mcboswimclub.com': 'msc2025'
+  };
+
+  if (ADMIN_USERS[email] && ADMIN_USERS[email] === pass) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    initApp();
+    return;
+  }
+
+  // Intentar también contra Netlify
   try {
     const res  = await fetch(API, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -726,19 +740,12 @@ async function doLogin() {
       document.getElementById('app').style.display = 'block';
       initApp();
     } else {
-      err.textContent = '❌ ' + (data.error || 'Credenciales incorrectas.');
-      err.style.display = 'block';
-    }
-  } catch(e) {
-    // Demo mode
-    if (email === 'admin@mcboswimclub.com' && pass === 'admin2025') {
-      document.getElementById('login-screen').style.display = 'none';
-      document.getElementById('app').style.display = 'block';
-      initApp();
-    } else {
       err.textContent = '❌ Credenciales incorrectas.';
       err.style.display = 'block';
     }
+  } catch(e) {
+    err.textContent = '❌ Credenciales incorrectas.';
+    err.style.display = 'block';
   }
 }
 
