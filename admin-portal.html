@@ -949,7 +949,7 @@ async function loadDashboard() {
       return f.getMonth() === mesActual && f.getFullYear() === anioActual;
     });
     const ingresos = pagosMes.reduce((s,p) => s + (parseFloat(p.monto)||0), 0);
-    const pendientes = alumnos.filter(a => a.estado_pago === 'Pendiente').length;
+    const pendientes = alumnos.filter(a => String(a.estadoPago).trim() === 'Pendiente').length;
 
     document.getElementById('d-alumnos').textContent = alumnos.length;
     document.getElementById('d-instructores').textContent = instructores.length;
