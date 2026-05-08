@@ -903,7 +903,8 @@ function initApp() {
   document.getElementById('dash-fecha').textContent =
     now.toLocaleDateString('es-VE', {weekday:'long',year:'numeric',month:'long',day:'numeric'});
   document.getElementById('pagos-mes').value = now.toISOString().slice(0,7);
-  switchSubtab('activos');
+  switchSubtab('pendientes');
+  setTimeout(function(){ switchSubtab('activos'); }, 200);
   document.getElementById('pago-fecha').value = now.toISOString().slice(0,10);
   loadDashboard();
   loadInstructores();
@@ -1148,8 +1149,10 @@ async function loadAlumnos() {
     allAlumnos = data.alumnos || [];
     renderAlumnos(allAlumnos);
     populatePagoAlumnoSelect(allAlumnos);
-  } catch(e) { allAlumnos = []; renderAlumnos([]); }
-  // Cargar leads (en proceso)
+  } catch(e) { 
+    allAlumnos = []; 
+    renderAlumnos([]); 
+  }
   loadLeads();
 }
 
