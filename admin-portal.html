@@ -584,55 +584,94 @@
 
 <!-- ═══ MODAL: REGISTRAR PAGO ═══ -->
 <div class="modal-overlay" id="modal-pago">
-  <div class="modal" style="position:relative;">
+  <div class="modal" style="position:relative;max-width:560px;">
     <button class="modal-close" onclick="closeModal('modal-pago')">✕</button>
     <h3>💳 Registrar Pago</h3>
-    <p>Registra un pago recibido por cualquier método.</p>
-    <div class="form-group-light">
-      <label>Alumno</label>
-      <select id="pago-alumno"><option value="">— Selecciona alumno —</option></select>
-    </div>
+    <p>Completa los datos del pago recibido. Se enviará recibo automático al representante.</p>
+
     <div class="form-row">
-      <div class="form-group-light">
-        <label>Monto (USD)</label>
-        <input type="number" id="pago-monto" placeholder="50" min="0"/>
-      </div>
-      <div class="form-group-light">
-        <label>Método de Pago</label>
-        <select id="pago-metodo">
-          <option value="Binance">₿ Binance Pay</option>
-          <option value="Zelle">💵 Zelle</option>
-          <option value="Efectivo">💰 Efectivo USD</option>
-          <option value="Pago Movil">📱 Pago Móvil</option>
-          <option value="PayPal">🌐 PayPal</option>
+      <div class="form-group-light" style="grid-column:1/-1;">
+        <label>Alumno</label>
+        <select id="pago-alumno" onchange="autocompletarMonto()">
+          <option value="">— Selecciona alumno —</option>
         </select>
       </div>
     </div>
+
     <div class="form-row">
       <div class="form-group-light">
         <label>Plan</label>
-        <select id="pago-plan">
-          <option value="Mensual 1h">Mensual · 1h ($50)</option>
-          <option value="Mensual 2h">Mensual · 2h ($80)</option>
-          <option value="Sabatino 1h">Sabatino · 1h ($30)</option>
-          <option value="Sabatino 2h">Sabatino · 2h ($40)</option>
-          <option value="Trimestral">Trimestral ($135)</option>
-          <option value="Promo 2x1">Promo 2x1 ($25 c/u)</option>
-          <option value="Privada">Clase Privada ($15)</option>
+        <select id="pago-plan" onchange="autocompletarMonto()">
+          <option value="Mensual 1h" data-monto="50">Mensual · 1h — $50</option>
+          <option value="Mensual 2h" data-monto="80">Mensual · 2h — $80</option>
+          <option value="Sabatino 1h" data-monto="30">Sabatino · 1h — $30</option>
+          <option value="Sabatino 2h" data-monto="40">Sabatino · 2h — $40</option>
+          <option value="Trimestral" data-monto="135">Trimestral — $135</option>
+          <option value="Promo 2x1" data-monto="25">Promo 2x1 — $25 c/u</option>
+          <option value="Privada" data-monto="15">Clase Privada — $15</option>
         </select>
       </div>
       <div class="form-group-light">
-        <label>Fecha</label>
+        <label>Monto Recibido (USD)</label>
+        <input type="number" id="pago-monto" placeholder="50" min="0" step="0.01"/>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group-light">
+        <label>Método de Pago</label>
+        <select id="pago-metodo" onchange="toggleCamposPago()">
+          <option value="Zelle">💵 Zelle</option>
+          <option value="Pago Movil">📱 Pago Móvil</option>
+          <option value="Efectivo USD">💰 Efectivo USD</option>
+          <option value="Binance Pay">₿ Binance Pay</option>
+          <option value="PayPal">🌐 PayPal</option>
+        </select>
+      </div>
+      <div class="form-group-light">
+        <label>Fecha del Pago</label>
         <input type="date" id="pago-fecha"/>
       </div>
     </div>
-    <div class="form-group-light">
-      <label>Referencia / Comprobante (opcional)</label>
-      <input type="text" id="pago-ref" placeholder="ID de transacción, número de referencia..."/>
+
+    <!-- Campos dinámicos según método -->
+    <div id="campos-transferencia">
+      <div class="form-row">
+        <div class="form-group-light">
+          <label>N° Referencia / Comprobante</label>
+          <input type="text" id="pago-ref" placeholder="Ej: 202505070123456"/>
+        </div>
+        <div class="form-group-light">
+          <label>Banco <span id="banco-label" style="color:var(--gray);font-weight:400;">(opcional)</span></label>
+          <input type="text" id="pago-banco" placeholder="Ej: Banesco, Bank of America..."/>
+        </div>
+      </div>
+      <div class="form-row" id="campos-pago-movil" style="display:none;">
+        <div class="form-group-light">
+          <label>Teléfono Pago Móvil</label>
+          <input type="text" id="pago-telefono" placeholder="Ej: 0414-6004468"/>
+        </div>
+        <div class="form-group-light">
+          <label>Nombre del Titular</label>
+          <input type="text" id="pago-titular" placeholder="Nombre en la cuenta"/>
+        </div>
+      </div>
     </div>
+
+    <div class="form-group-light">
+      <label>Observaciones <span style="color:var(--gray);font-weight:400;">(opcional)</span></label>
+      <textarea id="pago-obs" placeholder="Ej: Pago correspondiente a 2 meses, descuento aplicado, etc." rows="2"></textarea>
+    </div>
+
+    <!-- Preview del recibo -->
+    <div id="pago-preview" style="background:var(--surface);border-radius:10px;padding:.9rem 1.2rem;border:1.5px solid rgba(0,87,168,.1);margin-bottom:.5rem;font-size:.82rem;">
+      <strong style="color:var(--navy);">📧 Se enviará recibo a:</strong>
+      <span id="preview-email" style="color:var(--gray);margin-left:.4rem;">— selecciona un alumno —</span>
+    </div>
+
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeModal('modal-pago')">Cancelar</button>
-      <button class="btn btn-success btn-lg" onclick="registrarPago()">✅ Registrar Pago</button>
+      <button class="btn btn-success btn-lg" onclick="registrarPago()">✅ Registrar y Enviar Recibo</button>
     </div>
   </div>
 </div>
@@ -1057,7 +1096,9 @@ function populatePagoAlumnoSelect(alumnos) {
   sel.innerHTML = '<option value="">— Selecciona alumno —</option>';
   alumnos.forEach(a => {
     const opt = document.createElement('option');
-    opt.value = a.nombre; opt.textContent = `${a.nombre} (${a.nivel||'—'})`;
+    opt.value = a.nombre;
+    opt.dataset.email = a.email || '';
+    opt.textContent = `${a.nombre} (${a.nivel||'—'})`;
     sel.appendChild(opt);
   });
 }
@@ -1113,29 +1154,83 @@ async function loadPagos() {
   }
 }
 
+function toggleCamposPago() {
+  const metodo = document.getElementById('pago-metodo').value;
+  const camposT  = document.getElementById('campos-transferencia');
+  const camposPM = document.getElementById('campos-pago-movil');
+  const bancoLbl = document.getElementById('banco-label');
+  const refInput = document.getElementById('pago-ref');
+
+  // Efectivo no necesita referencia
+  if (metodo === 'Efectivo USD') {
+    camposT.style.display = 'none';
+  } else {
+    camposT.style.display = 'block';
+    camposPM.style.display = metodo === 'Pago Movil' ? 'grid' : 'none';
+    bancoLbl.textContent = metodo === 'Zelle' ? '(opcional)' : metodo === 'Pago Movil' ? '' : '(opcional)';
+    refInput.placeholder = metodo === 'Binance Pay' ? 'ID de transacción Binance' :
+                           metodo === 'Zelle'       ? 'Últimos 4 dígitos o referencia' :
+                           metodo === 'Pago Movil'  ? 'Número de referencia bancaria' :
+                           'Referencia / comprobante';
+  }
+}
+
+function autocompletarMonto() {
+  const plan = document.getElementById('pago-plan');
+  const monto = document.getElementById('pago-monto');
+  const opt   = plan.options[plan.selectedIndex];
+  if (opt && opt.dataset.monto) monto.value = opt.dataset.monto;
+
+  // Preview email
+  const alumno = document.getElementById('pago-alumno').value;
+  const alumnoObj = allAlumnos.find(a => a.nombre === alumno);
+  const previewEl  = document.getElementById('preview-email');
+  previewEl.textContent = alumnoObj ? (alumnoObj.email || 'sin email registrado') : '— selecciona un alumno —';
+}
+
 async function registrarPago() {
   const alumno = document.getElementById('pago-alumno').value;
   const monto  = document.getElementById('pago-monto').value;
   const metodo = document.getElementById('pago-metodo').value;
   const plan   = document.getElementById('pago-plan').value;
   const fecha  = document.getElementById('pago-fecha').value;
-  const ref    = document.getElementById('pago-ref').value;
+  const ref    = document.getElementById('pago-ref').value.trim();
+  const banco  = document.getElementById('pago-banco')?.value.trim() || '';
+  const tel    = document.getElementById('pago-telefono')?.value.trim() || '';
+  const titular= document.getElementById('pago-titular')?.value.trim() || '';
+  const obs    = document.getElementById('pago-obs')?.value.trim() || '';
 
-  if (!alumno || !monto) { showToast('⚠️','Faltan datos','Selecciona alumno e ingresa el monto'); return; }
+  if (!alumno) { showToast('⚠️','Falta alumno','Selecciona el alumno'); return; }
+  if (!monto || parseFloat(monto) <= 0) { showToast('⚠️','Falta monto','Ingresa el monto recibido'); return; }
+  if (metodo !== 'Efectivo USD' && !ref) {
+    showToast('⚠️','Falta referencia','Ingresa el número de referencia o comprobante'); return;
+  }
 
-  showLoading('Registrando pago...');
+  showLoading('Registrando pago y enviando recibo...');
   try {
-    const res = await fetch(API, { method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ accion:'registrarPago', nombre:alumno, monto, metodo, plan, fecha, referencia:ref, fuente:'Admin Panel' }) });
+    const res = await fetch(API, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        accion: 'registrarPago',
+        nombre: alumno, monto, metodo, plan, fecha,
+        referencia: ref, banco, telefono: tel, titular, observacion: obs,
+        fuente: 'Admin Panel'
+      })
+    });
     const data = await res.json();
     hideLoading();
     if (data.success) {
-      closeModal('modal-pago'); showToast('✅','Pago registrado',`$${monto} de ${alumno}`);
+      closeModal('modal-pago');
+      const msg = data.emailEnviado ? 'Recibo enviado al representante' : 'Pago guardado (sin email registrado)';
+      showToast('✅', 'Pago registrado · ' + plan, msg);
       loadPagos(); loadDashboard();
-    } else showToast('❌','Error', data.error||'No se pudo registrar');
+    } else {
+      showToast('❌', 'Error', data.error || 'No se pudo registrar');
+    }
   } catch(e) {
-    hideLoading(); closeModal('modal-pago');
-    showToast('✅','Pago registrado (demo)',`$${monto} de ${alumno} — En producción se guardaría`);
+    hideLoading();
+    closeModal('modal-pago');
+    showToast('✅', 'Demo · Pago registrado', `$${monto} de ${alumno}`);
     loadDashboard();
   }
 }
