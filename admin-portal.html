@@ -842,7 +842,9 @@ async function loadDashboard() {
     const hoy = new Date();
     const mesActual = hoy.getMonth(); const anioActual = hoy.getFullYear();
     const pagosMes = pagos.filter(p => {
-      const f = new Date(p.fecha);
+      const partes = String(p.fecha).split('/');
+      if (partes.length < 3) return false;
+      const f = new Date(partes[2], parseInt(partes[1])-1, partes[0]);
       return f.getMonth() === mesActual && f.getFullYear() === anioActual;
     });
     const ingresos = pagosMes.reduce((s,p) => s + (parseFloat(p.monto)||0), 0);
