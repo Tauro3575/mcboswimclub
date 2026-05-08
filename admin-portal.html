@@ -857,10 +857,9 @@ async function doLogin() {
     err.style.display = 'block'; return;
   }
 
-  // Validar credenciales admin
   const ADMIN_USERS = {
     'admin@mcboswimclub.com': 'admin2025',
-    'waltertordecilla75@gmail.co': 'msc2025'
+    'waltertordecilla75@gmail.com': 'msc2025'
   };
 
   if (ADMIN_USERS[email] && ADMIN_USERS[email] === pass) {
@@ -870,7 +869,6 @@ async function doLogin() {
     return;
   }
 
-  // Intentar también contra Netlify
   try {
     const res  = await fetch(API, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -886,23 +884,10 @@ async function doLogin() {
       err.style.display = 'block';
     }
   } catch(e) {
-    // Si falla Netlify igual validamos localmente
-    if (ADMIN_USERS[email] && ADMIN_USERS[email] === pass) {
-      document.getElementById('login-screen').style.display = 'none';
-      document.getElementById('app').style.display = 'block';
-      initApp();
-    } else {
-      err.textContent = '❌ Credenciales incorrectas.';
-      err.style.display = 'block';
-   }
+    err.textContent = '❌ Credenciales incorrectas.';
+    err.style.display = 'block';
+  }
 }
-
-function doLogout() {
-  document.getElementById('login-screen').style.display = 'flex';
-  document.getElementById('app').style.display = 'none';
-  document.getElementById('login-pass').value = '';
-}
-
 // ═══════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════
