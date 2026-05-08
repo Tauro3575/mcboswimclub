@@ -1584,9 +1584,9 @@ function abrirModalPago(nombre, nivel, email) {
 function renderAlumnos(list) {
   document.getElementById('alumnos-count').textContent = list.length + ' alumnos';
 
-  var activos    = list.filter(function(a){ return a.estado !== 'Inactivo' && a.estadoPago !== 'Pendiente'; });
-  var pendientes = list.filter(function(a){ return a.estado !== 'Inactivo' && a.estadoPago === 'Pendiente'; });
-  var inactivos  = list.filter(function(a){ return a.estado === 'Inactivo'; });
+  var activos    = list.filter(function(a){ return String(a.estado).trim() === 'Activo' && String(a.estadoPago).trim() === 'Pagado'; });
+  var pendientes = list.filter(function(a){ return String(a.estado).trim() === 'Activo' && String(a.estadoPago).trim() !== 'Pagado'; });
+  var inactivos  = list.filter(function(a){ return String(a.estado).trim() === 'Inactivo'; });
 
   document.getElementById('count-activos').textContent    = activos.length;
   document.getElementById('count-pendientes').textContent = pendientes.length;
