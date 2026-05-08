@@ -390,10 +390,28 @@
     <div class="tab-content" id="tab-alumnos">
       <div class="page-header">
         <h2>Gestión de Alumnos</h2>
-        <p>Listado completo de alumnos inscritos</p>
+        <p>Control completo de alumnos activos, pendientes y en proceso de inscripción</p>
       </div>
 
-      <div class="stats-bar" id="alumnos-stats"></div>
+      <!-- TABS INTERNOS -->
+      <div style="display:flex;gap:0;margin-bottom:1.5rem;background:white;border-radius:12px;overflow:hidden;border:1.5px solid rgba(0,87,168,.1);">
+        <button class="subtab-btn active" onclick="switchSubtab('activos')" id="subtab-activos"
+          style="flex:1;padding:.8rem;border:none;background:var(--blue);color:white;font-family:'Outfit',sans-serif;font-weight:700;font-size:.85rem;cursor:pointer;">
+          🟢 Activos <span id="count-activos" style="background:rgba(255,255,255,.2);padding:.1rem .5rem;border-radius:50px;font-size:.75rem;margin-left:.3rem;"></span>
+        </button>
+        <button class="subtab-btn" onclick="switchSubtab('proceso')" id="subtab-proceso"
+          style="flex:1;padding:.8rem;border:none;background:white;color:var(--gray);font-family:'Outfit',sans-serif;font-weight:600;font-size:.85rem;cursor:pointer;border-left:1px solid rgba(0,87,168,.1);">
+          🟡 En Proceso <span id="count-proceso" style="background:rgba(245,158,11,.15);color:var(--warning);padding:.1rem .5rem;border-radius:50px;font-size:.75rem;margin-left:.3rem;"></span>
+        </button>
+        <button class="subtab-btn" onclick="switchSubtab('pendientes')" id="subtab-pendientes"
+          style="flex:1;padding:.8rem;border:none;background:white;color:var(--gray);font-family:'Outfit',sans-serif;font-weight:600;font-size:.85rem;cursor:pointer;border-left:1px solid rgba(0,87,168,.1);">
+          🟠 Pago Pendiente <span id="count-pendientes" style="background:rgba(239,68,68,.1);color:var(--danger);padding:.1rem .5rem;border-radius:50px;font-size:.75rem;margin-left:.3rem;"></span>
+        </button>
+        <button class="subtab-btn" onclick="switchSubtab('inactivos')" id="subtab-inactivos"
+          style="flex:1;padding:.8rem;border:none;background:white;color:var(--gray);font-family:'Outfit',sans-serif;font-weight:600;font-size:.85rem;cursor:pointer;border-left:1px solid rgba(0,87,168,.1);">
+          🔴 Inactivos <span id="count-inactivos" style="background:rgba(100,116,139,.1);color:var(--gray);padding:.1rem .5rem;border-radius:50px;font-size:.75rem;margin-left:.3rem;"></span>
+        </button>
+      </div>
 
       <!-- Filtros -->
       <div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-bottom:1.2rem;align-items:center;">
@@ -406,30 +424,115 @@
           <option value="Adultos">🌊 Adultos</option>
           <option value="Privada">⭐ Privada</option>
         </select>
-        <input type="text" id="filtro-buscar" oninput="filtrarAlumnos()" placeholder="🔍 Buscar alumno..." style="padding:.55rem 1rem;border:1.5px solid rgba(0,87,168,.15);border-radius:10px;font-family:'Outfit',sans-serif;font-size:.88rem;color:var(--navy);background:white;outline:none;min-width:200px;"/>
+        <input type="text" id="filtro-buscar" oninput="filtrarAlumnos()" placeholder="🔍 Buscar alumno..."
+          style="padding:.55rem 1rem;border:1.5px solid rgba(0,87,168,.15);border-radius:10px;font-family:'Outfit',sans-serif;font-size:.88rem;color:var(--navy);background:white;outline:none;min-width:200px;"/>
       </div>
 
-      <div class="section-card">
-        <div class="section-card-header">
-          <h3>🏊 Lista de Alumnos</h3>
-          <span id="alumnos-count" style="color:var(--gray);font-size:.85rem;">Cargando...</span>
+      <!-- TABLA ACTIVOS -->
+      <div id="panel-activos">
+        <div class="section-card">
+          <div class="section-card-header">
+            <h3>🟢 Alumnos Activos</h3>
+            <span id="alumnos-count" style="color:var(--gray);font-size:.85rem;">Cargando...</span>
+          </div>
+          <div style="overflow-x:auto;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Alumno</th>
+                  <th>Nivel</th>
+                  <th>Horario</th>
+                  <th>Teléfono</th>
+                  <th>Estado Pago</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody id="alumnos-table-body">
+                <tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--gray);">⏳ Cargando...</td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
-        <div style="overflow-x:auto;">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Alumno</th>
-                <th>Nivel</th>
-                <th>Horario</th>
-                <th>Instructor</th>
-                <th>Fecha Ingreso</th>
-                <th>Estado Pago</th>
-              </tr>
-            </thead>
-            <tbody id="alumnos-table-body">
-              <tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--gray);">⏳ Cargando...</td></tr>
-            </tbody>
-          </table>
+      </div>
+
+      <!-- TABLA EN PROCESO (LEADS) -->
+      <div id="panel-proceso" style="display:none;">
+        <div class="section-card">
+          <div class="section-card-header">
+            <h3>🟡 En Proceso de Inscripción</h3>
+            <span style="color:var(--gray);font-size:.85rem;">Leads del chatbot pendientes de pago</span>
+          </div>
+          <div style="overflow-x:auto;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Nivel Interés</th>
+                  <th>Horario</th>
+                  <th>Teléfono</th>
+                  <th>Email</th>
+                  <th>Fecha Registro</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody id="leads-table-body">
+                <tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--gray);">⏳ Cargando...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABLA PENDIENTES -->
+      <div id="panel-pendientes" style="display:none;">
+        <div class="section-card">
+          <div class="section-card-header">
+            <h3>🟠 Pago Pendiente del Mes</h3>
+            <span style="color:var(--gray);font-size:.85rem;">Alumnos activos con mensualidad por cancelar</span>
+          </div>
+          <div style="overflow-x:auto;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Alumno</th>
+                  <th>Nivel</th>
+                  <th>Horario</th>
+                  <th>Mensualidad</th>
+                  <th>Teléfono</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody id="pendientes-table-body">
+                <tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--gray);">⏳ Cargando...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABLA INACTIVOS -->
+      <div id="panel-inactivos" style="display:none;">
+        <div class="section-card">
+          <div class="section-card-header">
+            <h3>🔴 Alumnos Inactivos</h3>
+            <span style="color:var(--gray);font-size:.85rem;">Registrar pago para reactivar</span>
+          </div>
+          <div style="overflow-x:auto;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Alumno</th>
+                  <th>Nivel</th>
+                  <th>Horario</th>
+                  <th>Teléfono</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody id="inactivos-table-body">
+                <tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--gray);">⏳ Cargando...</td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
@@ -802,6 +905,7 @@ function initApp() {
   document.getElementById('dash-fecha').textContent =
     now.toLocaleDateString('es-VE', {weekday:'long',year:'numeric',month:'long',day:'numeric'});
   document.getElementById('pagos-mes').value = now.toISOString().slice(0,7);
+  switchSubtab('activos');
   document.getElementById('pago-fecha').value = now.toISOString().slice(0,10);
   loadDashboard();
   loadInstructores();
@@ -842,9 +946,7 @@ async function loadDashboard() {
     const hoy = new Date();
     const mesActual = hoy.getMonth(); const anioActual = hoy.getFullYear();
     const pagosMes = pagos.filter(p => {
-      const partes = String(p.fecha).split('/');
-      if (partes.length < 3) return false;
-      const f = new Date(partes[2], parseInt(partes[1])-1, partes[0]);
+      const f = new Date(p.fecha);
       return f.getMonth() === mesActual && f.getFullYear() === anioActual;
     });
     const ingresos = pagosMes.reduce((s,p) => s + (parseFloat(p.monto)||0), 0);
@@ -1050,6 +1152,8 @@ async function loadAlumnos() {
     renderAlumnosStats(allAlumnos);
     populatePagoAlumnoSelect(allAlumnos);
   } catch(e) { allAlumnos = []; renderAlumnos([]); }
+  // Cargar leads (en proceso)
+  loadLeads();
 }
 
 function renderAlumnos(list) {
@@ -1387,6 +1491,159 @@ function showToast(icon, title, sub) {
   const t = document.getElementById('toast');
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+
+// ═══════════════════════════════════════════════════════
+// SUBTABS ALUMNOS
+// ═══════════════════════════════════════════════════════
+var currentSubtab = 'activos';
+var allLeads = [];
+
+function switchSubtab(tab) {
+  currentSubtab = tab;
+  var tabs = ['activos','proceso','pendientes','inactivos'];
+  tabs.forEach(function(t) {
+    var btn = document.getElementById('subtab-' + t);
+    var panel = document.getElementById('panel-' + t);
+    if (t === tab) {
+      btn.style.background = 'var(--blue)';
+      btn.style.color = 'white';
+      panel.style.display = 'block';
+    } else {
+      btn.style.background = 'white';
+      btn.style.color = 'var(--gray)';
+      panel.style.display = 'none';
+    }
+  });
+}
+
+// ── CARGAR LEADS (En Proceso) ──
+async function loadLeads() {
+  try {
+    const res  = await fetch(API + '?action=obtenerLeads');
+    const data = await res.json();
+    allLeads   = data.leads || [];
+    renderLeads(allLeads);
+    document.getElementById('count-proceso').textContent = allLeads.length;
+  } catch(e) {
+    allLeads = [];
+    renderLeads([]);
+  }
+}
+
+function renderLeads(list) {
+  const tbody = document.getElementById('leads-table-body');
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--gray);">No hay alumnos en proceso de inscripción</td></tr>';
+    return;
+  }
+  tbody.innerHTML = list.map(function(l) {
+    return '<tr>' +
+      '<td><strong>' + (l.nombre||'—') + '</strong></td>' +
+      '<td><span class="badge sabatino">' + (l.nivel||'—') + '</span></td>' +
+      '<td style="font-size:.82rem;">' + (l.horario||'—') + '</td>' +
+      '<td style="font-size:.82rem;">' + (l.telefono||'—') + '</td>' +
+      '<td style="font-size:.82rem;">' + (l.email||'—') + '</td>' +
+      '<td style="font-size:.82rem;">' + (l.fecha||'—') + '</td>' +
+      '<td><button class="btn btn-gold" onclick="pagarLead('' + (l.nombre||'').replace(/'/g,"\'") + '','' + (l.nivel||'') + '','' + (l.email||'') + '')">💳 Registrar Pago</button></td>' +
+    '</tr>';
+  }).join('');
+}
+
+function pagarLead(nombre, nivel, email) {
+  // Abrir modal de pago pre-cargado con datos del lead
+  openModal('modal-pago');
+  setTimeout(function() {
+    // Buscar en el select o agregar temporalmente
+    var sel = document.getElementById('pago-alumno');
+    var exists = false;
+    for (var i = 0; i < sel.options.length; i++) {
+      if (sel.options[i].value === nombre) { sel.selectedIndex = i; exists = true; break; }
+    }
+    if (!exists) {
+      var opt = document.createElement('option');
+      opt.value = nombre; opt.textContent = nombre + ' (' + nivel + ') — Lead';
+      opt.dataset.email = email; opt.dataset.isLead = 'true';
+      sel.appendChild(opt);
+      sel.value = nombre;
+    }
+    autocompletarMonto();
+    document.getElementById('preview-email').textContent = email || 'sin email';
+  }, 100);
+}
+
+// ── ACTUALIZAR renderAlumnos CON BOTÓN DE PAGO ──
+function renderAlumnos(list) {
+  document.getElementById('alumnos-count').textContent = list.length + ' alumnos';
+
+  // Separar por estado
+  var activos    = list.filter(function(a){ return a.estado === 'Activo' && a.estadoPago !== 'Pendiente'; });
+  var pendientes = list.filter(function(a){ return a.estado === 'Activo' && a.estadoPago === 'Pendiente'; });
+  var inactivos  = list.filter(function(a){ return a.estado === 'Inactivo'; });
+
+  document.getElementById('count-activos').textContent    = activos.length;
+  document.getElementById('count-pendientes').textContent = pendientes.length;
+  document.getElementById('count-inactivos').textContent  = inactivos.length;
+
+  // Tabla Activos
+  var tbody = document.getElementById('alumnos-table-body');
+  tbody.innerHTML = activos.length ? activos.map(function(a) {
+    return '<tr>' +
+      '<td><strong>' + (a.nombre||'—') + '</strong><br><span style="font-size:.75rem;color:var(--gray);">' + (a.email||'') + '</span></td>' +
+      '<td><span class="badge semanal">' + (a.nivel||'—') + '</span></td>' +
+      '<td style="font-size:.82rem;">' + (a.horario||'—') + '</td>' +
+      '<td style="font-size:.82rem;">' + (a.telefono||'—') + '</td>' +
+      '<td><span class="badge active">Al día</span></td>' +
+      '<td><button class="btn btn-outline" onclick="pagarAlumno('' + (a.nombre||'').replace(/'/g,"\'") + '')">💳 Renovar</button></td>' +
+    '</tr>';
+  }).join('') : '<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--gray);">No hay alumnos activos al día</td></tr>';
+
+  // Tabla Pendientes
+  var tbody2 = document.getElementById('pendientes-table-body');
+  tbody2.innerHTML = pendientes.length ? pendientes.map(function(a) {
+    return '<tr>' +
+      '<td><strong>' + (a.nombre||'—') + '</strong></td>' +
+      '<td><span class="badge semanal">' + (a.nivel||'—') + '</span></td>' +
+      '<td style="font-size:.82rem;">' + (a.horario||'—') + '</td>' +
+      '<td style="font-weight:700;color:var(--success);">$' + (a.mensualidad||'—') + '</td>' +
+      '<td style="font-size:.82rem;">' + (a.telefono||'—') + '</td>' +
+      '<td><button class="btn btn-gold" onclick="pagarAlumno('' + (a.nombre||'').replace(/'/g,"\'") + '')">💳 Registrar Pago</button></td>' +
+    '</tr>';
+  }).join('') : '<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--gray);">No hay pagos pendientes 🎉</td></tr>';
+
+  // Tabla Inactivos
+  var tbody3 = document.getElementById('inactivos-table-body');
+  tbody3.innerHTML = inactivos.length ? inactivos.map(function(a) {
+    return '<tr>' +
+      '<td><strong>' + (a.nombre||'—') + '</strong></td>' +
+      '<td><span class="badge inactive">' + (a.nivel||'—') + '</span></td>' +
+      '<td style="font-size:.82rem;">' + (a.horario||'—') + '</td>' +
+      '<td style="font-size:.82rem;">' + (a.telefono||'—') + '</td>' +
+      '<td><button class="btn btn-success" onclick="pagarAlumno('' + (a.nombre||'').replace(/'/g,"\'") + '')">✅ Reactivar con Pago</button></td>' +
+    '</tr>';
+  }).join('') : '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--gray);">No hay alumnos inactivos</td></tr>';
+}
+
+function pagarAlumno(nombre) {
+  openModal('modal-pago');
+  setTimeout(function() {
+    var sel = document.getElementById('pago-alumno');
+    for (var i = 0; i < sel.options.length; i++) {
+      if (sel.options[i].value === nombre) { sel.selectedIndex = i; break; }
+    }
+    autocompletarMonto();
+  }, 100);
+}
+
+function filtrarAlumnos() {
+  var nivel   = document.getElementById('filtro-nivel').value.toLowerCase();
+  var buscar  = document.getElementById('filtro-buscar').value.toLowerCase();
+  var filtered = allAlumnos.filter(function(a) {
+    return (!nivel  || (a.nivel||'').toLowerCase().includes(nivel)) &&
+           (!buscar || (a.nombre||'').toLowerCase().includes(buscar));
+  });
+  renderAlumnos(filtered);
 }
 
 // Close modals on overlay click
