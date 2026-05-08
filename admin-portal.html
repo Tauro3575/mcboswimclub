@@ -1155,34 +1155,62 @@ async function loadAlumnos() {
 }
 
 function renderAlumnos(list) {
-  document.getElementById('alumnos-count').textContent = list.length + ' alumnos';
-  const tbody = document.getElementById('alumnos-table-body');
-  if (!list.length) {
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--gray);">No hay alumnos registrados</td></tr>';
-    return;
-  }
-  tbody.innerHTML = list.map(a => {
-    const pago = a.estado_pago || 'Pendiente';
-    const badgePago = pago === 'Pagado' ? 'active' : pago === 'Pendiente' ? 'pending' : 'inactive';
-    const fecha = a.fecha ? new Date(a.fecha).toLocaleDateString('es-VE') : '—';
-    return `<tr>
-      <td><strong>${a.nombre||'—'}</strong><br><span style="font-size:.75rem;color:var(--gray);">${a.email||''}</span></td>
-      <td><span class="badge semanal">${a.nivel||'—'}</span></td>
-      <td style="font-size:.82rem;">${a.horario||'—'}</td>
-      <td style="font-size:.82rem;">${a.instructor||'Sin asignar'}</td>
-      <td style="font-size:.82rem;">${fecha}</td>
-      <td><span class="badge ${badgePago}">${pago}</span></td>
-    </tr>`;
-  }).join('');
-}
+  // Contar total
+  var total = list.length;
+  if (document.getElementById('alumnos-count'))
+    document.getElementById('alumnos-count').textContent = total + ' alumnos';
 
-function renderAlumnosStats(list) {
-  const niveles = {};
-  list.forEach(a => { const n = a.nivel||'Sin nivel'; niveles[n]=(niveles[n]||0)+1; });
-  document.getElementById('alumnos-stats').innerHTML =
-    Object.entries(niveles).map(([n,c]) =>
-      `<div class="stat-mini"><div><div class="sm-val">${c}</div><div class="sm-label">${n}</div></div></div>`
-    ).join('');
+  // Separar por estado
+  var activos    = list.filter(function(a){ return String(a.estado).trim() === 'Activo' && String(a.estadoPago).trim() === 'Pagado'; });
+  var pendientes = list.filter(function(a){ return String(a.estado).trim() === 'Activo' && String(a.estadoPago).trim() !== 'Pagado'; });
+  var inactivos  = list.filter(function(a){ return String(a.estado).trim() === 'Inactivo'; });
+
+  // Actualizar contadores
+  document.getElementById('count-activos').textContent    = activos.length;
+  document.getElementById('count-pendientes').textContent = pendientes.length;
+  document.getElementById('count-inactivos').textContent  = inactivos.length;
+
+  function btnPagar(nombre, label, cls) {
+    return '<button class="btn ' + cls + '" data-nombre="' + nombre.replace(/"/g,'') + '" onclick="pagarAlumno(this)">' + label + '</button>';
+  }
+
+  // ── TABLA ACTIVOS ──
+  var tb1 = document.getElementById('alumnos-table-body');
+  if (tb1) tb1.innerHTML = activos.length ? activos.map(function(a) {
+    return '<tr>' +
+      '<td><strong>' + (a.nombre||'—') + '</strong><br><span style="font-size:.75rem;color:var(--gray);">' + (a.email||'') + '</span></td>' +
+      '<td><span class="badge semanal">' + (a.nivel||'—') + '</span></td>' +
+      '<td style="font-size:.82rem;">' + (a.horario||'—') + '</td>' +
+      '<td style="font-size:.82rem;">' + (a.telefono||'—') + '</td>' +
+      '<td><span class="badge active">Al día ✅</span></td>' +
+      '<td>' + btnPagar(a.nombre||'','💳 Renovar','btn-outline') + '</td>' +
+    '</tr>';
+  }).join('') : '<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--gray);">No hay alumnos al día este mes</td></tr>';
+
+  // ── TABLA PENDIENTES ──
+  var tb2 = document.getElementById('pendientes-table-body');
+  if (tb2) tb2.innerHTML = pendientes.length ? pendientes.map(function(a) {
+    return '<tr>' +
+      '<td><strong>' + (a.nombre||'—') + '</strong><br><span style="font-size:.75rem;color:var(--gray);">' + (a.email||'') + '</span></td>' +
+      '<td><span class="badge semanal">' + (a.nivel||'—') + '</span></td>' +
+      '<td style="font-size:.82rem;">' + (a.horario||'—') + '</td>' +
+      '<td style="font-weight:700;color:var(--success);">$' + (a.mensualidad||'—') + '</td>' +
+      '<td style="font-size:.82rem;">' + (a.telefono||'—') + '</td>' +
+      '<td>' + btnPagar(a.nombre||'','💳 Pagar','btn-gold') + '</td>' +
+    '</tr>';
+  }).join('') : '<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--gray);">No hay pagos pendientes 🎉</td></tr>';
+
+  // ── TABLA INACTIVOS ──
+  var tb3 = document.getElementById('inactivos-table-body');
+  if (tb3) tb3.innerHTML = inactivos.length ? inactivos.map(function(a) {
+    return '<tr>' +
+      '<td><strong>' + (a.nombre||'—') + '</strong><br><span style="font-size:.75rem;color:var(--gray);">' + (a.email||'') + '</span></td>' +
+      '<td><span class="badge inactive">' + (a.nivel||'—') + '</span></td>' +
+      '<td style="font-size:.82rem;">' + (a.horario||'—') + '</td>' +
+      '<td style="font-size:.82rem;">' + (a.telefono||'—') + '</td>' +
+      '<td>' + btnPagar(a.nombre||'','✅ Reactivar','btn-success') + '</td>' +
+    '</tr>';
+  }).join('') : '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--gray);">No hay alumnos inactivos</td></tr>';
 }
 
 function filtrarAlumnos() {
@@ -1584,9 +1612,9 @@ function abrirModalPago(nombre, nivel, email) {
 function renderAlumnos(list) {
   document.getElementById('alumnos-count').textContent = list.length + ' alumnos';
 
-  var activos    = list.filter(function(a){ return String(a.estado).trim() === 'Activo' && String(a.estadoPago).trim() === 'Pagado'; });
-  var pendientes = list.filter(function(a){ return String(a.estado).trim() === 'Activo' && String(a.estadoPago).trim() !== 'Pagado'; });
-  var inactivos  = list.filter(function(a){ return String(a.estado).trim() === 'Inactivo'; });
+  var activos    = list.filter(function(a){ return a.estado !== 'Inactivo' && a.estadoPago !== 'Pendiente'; });
+  var pendientes = list.filter(function(a){ return a.estado !== 'Inactivo' && a.estadoPago === 'Pendiente'; });
+  var inactivos  = list.filter(function(a){ return a.estado === 'Inactivo'; });
 
   document.getElementById('count-activos').textContent    = activos.length;
   document.getElementById('count-pendientes').textContent = pendientes.length;
