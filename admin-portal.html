@@ -1147,7 +1147,6 @@ async function loadAlumnos() {
     const data = await res.json();
     allAlumnos = data.alumnos || [];
     renderAlumnos(allAlumnos);
-    renderAlumnosStats(allAlumnos);
     populatePagoAlumnoSelect(allAlumnos);
   } catch(e) { allAlumnos = []; renderAlumnos([]); }
   // Cargar leads (en proceso)
