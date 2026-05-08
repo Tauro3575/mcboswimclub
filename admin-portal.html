@@ -886,9 +886,15 @@ async function doLogin() {
       err.style.display = 'block';
     }
   } catch(e) {
-    err.textContent = '❌ Credenciales incorrectas.';
-    err.style.display = 'block';
-  }
+    // Si falla Netlify igual validamos localmente
+    if (ADMIN_USERS[email] && ADMIN_USERS[email] === pass) {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      initApp();
+    } else {
+      err.textContent = '❌ Credenciales incorrectas.';
+      err.style.display = 'block';
+   }
 }
 
 function doLogout() {
