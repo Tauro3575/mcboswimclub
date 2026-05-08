@@ -1,0 +1,1628 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Panel Admin — Maracaibo Swimming Club</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --navy: #031d3a; --blue: #0057a8; --cyan: #00b4d8;
+      --gold: #f4b942; --white: #ffffff; --gray: #64748b;
+      --surface: #f0f7ff; --success: #10b981; --warning: #f59e0b;
+      --danger: #ef4444; --purple: #8b5cf6;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Outfit', sans-serif; background: var(--surface); color: var(--navy); min-height: 100vh; }
+
+    /* ── LOGIN ── */
+    #login-screen {
+      min-height: 100vh;
+      background: linear-gradient(150deg, var(--navy) 0%, #052e5e 60%, var(--navy) 100%);
+      display: flex; align-items: center; justify-content: center; padding: 2rem;
+      position: relative; overflow: hidden;
+    }
+    .login-bg-circle { position: absolute; border-radius: 50%; opacity: .06; background: var(--gold); pointer-events: none; }
+    .login-bg-circle.c1 { width: 600px; height: 600px; top: -200px; right: -150px; }
+    .login-bg-circle.c2 { width: 350px; height: 350px; bottom: -100px; left: -80px; }
+    .login-card {
+      background: rgba(255,255,255,.04); border: 1px solid rgba(244,185,66,.2);
+      border-radius: 28px; padding: 3rem 2.5rem;
+      width: 100%; max-width: 420px;
+      backdrop-filter: blur(20px); position: relative; z-index: 2;
+      box-shadow: 0 30px 80px rgba(0,0,0,.4);
+    }
+    .login-logo { text-align: center; margin-bottom: 2rem; }
+    .login-logo .icon { width: 70px; height: 70px; background: linear-gradient(135deg,#b45309,var(--gold)); border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 1rem; box-shadow: 0 8px 30px rgba(244,185,66,.35); }
+    .login-logo h1 { font-family: 'Bebas Neue',sans-serif; font-size: 1.6rem; color: var(--white); letter-spacing: .08em; }
+    .login-logo p { color: var(--gold); font-size: .82rem; letter-spacing: .1em; text-transform: uppercase; margin-top: .3rem; }
+    .login-title { font-family: 'Bebas Neue',sans-serif; font-size: 2rem; color: var(--white); letter-spacing: .06em; margin-bottom: .4rem; }
+    .login-sub { color: rgba(255,255,255,.45); font-size: .88rem; margin-bottom: 2rem; }
+    .form-group { margin-bottom: 1.2rem; }
+    .form-group label { display: block; color: rgba(255,255,255,.6); font-size: .82rem; letter-spacing: .08em; text-transform: uppercase; margin-bottom: .5rem; }
+    .form-group input { width: 100%; padding: .85rem 1.1rem; background: rgba(255,255,255,.07); border: 1.5px solid rgba(255,255,255,.12); border-radius: 12px; color: white; font-family: 'Outfit',sans-serif; font-size: .95rem; transition: border-color .2s; outline: none; }
+    .form-group input::placeholder { color: rgba(255,255,255,.25); }
+    .form-group input:focus { border-color: var(--gold); background: rgba(244,185,66,.07); }
+    .btn-login { width: 100%; padding: 1rem; background: linear-gradient(135deg,#b45309,var(--gold)); border: none; border-radius: 12px; color: var(--navy); font-family: 'Outfit',sans-serif; font-size: 1rem; font-weight: 700; cursor: pointer; margin-top: .5rem; transition: all .2s; box-shadow: 0 6px 24px rgba(244,185,66,.4); }
+    .btn-login:hover { transform: translateY(-2px); box-shadow: 0 10px 32px rgba(244,185,66,.5); }
+    .login-error { background: rgba(239,68,68,.15); border: 1px solid rgba(239,68,68,.3); color: #fca5a5; border-radius: 10px; padding: .7rem 1rem; font-size: .85rem; margin-top: 1rem; display: none; }
+
+    /* ── APP ── */
+    #app { display: none; min-height: 100vh; }
+
+    /* TOPBAR */
+    .topbar { background: var(--navy); position: fixed; top: 0; width: 100%; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: .9rem 2rem; box-shadow: 0 2px 20px rgba(0,0,0,.3); }
+    .topbar-left { display: flex; align-items: center; gap: .8rem; }
+    .topbar-logo { display: flex; align-items: center; gap: .6rem; text-decoration: none; }
+    .topbar-logo .icon { width: 36px; height: 36px; background: linear-gradient(135deg,#b45309,var(--gold)); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+    .topbar-logo span { font-family: 'Bebas Neue',sans-serif; color: white; font-size: 1.2rem; letter-spacing: .06em; }
+    .topbar-divider { width: 1px; height: 28px; background: rgba(255,255,255,.1); }
+    .topbar-section { font-family: 'Bebas Neue',sans-serif; color: var(--gold); font-size: 1.1rem; letter-spacing: .08em; }
+    .topbar-right { display: flex; align-items: center; gap: 1rem; }
+    .admin-badge { display: flex; align-items: center; gap: .5rem; background: rgba(244,185,66,.1); border: 1px solid rgba(244,185,66,.25); border-radius: 50px; padding: .4rem .9rem; }
+    .admin-badge span { color: var(--gold); font-size: .85rem; font-weight: 600; }
+    .btn-logout { background: rgba(239,68,68,.15); border: 1px solid rgba(239,68,68,.25); color: #fca5a5; border-radius: 50px; padding: .4rem .9rem; font-size: .82rem; cursor: pointer; font-family: 'Outfit',sans-serif; transition: all .2s; }
+    .btn-logout:hover { background: rgba(239,68,68,.3); }
+
+    /* MAIN */
+    .main { padding-top: 70px; }
+
+    /* TABS */
+    .tabs-bar { background: white; border-bottom: 1px solid rgba(3,29,58,.08); display: flex; gap: 0; padding: 0 2rem; overflow-x: auto; position: sticky; top: 70px; z-index: 90; }
+    .tab-btn { padding: 1rem 1.5rem; border: none; background: none; font-family: 'Outfit',sans-serif; font-size: .9rem; font-weight: 500; color: var(--gray); cursor: pointer; border-bottom: 2.5px solid transparent; transition: all .2s; white-space: nowrap; display: flex; align-items: center; gap: .5rem; }
+    .tab-btn:hover { color: var(--blue); }
+    .tab-btn.active { color: var(--blue); border-bottom-color: var(--gold); font-weight: 600; }
+
+    /* CONTENT */
+    .tab-content { display: none; padding: 2rem; max-width: 1200px; margin: 0 auto; }
+    .tab-content.active { display: block; }
+
+    /* PAGE HEADER */
+    .page-header { margin-bottom: 2rem; }
+    .page-header h2 { font-family: 'Bebas Neue',sans-serif; font-size: 2.2rem; letter-spacing: .05em; color: var(--navy); }
+    .page-header p { color: var(--gray); font-size: .95rem; margin-top: .3rem; }
+
+    /* ── DASHBOARD CARDS ── */
+    .dash-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap: 1.2rem; margin-bottom: 2rem; }
+    .dash-card { background: white; border-radius: 18px; padding: 1.5rem; border: 1.5px solid rgba(0,87,168,.08); display: flex; align-items: center; gap: 1.2rem; transition: all .2s; }
+    .dash-card:hover { box-shadow: 0 8px 24px rgba(0,87,168,.1); transform: translateY(-2px); }
+    .dash-icon { width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0; }
+    .dash-icon.blue { background: rgba(0,87,168,.1); }
+    .dash-icon.cyan { background: rgba(0,180,216,.1); }
+    .dash-icon.gold { background: rgba(244,185,66,.15); }
+    .dash-icon.green { background: rgba(16,185,129,.1); }
+    .dash-icon.purple { background: rgba(139,92,246,.1); }
+    .dash-icon.red { background: rgba(239,68,68,.1); }
+    .dash-val { font-family: 'Bebas Neue',sans-serif; font-size: 2.2rem; color: var(--navy); letter-spacing: .04em; line-height: 1; }
+    .dash-label { font-size: .8rem; color: var(--gray); text-transform: uppercase; letter-spacing: .08em; margin-top: .2rem; }
+
+    /* SECTION CARD */
+    .section-card { background: white; border-radius: 18px; border: 1.5px solid rgba(0,87,168,.08); overflow: hidden; margin-bottom: 1.5rem; }
+    .section-card-header { padding: 1.2rem 1.5rem; border-bottom: 1px solid rgba(0,87,168,.07); display: flex; align-items: center; justify-content: space-between; background: var(--surface); flex-wrap: wrap; gap: .8rem; }
+    .section-card-header h3 { font-family: 'Bebas Neue',sans-serif; font-size: 1.3rem; letter-spacing: .05em; color: var(--navy); }
+
+    /* TABLES */
+    .data-table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+    .data-table th { padding: .8rem 1.2rem; text-align: left; font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--gray); background: var(--surface); border-bottom: 1px solid rgba(0,87,168,.07); }
+    .data-table td { padding: .85rem 1.2rem; border-bottom: 1px solid rgba(0,87,168,.05); color: var(--navy); vertical-align: middle; }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tr:hover td { background: rgba(0,87,168,.02); }
+
+    /* BADGES */
+    .badge { display: inline-block; padding: .25rem .75rem; border-radius: 50px; font-size: .75rem; font-weight: 700; }
+    .badge.active { background: rgba(16,185,129,.12); color: var(--success); }
+    .badge.inactive { background: rgba(239,68,68,.12); color: var(--danger); }
+    .badge.pending { background: rgba(245,158,11,.12); color: var(--warning); }
+    .badge.semanal { background: rgba(0,87,168,.1); color: var(--blue); }
+    .badge.sabatino { background: rgba(139,92,246,.1); color: var(--purple); }
+
+    /* BTNS */
+    .btn { padding: .45rem 1rem; border-radius: 8px; border: none; font-family: 'Outfit',sans-serif; font-size: .82rem; font-weight: 600; cursor: pointer; transition: all .2s; display: inline-flex; align-items: center; gap: .4rem; }
+    .btn-primary { background: var(--blue); color: white; }
+    .btn-primary:hover { background: var(--cyan); }
+    .btn-gold { background: var(--gold); color: var(--navy); }
+    .btn-gold:hover { background: #f0a800; }
+    .btn-danger { background: rgba(239,68,68,.1); color: var(--danger); border: 1px solid rgba(239,68,68,.2); }
+    .btn-danger:hover { background: var(--danger); color: white; }
+    .btn-success { background: rgba(16,185,129,.1); color: var(--success); border: 1px solid rgba(16,185,129,.2); }
+    .btn-success:hover { background: var(--success); color: white; }
+    .btn-outline { background: transparent; color: var(--blue); border: 1.5px solid var(--blue); }
+    .btn-outline:hover { background: var(--blue); color: white; }
+    .btn-lg { padding: .8rem 1.8rem; font-size: .95rem; border-radius: 12px; }
+
+    /* FORMS */
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form-group-light { margin-bottom: 1rem; }
+    .form-group-light label { display: block; font-size: .8rem; font-weight: 600; color: var(--navy); text-transform: uppercase; letter-spacing: .06em; margin-bottom: .4rem; }
+    .form-group-light input, .form-group-light select, .form-group-light textarea {
+      width: 100%; padding: .75rem 1rem; border: 1.5px solid rgba(0,87,168,.15);
+      border-radius: 10px; font-family: 'Outfit',sans-serif; font-size: .9rem;
+      color: var(--navy); outline: none; transition: border-color .2s; background: white;
+    }
+    .form-group-light input:focus, .form-group-light select:focus, .form-group-light textarea:focus { border-color: var(--cyan); }
+    .form-group-light textarea { resize: vertical; min-height: 70px; }
+
+    /* TOKEN CARD */
+    .token-card {
+      background: linear-gradient(135deg, var(--navy), #052e5e);
+      border-radius: 16px; padding: 1.5rem;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;
+    }
+    .token-info strong { color: white; display: block; font-size: .95rem; margin-bottom: .2rem; }
+    .token-info span { color: rgba(255,255,255,.5); font-size: .8rem; }
+    .token-link { font-family: monospace; font-size: .78rem; color: var(--cyan); background: rgba(0,180,216,.1); border: 1px solid rgba(0,180,216,.2); padding: .4rem .8rem; border-radius: 6px; word-break: break-all; flex: 1; min-width: 200px; }
+    .token-actions { display: flex; gap: .5rem; flex-shrink: 0; }
+
+    /* MODAL */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(3,29,58,.7); z-index: 2000; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+    .modal-overlay.open { display: flex; }
+    .modal { background: white; border-radius: 24px; padding: 2.5rem; max-width: 520px; width: 92%; max-height: 90vh; overflow-y: auto; animation: popIn .3s ease; }
+    @keyframes popIn { from{transform:scale(.9);opacity:0} to{transform:scale(1);opacity:1} }
+    .modal h3 { font-family: 'Bebas Neue',sans-serif; font-size: 1.8rem; color: var(--navy); letter-spacing: .05em; margin-bottom: .4rem; }
+    .modal p { color: var(--gray); font-size: .88rem; margin-bottom: 1.5rem; }
+    .modal-footer { display: flex; justify-content: flex-end; gap: .8rem; margin-top: 1.5rem; }
+    .modal-close { position: absolute; top: 1.2rem; right: 1.2rem; background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--gray); }
+
+    /* PAYMENT ROWS */
+    .payment-row { display: flex; align-items: center; gap: 1rem; padding: 1rem 1.2rem; border-bottom: 1px solid rgba(0,87,168,.05); flex-wrap: wrap; }
+    .payment-row:last-child { border-bottom: none; }
+    .payment-avatar { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg,var(--blue),var(--cyan)); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: .85rem; flex-shrink: 0; }
+    .payment-info { flex: 1; min-width: 140px; }
+    .payment-info strong { display: block; font-size: .9rem; color: var(--navy); }
+    .payment-info span { font-size: .78rem; color: var(--gray); }
+    .payment-amount { font-family: 'Bebas Neue',sans-serif; font-size: 1.3rem; color: var(--success); letter-spacing: .04em; }
+    .payment-method { font-size: .75rem; background: rgba(0,87,168,.08); color: var(--blue); padding: .2rem .7rem; border-radius: 50px; font-weight: 600; }
+
+    /* ASSIGN CLASES */
+    .assign-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px,1fr)); gap: .6rem; margin-top: .8rem; }
+    .assign-item { border: 1.5px solid rgba(0,87,168,.12); border-radius: 10px; padding: .6rem .9rem; cursor: pointer; transition: all .18s; display: flex; align-items: center; gap: .5rem; font-size: .82rem; color: var(--navy); }
+    .assign-item:hover { border-color: var(--cyan); background: rgba(0,180,216,.04); }
+    .assign-item.selected { border-color: var(--blue); background: rgba(0,87,168,.07); color: var(--blue); font-weight: 600; }
+    .assign-item input[type=checkbox] { accent-color: var(--blue); }
+
+    /* STATS BAR */
+    .stats-bar { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .stat-mini { background: white; border-radius: 12px; padding: .8rem 1.2rem; border: 1.5px solid rgba(0,87,168,.08); display: flex; align-items: center; gap: .6rem; flex: 1; min-width: 130px; }
+    .stat-mini .sm-val { font-family: 'Bebas Neue',sans-serif; font-size: 1.6rem; color: var(--navy); letter-spacing: .03em; }
+    .stat-mini .sm-label { font-size: .75rem; color: var(--gray); text-transform: uppercase; letter-spacing: .06em; }
+
+    /* TOAST */
+    .toast { position: fixed; bottom: 2rem; right: 2rem; z-index: 9999; background: var(--navy); color: white; border-radius: 14px; padding: 1rem 1.5rem; display: flex; align-items: center; gap: .8rem; box-shadow: 0 10px 40px rgba(0,0,0,.3); transform: translateY(100px); opacity: 0; transition: all .35s cubic-bezier(.4,0,.2,1); max-width: 360px; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast .ti { font-size: 1.4rem; }
+    .toast .tt strong { display: block; font-size: .95rem; }
+    .toast .tt span { font-size: .8rem; color: rgba(255,255,255,.6); }
+
+    /* LOADING */
+    .loading-overlay { position: fixed; inset: 0; background: rgba(3,29,58,.7); z-index: 9998; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+    .loading-overlay.active { display: flex; }
+    .loading-box { background: white; border-radius: 20px; padding: 2rem 2.5rem; text-align: center; }
+    .spinner { width: 44px; height: 44px; border: 3px solid var(--surface); border-top-color: var(--cyan); border-radius: 50%; animation: spin .8s linear infinite; margin: 0 auto 1rem; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-box p { color: var(--navy); font-weight: 500; }
+
+    /* RESPONSIVE */
+    @media(max-width:768px) {
+      .topbar { padding: .8rem 1rem; }
+      .tab-content { padding: 1rem; }
+      .form-row { grid-template-columns: 1fr; }
+      .dash-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media(max-width:480px) {
+      .dash-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-bg-circle c1"></div>
+  <div class="login-bg-circle c2"></div>
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="icon">⚙️</div>
+      <h1>Maracaibo Swimming Club</h1>
+      <p>Panel de Administración</p>
+    </div>
+    <h2 class="login-title">Acceso Admin</h2>
+    <p class="login-sub">Solo personal autorizado</p>
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="login-email" placeholder="admin@mcboswimclub.com"/>
+    </div>
+    <div class="form-group">
+      <label>Contraseña</label>
+      <input type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/>
+    </div>
+    <button class="btn-login" onclick="doLogin()">⚙️ Ingresar al Panel</button>
+    <div class="login-error" id="login-error">❌ Credenciales incorrectas.</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <a class="topbar-logo" href="#">
+        <div class="icon">🏊</div>
+        <span>MSC</span>
+      </a>
+      <div class="topbar-divider"></div>
+      <span class="topbar-section">⚙️ Panel Admin</span>
+    </div>
+    <div class="topbar-right">
+      <div class="admin-badge"><span>👑 Administrador</span></div>
+      <button class="btn-logout" onclick="doLogout()">Salir</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <!-- TABS -->
+    <div class="tabs-bar">
+      <button class="tab-btn active" onclick="switchTab('dashboard')">📊 Dashboard</button>
+      <button class="tab-btn" onclick="switchTab('instructores')">👨‍🏫 Instructores</button>
+      <button class="tab-btn" onclick="switchTab('tokens')">🔑 Tokens</button>
+      <button class="tab-btn" onclick="switchTab('alumnos')">🏊 Alumnos</button>
+      <button class="tab-btn" onclick="switchTab('pagos')">💳 Pagos</button>
+      <button class="tab-btn" onclick="switchTab('asignacion')">📋 Asignación</button>
+    </div>
+
+    <!-- ══ TAB: DASHBOARD ══ -->
+    <div class="tab-content active" id="tab-dashboard">
+      <div class="page-header">
+        <h2>Dashboard General</h2>
+        <p id="dash-fecha">Cargando...</p>
+      </div>
+
+      <div class="dash-grid" id="dash-grid">
+        <div class="dash-card">
+          <div class="dash-icon blue">🏊</div>
+          <div><div class="dash-val" id="d-alumnos">—</div><div class="dash-label">Alumnos Activos</div></div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-icon cyan">👨‍🏫</div>
+          <div><div class="dash-val" id="d-instructores">—</div><div class="dash-label">Instructores</div></div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-icon gold">💳</div>
+          <div><div class="dash-val" id="d-pagos-mes">—</div><div class="dash-label">Pagos este mes</div></div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-icon green">💰</div>
+          <div><div class="dash-val" id="d-ingresos">—</div><div class="dash-label">Ingresos del mes</div></div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-icon purple">📋</div>
+          <div><div class="dash-val" id="d-clases">—</div><div class="dash-label">Clases registradas</div></div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-icon red">⚠️</div>
+          <div><div class="dash-val" id="d-pendientes">—</div><div class="dash-label">Pagos pendientes</div></div>
+        </div>
+      </div>
+
+      <!-- Alumnos por nivel -->
+      <div class="section-card">
+        <div class="section-card-header">
+          <h3>📊 Alumnos por Nivel</h3>
+          <button class="btn btn-outline" onclick="loadDashboard()">🔄 Actualizar</button>
+        </div>
+        <div style="padding:1.5rem;">
+          <div id="niveles-chart" style="display:flex;flex-direction:column;gap:.8rem;"></div>
+        </div>
+      </div>
+
+      <!-- Últimos pagos -->
+      <div class="section-card">
+        <div class="section-card-header">
+          <h3>💳 Últimos Pagos</h3>
+          <button class="btn btn-primary" onclick="switchTab('pagos')">Ver todos →</button>
+        </div>
+        <div id="dash-pagos-list" style="padding:.5rem 0;"></div>
+      </div>
+    </div>
+
+    <!-- ══ TAB: INSTRUCTORES ══ -->
+    <div class="tab-content" id="tab-instructores">
+      <div class="page-header">
+        <h2>Gestión de Instructores</h2>
+        <p>Administra el equipo de instructores del MSC</p>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;margin-bottom:1.2rem;gap:.8rem;">
+        <button class="btn btn-gold btn-lg" onclick="openModal('modal-token')">🔑 Generar Token de Registro</button>
+      </div>
+
+      <div class="section-card">
+        <div class="section-card-header">
+          <h3>👨‍🏫 Instructores Registrados</h3>
+          <span id="inst-count" style="color:var(--gray);font-size:.85rem;">Cargando...</span>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Instructor</th>
+                <th>Email</th>
+                <th>Teléfono</th>
+                <th>Cédula</th>
+                <th>Disponibilidad</th>
+                <th>Estado</th>
+                <th>Clases Asignadas</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="inst-table-body">
+              <tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--gray);">⏳ Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ TAB: TOKENS ══ -->
+    <div class="tab-content" id="tab-tokens">
+      <div class="page-header">
+        <h2>Tokens de Registro</h2>
+        <p>Genera y gestiona invitaciones para nuevos instructores</p>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;margin-bottom:1.2rem;">
+        <button class="btn btn-gold btn-lg" onclick="openModal('modal-token')">🔑 Nuevo Token</button>
+      </div>
+
+      <div class="section-card">
+        <div class="section-card-header">
+          <h3>🔑 Tokens Activos</h3>
+          <span style="color:var(--gray);font-size:.85rem;">Válidos por 72 horas</span>
+        </div>
+        <div style="padding:1.2rem;" id="tokens-list">
+          <div style="text-align:center;padding:2rem;color:var(--gray);">⏳ Cargando tokens...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ TAB: ALUMNOS ══ -->
+    <div class="tab-content" id="tab-alumnos">
+      <div class="page-header">
+        <h2>Gestión de Alumnos</h2>
+        <p>Control completo de alumnos activos, pendientes y en proceso de inscripción</p>
+      </div>
+
+      <!-- TABS INTERNOS -->
+      <div style="display:flex;gap:0;margin-bottom:1.5rem;background:white;border-radius:12px;overflow:hidden;border:1.5px solid rgba(0,87,168,.1);">
+        <button class="subtab-btn active" onclick="switchSubtab('activos')" id="subtab-activos"
+          style="flex:1;padding:.8rem;border:none;background:var(--blue);color:white;font-family:'Outfit',sans-serif;font-weight:700;font-size:.85rem;cursor:pointer;">
+          🟢 Activos <span id="count-activos" style="background:rgba(255,255,255,.2);padding:.1rem .5rem;border-radius:50px;font-size:.75rem;margin-left:.3rem;"></span>
+        </button>
+        <button class="subtab-btn" onclick="switchSubtab('proceso')" id="subtab-proceso"
+          style="flex:1;padding:.8rem;border:none;background:white;color:var(--gray);font-family:'Outfit',sans-serif;font-weight:600;font-size:.85rem;cursor:pointer;border-left:1px solid rgba(0,87,168,.1);">
+          🟡 En Proceso <span id="count-proceso" style="background:rgba(245,158,11,.15);color:var(--warning);padding:.1rem .5rem;border-radius:50px;font-size:.75rem;margin-left:.3rem;"></span>
+        </button>
+        <button class="subtab-btn" onclick="switchSubtab('pendientes')" id="subtab-pendientes"
+          style="flex:1;padding:.8rem;border:none;background:white;color:var(--gray);font-family:'Outfit',sans-serif;font-weight:600;font-size:.85rem;cursor:pointer;border-left:1px solid rgba(0,87,168,.1);">
+          🟠 Pago Pendiente <span id="count-pendientes" style="background:rgba(239,68,68,.1);color:var(--danger);padding:.1rem .5rem;border-radius:50px;font-size:.75rem;margin-left:.3rem;"></span>
+        </button>
+        <button class="subtab-btn" onclick="switchSubtab('inactivos')" id="subtab-inactivos"
+          style="flex:1;padding:.8rem;border:none;background:white;color:var(--gray);font-family:'Outfit',sans-serif;font-weight:600;font-size:.85rem;cursor:pointer;border-left:1px solid rgba(0,87,168,.1);">
+          🔴 Inactivos <span id="count-inactivos" style="background:rgba(100,116,139,.1);color:var(--gray);padding:.1rem .5rem;border-radius:50px;font-size:.75rem;margin-left:.3rem;"></span>
+        </button>
+      </div>
+
+      <!-- Filtros -->
+      <div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-bottom:1.2rem;align-items:center;">
+        <select id="filtro-nivel" onchange="filtrarAlumnos()" style="padding:.55rem 1rem;border:1.5px solid rgba(0,87,168,.15);border-radius:10px;font-family:'Outfit',sans-serif;font-size:.88rem;color:var(--navy);background:white;outline:none;">
+          <option value="">Todos los niveles</option>
+          <option value="Burbuja">🫧 Burbuja</option>
+          <option value="Iniciación">🎒 Iniciación</option>
+          <option value="Intermedio">🏊 Intermedio</option>
+          <option value="Avanzado">🏅 Avanzado</option>
+          <option value="Adultos">🌊 Adultos</option>
+          <option value="Privada">⭐ Privada</option>
+        </select>
+        <input type="text" id="filtro-buscar" oninput="filtrarAlumnos()" placeholder="🔍 Buscar alumno..."
+          style="padding:.55rem 1rem;border:1.5px solid rgba(0,87,168,.15);border-radius:10px;font-family:'Outfit',sans-serif;font-size:.88rem;color:var(--navy);background:white;outline:none;min-width:200px;"/>
+      </div>
+
+      <!-- TABLA ACTIVOS -->
+      <div id="panel-activos">
+        <div class="section-card">
+          <div class="section-card-header">
+            <h3>🟢 Alumnos Activos</h3>
+            <span id="alumnos-count" style="color:var(--gray);font-size:.85rem;">Cargando...</span>
+          </div>
+          <div style="overflow-x:auto;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Alumno</th>
+                  <th>Nivel</th>
+                  <th>Horario</th>
+                  <th>Teléfono</th>
+                  <th>Estado Pago</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody id="alumnos-table-body">
+                <tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--gray);">⏳ Cargando...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABLA EN PROCESO (LEADS) -->
+      <div id="panel-proceso" style="display:none;">
+        <div class="section-card">
+          <div class="section-card-header">
+            <h3>🟡 En Proceso de Inscripción</h3>
+            <span style="color:var(--gray);font-size:.85rem;">Leads del chatbot pendientes de pago</span>
+          </div>
+          <div style="overflow-x:auto;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Nivel Interés</th>
+                  <th>Horario</th>
+                  <th>Teléfono</th>
+                  <th>Email</th>
+                  <th>Fecha Registro</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody id="leads-table-body">
+                <tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--gray);">⏳ Cargando...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABLA PENDIENTES -->
+      <div id="panel-pendientes" style="display:none;">
+        <div class="section-card">
+          <div class="section-card-header">
+            <h3>🟠 Pago Pendiente del Mes</h3>
+            <span style="color:var(--gray);font-size:.85rem;">Alumnos activos con mensualidad por cancelar</span>
+          </div>
+          <div style="overflow-x:auto;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Alumno</th>
+                  <th>Nivel</th>
+                  <th>Horario</th>
+                  <th>Mensualidad</th>
+                  <th>Teléfono</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody id="pendientes-table-body">
+                <tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--gray);">⏳ Cargando...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABLA INACTIVOS -->
+      <div id="panel-inactivos" style="display:none;">
+        <div class="section-card">
+          <div class="section-card-header">
+            <h3>🔴 Alumnos Inactivos</h3>
+            <span style="color:var(--gray);font-size:.85rem;">Registrar pago para reactivar</span>
+          </div>
+          <div style="overflow-x:auto;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Alumno</th>
+                  <th>Nivel</th>
+                  <th>Horario</th>
+                  <th>Teléfono</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody id="inactivos-table-body">
+                <tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--gray);">⏳ Cargando...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ TAB: PAGOS ══ -->
+    <div class="tab-content" id="tab-pagos">
+      <div class="page-header">
+        <h2>Control de Pagos</h2>
+        <p>Registro de mensualidades y pagos recibidos</p>
+      </div>
+
+      <div class="stats-bar">
+        <div class="stat-mini">
+          <div>
+            <div class="sm-val" id="p-total-mes">—</div>
+            <div class="sm-label">Total del mes</div>
+          </div>
+        </div>
+        <div class="stat-mini">
+          <div>
+            <div class="sm-val" id="p-cantidad">—</div>
+            <div class="sm-label">Pagos recibidos</div>
+          </div>
+        </div>
+        <div class="stat-mini">
+          <div>
+            <div class="sm-val" id="p-pendientes">—</div>
+            <div class="sm-label">Pendientes</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-bottom:1.2rem;align-items:center;">
+        <input type="month" id="pagos-mes" style="padding:.55rem 1rem;border:1.5px solid rgba(0,87,168,.15);border-radius:10px;font-family:'Outfit',sans-serif;font-size:.88rem;color:var(--navy);outline:none;"/>
+        <select id="pagos-metodo" style="padding:.55rem 1rem;border:1.5px solid rgba(0,87,168,.15);border-radius:10px;font-family:'Outfit',sans-serif;font-size:.88rem;color:var(--navy);background:white;outline:none;">
+          <option value="">Todos los métodos</option>
+          <option value="Binance">₿ Binance Pay</option>
+          <option value="Zelle">💵 Zelle</option>
+          <option value="Efectivo">💰 Efectivo</option>
+          <option value="Pago Movil">📱 Pago Móvil</option>
+          <option value="PayPal">🌐 PayPal</option>
+        </select>
+        <button class="btn btn-primary" onclick="loadPagos()">🔍 Buscar</button>
+        <button class="btn btn-gold" onclick="openModal('modal-pago')">+ Registrar Pago</button>
+      </div>
+
+      <div class="section-card">
+        <div class="section-card-header"><h3>💳 Pagos Registrados</h3></div>
+        <div id="pagos-list" style="padding:.5rem 0;">
+          <div style="text-align:center;padding:2rem;color:var(--gray);">Selecciona un mes y presiona Buscar</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ TAB: ASIGNACIÓN ══ -->
+    <div class="tab-content" id="tab-asignacion">
+      <div class="page-header">
+        <h2>Asignación de Clases</h2>
+        <p>Asigna grupos y horarios a cada instructor</p>
+      </div>
+
+      <div class="section-card">
+        <div class="section-card-header">
+          <h3>📋 Asignar Clases a Instructor</h3>
+        </div>
+        <div style="padding:1.5rem;">
+          <div class="form-group-light" style="max-width:400px;margin-bottom:1.5rem;">
+            <label>Selecciona Instructor</label>
+            <select id="asig-instructor" onchange="cargarAsignacion()">
+              <option value="">— Selecciona un instructor —</option>
+            </select>
+          </div>
+
+          <div id="asig-panel" style="display:none;">
+            <p style="font-size:.88rem;color:var(--gray);margin-bottom:1rem;">Selecciona las clases que impartirá este instructor:</p>
+            <div class="assign-grid" id="assign-grid"></div>
+            <div style="margin-top:1.5rem;">
+              <button class="btn btn-primary btn-lg" onclick="guardarAsignacion()">💾 Guardar Asignación</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vista resumen por clase -->
+      <div class="section-card">
+        <div class="section-card-header">
+          <h3>📊 Resumen de Asignaciones</h3>
+          <button class="btn btn-outline" onclick="loadAsignaciones()">🔄 Actualizar</button>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="data-table">
+            <thead>
+              <tr><th>Clase / Horario</th><th>Nivel</th><th>Instructor Asignado</th><th>Alumnos</th><th>Estado</th></tr>
+            </thead>
+            <tbody id="asig-table-body">
+              <tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--gray);">⏳ Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: GENERAR TOKEN ═══ -->
+<div class="modal-overlay" id="modal-token">
+  <div class="modal" style="position:relative;">
+    <button class="modal-close" onclick="closeModal('modal-token')">✕</button>
+    <h3>🔑 Generar Token de Registro</h3>
+    <p>El instructor recibirá un link único válido por 72 horas para completar su registro.</p>
+    <div class="form-row">
+      <div class="form-group-light">
+        <label>Nombre del Instructor</label>
+        <input type="text" id="token-nombre" placeholder="Nombre completo"/>
+      </div>
+      <div class="form-group-light">
+        <label>Email</label>
+        <input type="email" id="token-email" placeholder="instructor@email.com"/>
+      </div>
+    </div>
+    <div class="form-group-light">
+      <label>Nota (opcional)</label>
+      <textarea id="token-nota" placeholder="Ej: Instructor de nivel Burbuja, turno mañana..."></textarea>
+    </div>
+    <div id="token-resultado" style="display:none;margin-top:1rem;">
+      <div style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:12px;padding:1.2rem;">
+        <p style="font-size:.82rem;font-weight:600;color:var(--success);margin-bottom:.6rem;">✅ Token generado — Envía este link al instructor:</p>
+        <div style="background:white;border:1px solid rgba(0,87,168,.1);border-radius:8px;padding:.7rem 1rem;font-family:monospace;font-size:.78rem;color:var(--navy);word-break:break-all;" id="token-link-display"></div>
+        <button class="btn btn-primary" style="margin-top:.8rem;width:100%;" onclick="copiarToken()">📋 Copiar Link</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-token')">Cancelar</button>
+      <button class="btn btn-gold btn-lg" onclick="generarToken()">⚡ Generar Token</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: ASIGNAR CLASES ═══ -->
+<div class="modal-overlay" id="modal-asignar">
+  <div class="modal" style="position:relative;max-width:600px;">
+    <button class="modal-close" onclick="closeModal('modal-asignar')">✕</button>
+    <h3>📋 Asignar Clases</h3>
+    <p id="modal-asig-nombre">Instructor seleccionado</p>
+    <div class="assign-grid" id="modal-assign-grid"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-asignar')">Cancelar</button>
+      <button class="btn btn-primary btn-lg" onclick="guardarAsignacionModal()">💾 Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: REGISTRAR PAGO ═══ -->
+<div class="modal-overlay" id="modal-pago">
+  <div class="modal" style="position:relative;max-width:560px;">
+    <button class="modal-close" onclick="closeModal('modal-pago')">✕</button>
+    <h3>💳 Registrar Pago</h3>
+    <p>Completa los datos del pago recibido. Se enviará recibo automático al representante.</p>
+
+    <div class="form-row">
+      <div class="form-group-light" style="grid-column:1/-1;">
+        <label>Alumno</label>
+        <select id="pago-alumno" onchange="autocompletarMonto()">
+          <option value="">— Selecciona alumno —</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group-light">
+        <label>Plan</label>
+        <select id="pago-plan" onchange="autocompletarMonto()">
+          <option value="Mensual 1h" data-monto="50">Mensual · 1h — $50</option>
+          <option value="Mensual 2h" data-monto="80">Mensual · 2h — $80</option>
+          <option value="Sabatino 1h" data-monto="30">Sabatino · 1h — $30</option>
+          <option value="Sabatino 2h" data-monto="40">Sabatino · 2h — $40</option>
+          <option value="Trimestral" data-monto="135">Trimestral — $135</option>
+          <option value="Promo 2x1" data-monto="25">Promo 2x1 — $25 c/u</option>
+          <option value="Privada" data-monto="15">Clase Privada — $15</option>
+        </select>
+      </div>
+      <div class="form-group-light">
+        <label>Monto Recibido (USD)</label>
+        <input type="number" id="pago-monto" placeholder="50" min="0" step="0.01"/>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group-light">
+        <label>Método de Pago</label>
+        <select id="pago-metodo" onchange="toggleCamposPago()">
+          <option value="Zelle">💵 Zelle</option>
+          <option value="Pago Movil">📱 Pago Móvil</option>
+          <option value="Efectivo USD">💰 Efectivo USD</option>
+          <option value="Binance Pay">₿ Binance Pay</option>
+          <option value="PayPal">🌐 PayPal</option>
+        </select>
+      </div>
+      <div class="form-group-light">
+        <label>Fecha del Pago</label>
+        <input type="date" id="pago-fecha"/>
+      </div>
+    </div>
+
+    <!-- Campos dinámicos según método -->
+    <div id="campos-transferencia">
+      <div class="form-row">
+        <div class="form-group-light">
+          <label>N° Referencia / Comprobante</label>
+          <input type="text" id="pago-ref" placeholder="Ej: 202505070123456"/>
+        </div>
+        <div class="form-group-light">
+          <label>Banco <span id="banco-label" style="color:var(--gray);font-weight:400;">(opcional)</span></label>
+          <input type="text" id="pago-banco" placeholder="Ej: Banesco, Bank of America..."/>
+        </div>
+      </div>
+      <div class="form-row" id="campos-pago-movil" style="display:none;">
+        <div class="form-group-light">
+          <label>Teléfono Pago Móvil</label>
+          <input type="text" id="pago-telefono" placeholder="Ej: 0414-6004468"/>
+        </div>
+        <div class="form-group-light">
+          <label>Nombre del Titular</label>
+          <input type="text" id="pago-titular" placeholder="Nombre en la cuenta"/>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group-light">
+      <label>Observaciones <span style="color:var(--gray);font-weight:400;">(opcional)</span></label>
+      <textarea id="pago-obs" placeholder="Ej: Pago correspondiente a 2 meses, descuento aplicado, etc." rows="2"></textarea>
+    </div>
+
+    <!-- Preview del recibo -->
+    <div id="pago-preview" style="background:var(--surface);border-radius:10px;padding:.9rem 1.2rem;border:1.5px solid rgba(0,87,168,.1);margin-bottom:.5rem;font-size:.82rem;">
+      <strong style="color:var(--navy);">📧 Se enviará recibo a:</strong>
+      <span id="preview-email" style="color:var(--gray);margin-left:.4rem;">— selecciona un alumno —</span>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-pago')">Cancelar</button>
+      <button class="btn btn-success btn-lg" onclick="registrarPago()">✅ Registrar y Enviar Recibo</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: CONFIRMAR ACCIÓN ═══ -->
+<div class="modal-overlay" id="modal-confirm">
+  <div class="modal" style="position:relative;max-width:400px;text-align:center;">
+    <div style="font-size:3rem;margin-bottom:1rem;" id="confirm-icon">⚠️</div>
+    <h3 id="confirm-title">¿Confirmar acción?</h3>
+    <p id="confirm-msg" style="margin:1rem 0 0;">Esta acción no se puede deshacer.</p>
+    <div class="modal-footer" style="justify-content:center;">
+      <button class="btn btn-outline" onclick="closeModal('modal-confirm')">Cancelar</button>
+      <button class="btn btn-danger btn-lg" id="confirm-btn">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span class="ti" id="toast-icon">✅</span>
+  <div class="tt">
+    <strong id="toast-title">Listo</strong>
+    <span id="toast-sub">Operación completada</span>
+  </div>
+</div>
+
+<!-- LOADING -->
+<div class="loading-overlay" id="loading">
+  <div class="loading-box">
+    <div class="spinner"></div>
+    <p id="loading-text">Procesando...</p>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════
+const API = '/.netlify/functions/instructor';
+const API_ADMIN = '/.netlify/functions/admin';
+
+// Clases disponibles para asignar
+const CLASES_DISPONIBLES = [
+  { id:'burbuja-lv-1530',   label:'🫧 Burbuja · L-V 3:30pm' },
+  { id:'burbuja-sab-11',    label:'🫧 Burbuja · Sáb 11am' },
+  { id:'iniciacion-lv-1500',label:'🎒 Iniciación · L-V 3pm (2h)' },
+  { id:'iniciacion-lv-1600',label:'🎒 Iniciación · L-V 4pm (1h)' },
+  { id:'iniciacion-sab-900',label:'🎒 Iniciación · Sáb 9am' },
+  { id:'intermedio-lv-1600',label:'🏊 Intermedio · L-V 4pm' },
+  { id:'intermedio-sab-1000',label:'🏊 Intermedio · Sáb 10am' },
+  { id:'avanzado-lv-1700',  label:'🏅 Avanzado · L-V 5pm' },
+  { id:'avanzado-sab-800',  label:'🏅 Avanzado · Sáb 8am' },
+  { id:'adultos-lv-1700',   label:'🌊 Adultos · L-V 5pm' },
+  { id:'adultos-lv-1800',   label:'🌊 Adultos · L-V 6pm' },
+  { id:'adultos-lv-1900',   label:'🌊 Adultos · L-V 7pm' },
+  { id:'adultos-sab-800',   label:'🌊 Adultos · Sáb 8am' },
+  { id:'privada-lv-1400',   label:'⭐ Privada · L-V 2pm' },
+  { id:'privada-sab-800',   label:'⭐ Privada · Sáb 8am' },
+];
+
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+let allInstructores = [];
+let allAlumnos = [];
+let currentModalInstructor = null;
+let currentModalClases = [];
+
+// ═══════════════════════════════════════════════════════
+// LOGIN / LOGOUT
+// ═══════════════════════════════════════════════════════
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass  = document.getElementById('login-pass').value;
+  const err   = document.getElementById('login-error');
+  err.style.display = 'none';
+
+  if (!email || !pass) {
+    err.textContent = '❌ Completa todos los campos.';
+    err.style.display = 'block'; return;
+  }
+
+  const ADMIN_USERS = {
+    'admin@mcboswimclub.com': 'admin2025',
+    'waltertordecilla75@gmail.com': 'msc2025'
+  };
+
+  if (ADMIN_USERS[email] && ADMIN_USERS[email] === pass) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    initApp();
+    return;
+  }
+
+  try {
+    const res  = await fetch(API, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ accion: 'loginAdmin', email, password: pass })
+    });
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      initApp();
+    } else {
+      err.textContent = '❌ Credenciales incorrectas.';
+      err.style.display = 'block';
+    }
+  } catch(e) {
+    err.textContent = '❌ Credenciales incorrectas.';
+    err.style.display = 'block';
+  }
+}
+
+function doLogout() {
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-pass').value = '';
+}
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+function initApp() {
+  const now = new Date();
+  document.getElementById('dash-fecha').textContent =
+    now.toLocaleDateString('es-VE', {weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  document.getElementById('pagos-mes').value = now.toISOString().slice(0,7);
+  switchSubtab('activos');
+  document.getElementById('pago-fecha').value = now.toISOString().slice(0,10);
+  loadDashboard();
+  loadInstructores();
+  loadTokens();
+  loadAlumnos();
+  loadAsignaciones();
+}
+
+// ═══════════════════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════════════════
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  const tabs = ['dashboard','instructores','tokens','alumnos','pagos','asignacion'];
+  const idx = tabs.indexOf(tab);
+  document.querySelectorAll('.tab-btn')[idx].classList.add('active');
+  document.getElementById('tab-'+tab).classList.add('active');
+}
+
+// ═══════════════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════════════
+async function loadDashboard() {
+  try {
+    const [rAlumnos, rInst, rPagos, rClases] = await Promise.all([
+      fetch(`${API}?action=obtenerTodosAlumnos`).then(r=>r.json()).catch(()=>({alumnos:[]})),
+      fetch(`${API}?action=obtenerInstructores`).then(r=>r.json()).catch(()=>({instructores:[]})),
+      fetch(`${API}?action=obtenerPagos`).then(r=>r.json()).catch(()=>({pagos:[]})),
+      fetch(`${API}?action=obtenerHistorial`).then(r=>r.json()).catch(()=>({reportes:[]})),
+    ]);
+
+    const alumnos = rAlumnos.alumnos || [];
+    const instructores = (rInst.instructores || []).filter(i => i.activo !== false);
+    const pagos = rPagos.pagos || [];
+    const clases = rClases.reportes || [];
+
+    const hoy = new Date();
+    const mesActual = hoy.getMonth(); const anioActual = hoy.getFullYear();
+    const pagosMes = pagos.filter(p => {
+      const f = new Date(p.fecha);
+      return f.getMonth() === mesActual && f.getFullYear() === anioActual;
+    });
+    const ingresos = pagosMes.reduce((s,p) => s + (parseFloat(p.monto)||0), 0);
+    const pendientes = alumnos.filter(a => a.estado_pago === 'Pendiente').length;
+
+    document.getElementById('d-alumnos').textContent = alumnos.length;
+    document.getElementById('d-instructores').textContent = instructores.length;
+    document.getElementById('d-pagos-mes').textContent = pagosMes.length;
+    document.getElementById('d-ingresos').textContent = '$' + ingresos.toFixed(0);
+    document.getElementById('d-clases').textContent = clases.length;
+    document.getElementById('d-pendientes').textContent = pendientes;
+
+    // Alumnos por nivel
+    const niveles = {};
+    alumnos.forEach(a => { const n = a.nivel || 'Sin nivel'; niveles[n] = (niveles[n]||0)+1; });
+    const total = alumnos.length || 1;
+    const colores = { 'Burbuja':'#00b4d8','Iniciación':'#0057a8','Intermedio':'#8b5cf6','Avanzado':'#f4b942','Adultos':'#10b981','Privada':'#ef4444' };
+    document.getElementById('niveles-chart').innerHTML = Object.entries(niveles).map(([n,c]) => `
+      <div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:.3rem;">
+          <span style="font-size:.85rem;font-weight:600;color:var(--navy);">${n}</span>
+          <span style="font-size:.82rem;color:var(--gray);">${c} alumnos</span>
+        </div>
+        <div style="background:var(--surface);border-radius:50px;height:10px;overflow:hidden;">
+          <div style="height:100%;border-radius:50px;background:${colores[n]||'var(--blue)'};width:${Math.round(c/total*100)}%;transition:width .5s;"></div>
+        </div>
+      </div>`).join('');
+
+    // Últimos pagos
+    const ultimos = [...pagosMes].slice(-5).reverse();
+    document.getElementById('dash-pagos-list').innerHTML = ultimos.length ? ultimos.map(p => {
+      const ini = (p.nombre||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+      return `<div class="payment-row">
+        <div class="payment-avatar">${ini}</div>
+        <div class="payment-info"><strong>${p.nombre||'—'}</strong><span>${p.plan||p.programa||'—'}</span></div>
+        <span class="payment-method">${p.metodo||p.fuente||'—'}</span>
+        <span class="payment-amount">$${parseFloat(p.monto||0).toFixed(0)}</span>
+      </div>`;
+    }).join('') : '<div style="text-align:center;padding:2rem;color:var(--gray);">Sin pagos este mes</div>';
+
+  } catch(e) {
+    // Demo fallback
+    document.getElementById('d-alumnos').textContent = '—';
+    document.getElementById('d-instructores').textContent = '—';
+    document.getElementById('d-pagos-mes').textContent = '—';
+    document.getElementById('d-ingresos').textContent = '—';
+    document.getElementById('d-clases').textContent = '—';
+    document.getElementById('d-pendientes').textContent = '—';
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// INSTRUCTORES
+// ═══════════════════════════════════════════════════════
+async function loadInstructores() {
+  try {
+    const res = await fetch(`${API}?action=obtenerInstructores`);
+    const data = await res.json();
+    allInstructores = data.instructores || [];
+    renderInstructores(allInstructores);
+    populateInstSelect();
+  } catch(e) {
+    allInstructores = [];
+    renderInstructores([]);
+  }
+}
+
+function renderInstructores(list) {
+  document.getElementById('inst-count').textContent = list.length + ' instructores';
+  const tbody = document.getElementById('inst-table-body');
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--gray);">No hay instructores registrados aún</td></tr>';
+    return;
+  }
+  tbody.innerHTML = list.map(i => {
+    const activo = i.activo !== false;
+    const clases = Array.isArray(i.clases) ? i.clases.join(', ') : (i.clasesAsignadas || '—');
+    return `<tr>
+      <td><strong>${i.nombre||'—'}</strong></td>
+      <td style="font-size:.82rem;">${i.email||'—'}</td>
+      <td style="font-size:.82rem;">${i.telefono||'—'}</td>
+      <td style="font-size:.82rem;">${i.cedula||'—'}</td>
+      <td><span class="badge ${i.disponibilidad==='Sabatino'?'sabatino':'semanal'}">${i.disponibilidad||'—'}</span></td>
+      <td><span class="badge ${activo?'active':'inactive'}">${activo?'Activo':'Inactivo'}</span></td>
+      <td style="font-size:.78rem;color:var(--gray);">${clases||'Sin asignar'}</td>
+      <td>
+        <div style="display:flex;gap:.4rem;">
+          <button class="btn btn-outline" onclick="abrirAsignarModal('${i.email}','${i.nombre}')">📋 Clases</button>
+          <button class="btn ${activo?'btn-danger':'btn-success'}" onclick="toggleInstructor('${i.email}',${activo})">${activo?'🚫 Deshabilitar':'✅ Habilitar'}</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+async function toggleInstructor(email, activo) {
+  const accion = activo ? 'deshabilitarInstructor' : 'habilitarInstructor';
+  const msg = activo ? `¿Deshabilitar al instructor ${email}? No podrá acceder al portal.` : `¿Habilitar al instructor ${email}?`;
+  confirmar('⚠️', activo ? 'Deshabilitar Instructor' : 'Habilitar Instructor', msg, async () => {
+    showLoading('Actualizando estado...');
+    try {
+      const res = await fetch(API, { method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ accion, email }) });
+      const data = await res.json();
+      hideLoading();
+      if (data.success) { showToast('✅','Listo',`Instructor ${activo?'deshabilitado':'habilitado'}`); loadInstructores(); }
+      else showToast('❌','Error', data.error||'No se pudo actualizar');
+    } catch(e) { hideLoading(); showToast('✅','Demo','En producción se actualizaría el estado'); loadInstructores(); }
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// TOKENS
+// ═══════════════════════════════════════════════════════
+async function loadTokens() {
+  const list = document.getElementById('tokens-list');
+  try {
+    const res = await fetch(`${API}?action=obtenerTokens`);
+    const data = await res.json();
+    const tokens = data.tokens || [];
+    if (!tokens.length) {
+      list.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--gray);">No hay tokens activos</div>';
+      return;
+    }
+    list.innerHTML = tokens.map(t => {
+      const link = `${window.location.origin}/registro-instructor.html?token=${t.token}`;
+      const exp = new Date(t.expira);
+      const expirado = exp < new Date();
+      return `<div class="token-card" style="${expirado?'opacity:.5':''}">
+        <div class="token-info">
+          <strong>👤 ${t.nombre||'—'} <small style="color:rgba(255,255,255,.4);font-weight:400;">${t.email||''}</small></strong>
+          <span>${expirado?'⚠️ Expirado':'✅ Válido'} · Expira: ${exp.toLocaleDateString('es-VE')}</span>
+          ${t.nota?`<span style="font-size:.75rem;color:rgba(255,255,255,.35);">${t.nota}</span>`:''}
+        </div>
+        <div class="token-link">${link}</div>
+        <div class="token-actions">
+          <button class="btn btn-gold" onclick="copiarTexto('${link}')">📋 Copiar</button>
+          ${!expirado?`<button class="btn btn-danger" onclick="revocarToken('${t.token}')">🗑️</button>`:''}
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    list.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--gray);">No hay tokens registrados aún</div>';
+  }
+}
+
+async function generarToken() {
+  const nombre = document.getElementById('token-nombre').value.trim();
+  const email  = document.getElementById('token-email').value.trim();
+  const nota   = document.getElementById('token-nota').value.trim();
+  if (!nombre || !email) { showToast('⚠️','Faltan datos','Completa nombre y email'); return; }
+
+  showLoading('Generando token...');
+  try {
+    const res = await fetch(API, { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ accion:'generarToken', nombre, email, nota }) });
+    const data = await res.json();
+    hideLoading();
+    const token = data.token || ('demo-' + Math.random().toString(36).slice(2,10));
+    const link = `${window.location.origin}/registro-instructor.html?token=${token}`;
+    document.getElementById('token-link-display').textContent = link;
+    document.getElementById('token-resultado').style.display = 'block';
+    loadTokens();
+    showToast('✅','Token generado','Link listo para enviar al instructor');
+  } catch(e) {
+    hideLoading();
+    const token = 'demo-' + Math.random().toString(36).slice(2,10);
+    const link = `${window.location.origin}/registro-instructor.html?token=${token}`;
+    document.getElementById('token-link-display').textContent = link;
+    document.getElementById('token-resultado').style.display = 'block';
+    showToast('✅','Token generado (demo)','En producción se guardaría en Sheets');
+  }
+}
+
+function copiarToken() {
+  const link = document.getElementById('token-link-display').textContent;
+  copiarTexto(link);
+}
+
+function copiarTexto(txt) {
+  navigator.clipboard.writeText(txt).then(() => showToast('📋','Copiado','Link copiado al portapapeles'));
+}
+
+async function revocarToken(token) {
+  confirmar('🗑️','Revocar Token','¿Revocar este token? El link ya no funcionará.', async () => {
+    try {
+      await fetch(API, { method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ accion:'revocarToken', token }) });
+      showToast('✅','Token revocado','El link ya no es válido'); loadTokens();
+    } catch(e) { showToast('✅','Demo','En producción se revocaría'); loadTokens(); }
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// ALUMNOS
+// ═══════════════════════════════════════════════════════
+async function loadAlumnos() {
+  try {
+    const res = await fetch(`${API}?action=obtenerTodosAlumnos`);
+    const data = await res.json();
+    allAlumnos = data.alumnos || [];
+    renderAlumnos(allAlumnos);
+    renderAlumnosStats(allAlumnos);
+    populatePagoAlumnoSelect(allAlumnos);
+  } catch(e) { allAlumnos = []; renderAlumnos([]); }
+  // Cargar leads (en proceso)
+  loadLeads();
+}
+
+function renderAlumnos(list) {
+  // Contar total
+  var total = list.length;
+  if (document.getElementById('alumnos-count'))
+    document.getElementById('alumnos-count').textContent = total + ' alumnos';
+
+  // Separar por estado
+  var activos    = list.filter(function(a){ return String(a.estado).trim() === 'Activo' && String(a.estadoPago).trim() === 'Pagado'; });
+  var pendientes = list.filter(function(a){ return String(a.estado).trim() === 'Activo' && String(a.estadoPago).trim() !== 'Pagado'; });
+  var inactivos  = list.filter(function(a){ return String(a.estado).trim() === 'Inactivo'; });
+
+  // Actualizar contadores
+  document.getElementById('count-activos').textContent    = activos.length;
+  document.getElementById('count-pendientes').textContent = pendientes.length;
+  document.getElementById('count-inactivos').textContent  = inactivos.length;
+
+  function btnPagar(nombre, label, cls) {
+    return '<button class="btn ' + cls + '" data-nombre="' + nombre.replace(/"/g,'') + '" onclick="pagarAlumno(this)">' + label + '</button>';
+  }
+
+  // ── TABLA ACTIVOS ──
+  var tb1 = document.getElementById('alumnos-table-body');
+  if (tb1) tb1.innerHTML = activos.length ? activos.map(function(a) {
+    return '<tr>' +
+      '<td><strong>' + (a.nombre||'—') + '</strong><br><span style="font-size:.75rem;color:var(--gray);">' + (a.email||'') + '</span></td>' +
+      '<td><span class="badge semanal">' + (a.nivel||'—') + '</span></td>' +
+      '<td style="font-size:.82rem;">' + (a.horario||'—') + '</td>' +
+      '<td style="font-size:.82rem;">' + (a.telefono||'—') + '</td>' +
+      '<td><span class="badge active">Al día ✅</span></td>' +
+      '<td>' + btnPagar(a.nombre||'','💳 Renovar','btn-outline') + '</td>' +
+    '</tr>';
+  }).join('') : '<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--gray);">No hay alumnos al día este mes</td></tr>';
+
+  // ── TABLA PENDIENTES ──
+  var tb2 = document.getElementById('pendientes-table-body');
+  if (tb2) tb2.innerHTML = pendientes.length ? pendientes.map(function(a) {
+    return '<tr>' +
+      '<td><strong>' + (a.nombre||'—') + '</strong><br><span style="font-size:.75rem;color:var(--gray);">' + (a.email||'') + '</span></td>' +
+      '<td><span class="badge semanal">' + (a.nivel||'—') + '</span></td>' +
+      '<td style="font-size:.82rem;">' + (a.horario||'—') + '</td>' +
+      '<td style="font-weight:700;color:var(--success);">$' + (a.mensualidad||'—') + '</td>' +
+      '<td style="font-size:.82rem;">' + (a.telefono||'—') + '</td>' +
+      '<td>' + btnPagar(a.nombre||'','💳 Pagar','btn-gold') + '</td>' +
+    '</tr>';
+  }).join('') : '<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--gray);">No hay pagos pendientes 🎉</td></tr>';
+
+  // ── TABLA INACTIVOS ──
+  var tb3 = document.getElementById('inactivos-table-body');
+  if (tb3) tb3.innerHTML = inactivos.length ? inactivos.map(function(a) {
+    return '<tr>' +
+      '<td><strong>' + (a.nombre||'—') + '</strong><br><span style="font-size:.75rem;color:var(--gray);">' + (a.email||'') + '</span></td>' +
+      '<td><span class="badge inactive">' + (a.nivel||'—') + '</span></td>' +
+      '<td style="font-size:.82rem;">' + (a.horario||'—') + '</td>' +
+      '<td style="font-size:.82rem;">' + (a.telefono||'—') + '</td>' +
+      '<td>' + btnPagar(a.nombre||'','✅ Reactivar','btn-success') + '</td>' +
+    '</tr>';
+  }).join('') : '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--gray);">No hay alumnos inactivos</td></tr>';
+}
+
+function filtrarAlumnos() {
+  const nivel = document.getElementById('filtro-nivel').value.toLowerCase();
+  const buscar = document.getElementById('filtro-buscar').value.toLowerCase();
+  const filtered = allAlumnos.filter(a =>
+    (!nivel || (a.nivel||'').toLowerCase().includes(nivel)) &&
+    (!buscar || (a.nombre||'').toLowerCase().includes(buscar) || (a.email||'').toLowerCase().includes(buscar))
+  );
+  renderAlumnos(filtered);
+}
+
+function populatePagoAlumnoSelect(alumnos) {
+  const sel = document.getElementById('pago-alumno');
+  sel.innerHTML = '<option value="">— Selecciona alumno —</option>';
+  alumnos.forEach(a => {
+    const opt = document.createElement('option');
+    opt.value = a.nombre;
+    opt.dataset.email = a.email || '';
+    opt.textContent = `${a.nombre} (${a.nivel||'—'})`;
+    sel.appendChild(opt);
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// PAGOS
+// ═══════════════════════════════════════════════════════
+async function loadPagos() {
+  const mes = document.getElementById('pagos-mes').value;
+  const metodo = document.getElementById('pagos-metodo').value;
+  const list = document.getElementById('pagos-list');
+  list.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--gray);">⏳ Cargando...</div>';
+
+  try {
+    const res = await fetch(`${API}?action=obtenerPagos`);
+    const data = await res.json();
+    let pagos = data.pagos || [];
+
+    if (mes) {
+      const [anio, mesNum] = mes.split('-');
+      pagos = pagos.filter(p => {
+        const f = new Date(p.fecha);
+        return f.getFullYear()==anio && (f.getMonth()+1)==parseInt(mesNum);
+      });
+    }
+    if (metodo) pagos = pagos.filter(p => (p.metodo||p.fuente||'').includes(metodo));
+
+    const totalMes = pagos.reduce((s,p)=>s+(parseFloat(p.monto)||0),0);
+    document.getElementById('p-total-mes').textContent = '$'+totalMes.toFixed(0);
+    document.getElementById('p-cantidad').textContent = pagos.length;
+    document.getElementById('p-pendientes').textContent = allAlumnos.filter(a=>a.estado_pago==='Pendiente').length;
+
+    if (!pagos.length) {
+      list.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--gray);">Sin pagos para ese filtro</div>';
+      return;
+    }
+    list.innerHTML = pagos.map(p => {
+      const ini = (p.nombre||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+      const fecha = p.fecha ? new Date(p.fecha).toLocaleDateString('es-VE') : '—';
+      return `<div class="payment-row">
+        <div class="payment-avatar">${ini}</div>
+        <div class="payment-info"><strong>${p.nombre||'—'}</strong><span>${p.plan||p.programa||'—'} · ${fecha}</span></div>
+        <span class="payment-method">${p.metodo||p.fuente||'—'}</span>
+        ${p.referencia?`<span style="font-family:monospace;font-size:.75rem;color:var(--gray);">${p.referencia}</span>`:''}
+        <span class="payment-amount">$${parseFloat(p.monto||0).toFixed(0)}</span>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    list.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--gray);">Sin datos de pagos aún</div>';
+    document.getElementById('p-total-mes').textContent = '—';
+    document.getElementById('p-cantidad').textContent = '—';
+    document.getElementById('p-pendientes').textContent = '—';
+  }
+}
+
+function toggleCamposPago() {
+  const metodo = document.getElementById('pago-metodo').value;
+  const camposT  = document.getElementById('campos-transferencia');
+  const camposPM = document.getElementById('campos-pago-movil');
+  const bancoLbl = document.getElementById('banco-label');
+  const refInput = document.getElementById('pago-ref');
+
+  // Efectivo no necesita referencia
+  if (metodo === 'Efectivo USD') {
+    camposT.style.display = 'none';
+  } else {
+    camposT.style.display = 'block';
+    camposPM.style.display = metodo === 'Pago Movil' ? 'grid' : 'none';
+    bancoLbl.textContent = metodo === 'Zelle' ? '(opcional)' : metodo === 'Pago Movil' ? '' : '(opcional)';
+    refInput.placeholder = metodo === 'Binance Pay' ? 'ID de transacción Binance' :
+                           metodo === 'Zelle'       ? 'Últimos 4 dígitos o referencia' :
+                           metodo === 'Pago Movil'  ? 'Número de referencia bancaria' :
+                           'Referencia / comprobante';
+  }
+}
+
+function autocompletarMonto() {
+  const plan = document.getElementById('pago-plan');
+  const monto = document.getElementById('pago-monto');
+  const opt   = plan.options[plan.selectedIndex];
+  if (opt && opt.dataset.monto) monto.value = opt.dataset.monto;
+
+  // Preview email
+  const alumno = document.getElementById('pago-alumno').value;
+  const alumnoObj = allAlumnos.find(a => a.nombre === alumno);
+  const previewEl  = document.getElementById('preview-email');
+  previewEl.textContent = alumnoObj ? (alumnoObj.email || 'sin email registrado') : '— selecciona un alumno —';
+}
+
+async function registrarPago() {
+  const alumno = document.getElementById('pago-alumno').value;
+  const monto  = document.getElementById('pago-monto').value;
+  const metodo = document.getElementById('pago-metodo').value;
+  const plan   = document.getElementById('pago-plan').value;
+  const fecha  = document.getElementById('pago-fecha').value;
+  const ref    = document.getElementById('pago-ref').value.trim();
+  const banco  = document.getElementById('pago-banco')?.value.trim() || '';
+  const tel    = document.getElementById('pago-telefono')?.value.trim() || '';
+  const titular= document.getElementById('pago-titular')?.value.trim() || '';
+  const obs    = document.getElementById('pago-obs')?.value.trim() || '';
+
+  if (!alumno) { showToast('⚠️','Falta alumno','Selecciona el alumno'); return; }
+  if (!monto || parseFloat(monto) <= 0) { showToast('⚠️','Falta monto','Ingresa el monto recibido'); return; }
+  if (metodo !== 'Efectivo USD' && !ref) {
+    showToast('⚠️','Falta referencia','Ingresa el número de referencia o comprobante'); return;
+  }
+
+  showLoading('Registrando pago y enviando recibo...');
+  try {
+    const res = await fetch(API, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        accion: 'registrarPago',
+        nombre: alumno, monto, metodo, plan, fecha,
+        referencia: ref, banco, telefono: tel, titular, observacion: obs,
+        fuente: 'Admin Panel'
+      })
+    });
+    const data = await res.json();
+    hideLoading();
+    if (data.success) {
+      closeModal('modal-pago');
+      const msg = data.emailEnviado ? 'Recibo enviado al representante' : 'Pago guardado (sin email registrado)';
+      showToast('✅', 'Pago registrado · ' + plan, msg);
+      loadPagos(); loadDashboard();
+    } else {
+      showToast('❌', 'Error', data.error || 'No se pudo registrar');
+    }
+  } catch(e) {
+    hideLoading();
+    closeModal('modal-pago');
+    showToast('✅', 'Demo · Pago registrado', `$${monto} de ${alumno}`);
+    loadDashboard();
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// ASIGNACIÓN DE CLASES
+// ═══════════════════════════════════════════════════════
+function populateInstSelect() {
+  const sel = document.getElementById('asig-instructor');
+  sel.innerHTML = '<option value="">— Selecciona un instructor —</option>';
+  allInstructores.forEach(i => {
+    const opt = document.createElement('option');
+    opt.value = i.email; opt.textContent = i.nombre;
+    opt.dataset.clases = JSON.stringify(i.clases || []);
+    sel.appendChild(opt);
+  });
+}
+
+function cargarAsignacion() {
+  const sel = document.getElementById('asig-instructor');
+  const opt = sel.options[sel.selectedIndex];
+  if (!sel.value) { document.getElementById('asig-panel').style.display = 'none'; return; }
+  const clasesActuales = JSON.parse(opt.dataset.clases || '[]');
+  document.getElementById('asig-panel').style.display = 'block';
+  renderAssignGrid('assign-grid', clasesActuales);
+}
+
+function renderAssignGrid(containerId, seleccionadas) {
+  const grid = document.getElementById(containerId);
+  grid.innerHTML = CLASES_DISPONIBLES.map(c => `
+    <div class="assign-item ${seleccionadas.includes(c.id)?'selected':''}" onclick="toggleAsign(this,'${c.id}','${containerId}')">
+      <input type="checkbox" ${seleccionadas.includes(c.id)?'checked':''} style="pointer-events:none;accent-color:var(--blue);"/>
+      ${c.label}
+    </div>`).join('');
+}
+
+function toggleAsign(el, id, containerId) {
+  el.classList.toggle('selected');
+  el.querySelector('input').checked = el.classList.contains('selected');
+}
+
+function getSelectedClases(containerId) {
+  return [...document.getElementById(containerId).querySelectorAll('.assign-item.selected')]
+    .map(el => el.onclick.toString().match(/'([^']+)'/)?.[1]).filter(Boolean);
+}
+
+async function guardarAsignacion() {
+  const sel = document.getElementById('asig-instructor');
+  const email = sel.value;
+  if (!email) { showToast('⚠️','Sin instructor','Selecciona un instructor primero'); return; }
+  const clases = [...document.getElementById('assign-grid').querySelectorAll('.assign-item.selected')]
+    .map(el => { const m = el.getAttribute('onclick').match(/'([^']+)'/); return m?m[1]:''; }).filter(Boolean);
+  showLoading('Guardando asignación...');
+  try {
+    const res = await fetch(API, { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ accion:'asignarClases', email, clases }) });
+    const data = await res.json();
+    hideLoading();
+    showToast('✅','Asignación guardada',`${clases.length} clases asignadas`);
+    loadInstructores(); loadAsignaciones();
+  } catch(e) {
+    hideLoading(); showToast('✅','Demo',`${clases.length} clases asignadas (demo)`);
+    loadInstructores();
+  }
+}
+
+function abrirAsignarModal(email, nombre) {
+  const inst = allInstructores.find(i => i.email === email);
+  currentModalInstructor = email;
+  const clasesActuales = inst?.clases || [];
+  document.getElementById('modal-asig-nombre').textContent = `Asignando clases a: ${nombre}`;
+  renderAssignGrid('modal-assign-grid', clasesActuales);
+  openModal('modal-asignar');
+}
+
+async function guardarAsignacionModal() {
+  const clases = [...document.getElementById('modal-assign-grid').querySelectorAll('.assign-item.selected')]
+    .map(el => { const m = el.getAttribute('onclick').match(/'([^']+)'/); return m?m[1]:''; }).filter(Boolean);
+  showLoading('Guardando...');
+  closeModal('modal-asignar');
+  try {
+    const res = await fetch(API, { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ accion:'asignarClases', email: currentModalInstructor, clases }) });
+    hideLoading();
+    showToast('✅','Clases asignadas',`${clases.length} clases`);
+    loadInstructores(); loadAsignaciones();
+  } catch(e) {
+    hideLoading(); showToast('✅','Demo',`${clases.length} clases asignadas`);
+    loadInstructores();
+  }
+}
+
+async function loadAsignaciones() {
+  try {
+    const res = await fetch(`${API}?action=obtenerInstructores`);
+    const data = await res.json();
+    const instructores = data.instructores || [];
+    const tbody = document.getElementById('asig-table-body');
+
+    const rows = [];
+    CLASES_DISPONIBLES.forEach(clase => {
+      const inst = instructores.find(i => Array.isArray(i.clases) && i.clases.includes(clase.id));
+      const nivel = clase.id.split('-')[0];
+      const nivelLabels = {burbuja:'🫧 Burbuja',iniciacion:'🎒 Iniciación',intermedio:'🏊 Intermedio',avanzado:'🏅 Avanzado',adultos:'🌊 Adultos',privada:'⭐ Privada'};
+      rows.push(`<tr>
+        <td><strong>${clase.label.split('·')[1]?.trim()||clase.label}</strong></td>
+        <td><span class="badge semanal">${nivelLabels[nivel]||nivel}</span></td>
+        <td>${inst?`<strong>${inst.nombre}</strong>`:'<span style="color:var(--gray);">Sin asignar</span>'}</td>
+        <td style="color:var(--gray);">—</td>
+        <td><span class="badge ${inst?'active':'pending'}">${inst?'Asignado':'Disponible'}</span></td>
+      </tr>`);
+    });
+    tbody.innerHTML = rows.join('');
+  } catch(e) {
+    document.getElementById('asig-table-body').innerHTML =
+      '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--gray);">Sin datos de asignaciones</td></tr>';
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// UI HELPERS
+// ═══════════════════════════════════════════════════════
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  if (id === 'modal-token') {
+    document.getElementById('token-resultado').style.display = 'none';
+    document.getElementById('token-nombre').value = '';
+    document.getElementById('token-email').value = '';
+    document.getElementById('token-nota').value = '';
+  }
+}
+
+function confirmar(icon, titulo, msg, callback) {
+  document.getElementById('confirm-icon').textContent = icon;
+  document.getElementById('confirm-title').textContent = titulo;
+  document.getElementById('confirm-msg').textContent = msg;
+  document.getElementById('confirm-btn').onclick = () => { closeModal('modal-confirm'); callback(); };
+  openModal('modal-confirm');
+}
+
+function showLoading(msg) {
+  document.getElementById('loading-text').textContent = msg||'Procesando...';
+  document.getElementById('loading').classList.add('active');
+}
+function hideLoading() { document.getElementById('loading').classList.remove('active'); }
+
+function showToast(icon, title, sub) {
+  document.getElementById('toast-icon').textContent = icon;
+  document.getElementById('toast-title').textContent = title;
+  document.getElementById('toast-sub').textContent = sub;
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+
+// ═══════════════════════════════════════════════════════
+// SUBTABS ALUMNOS
+// ═══════════════════════════════════════════════════════
+var currentSubtab = 'activos';
+var allLeads = [];
+
+function switchSubtab(tab) {
+  currentSubtab = tab;
+  ['activos','proceso','pendientes','inactivos'].forEach(function(t) {
+    var btn   = document.getElementById('subtab-' + t);
+    var panel = document.getElementById('panel-' + t);
+    if (t === tab) {
+      btn.style.background = 'var(--blue)';
+      btn.style.color = 'white';
+      panel.style.display = 'block';
+    } else {
+      btn.style.background = 'white';
+      btn.style.color = 'var(--gray)';
+      panel.style.display = 'none';
+    }
+  });
+}
+
+async function loadLeads() {
+  try {
+    var res  = await fetch(API + '?action=obtenerLeads');
+    var data = await res.json();
+    allLeads = data.leads || [];
+  } catch(e) {
+    allLeads = [];
+  }
+  renderLeads(allLeads);
+  document.getElementById('count-proceso').textContent = allLeads.length;
+}
+
+function renderLeads(list) {
+  var tbody = document.getElementById('leads-table-body');
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--gray);">No hay alumnos en proceso de inscripción</td></tr>';
+    return;
+  }
+  tbody.innerHTML = list.map(function(l, idx) {
+    return '<tr>' +
+      '<td><strong>' + (l.nombre||'—') + '</strong></td>' +
+      '<td><span class="badge sabatino">' + (l.nivel||'—') + '</span></td>' +
+      '<td style="font-size:.82rem;">' + (l.horario||'—') + '</td>' +
+      '<td style="font-size:.82rem;">' + (l.telefono||'—') + '</td>' +
+      '<td style="font-size:.82rem;">' + (l.email||'—') + '</td>' +
+      '<td style="font-size:.82rem;">' + (l.fecha||'—') + '</td>' +
+      '<td><button class="btn btn-gold" data-idx="' + idx + '" onclick="pagarLead(this)">💳 Registrar Pago</button></td>' +
+    '</tr>';
+  }).join('');
+}
+
+function pagarLead(btn) {
+  var idx  = parseInt(btn.dataset.idx);
+  var lead = allLeads[idx] || {};
+  abrirModalPago(lead.nombre||'', lead.nivel||'', lead.email||'');
+}
+
+function pagarAlumno(btn) {
+  var nombre = btn.dataset.nombre || '';
+  abrirModalPago(nombre, '', '');
+}
+
+function abrirModalPago(nombre, nivel, email) {
+  openModal('modal-pago');
+  setTimeout(function() {
+    var sel = document.getElementById('pago-alumno');
+    var found = false;
+    for (var i = 0; i < sel.options.length; i++) {
+      if (sel.options[i].value === nombre) {
+        sel.selectedIndex = i; found = true; break;
+      }
+    }
+    if (!found && nombre) {
+      var opt = document.createElement('option');
+      opt.value = nombre;
+      opt.textContent = nombre + (nivel ? ' (' + nivel + ') — Lead' : '');
+      opt.dataset.email = email;
+      sel.appendChild(opt);
+      sel.value = nombre;
+    }
+    autocompletarMonto();
+    var prev = document.getElementById('preview-email');
+    if (prev) prev.textContent = email || 'sin email registrado';
+  }, 100);
+}
+
+function filtrarAlumnos() {
+  var nivel  = document.getElementById('filtro-nivel').value.toLowerCase();
+  var buscar = document.getElementById('filtro-buscar').value.toLowerCase();
+  var filtered = allAlumnos.filter(function(a) {
+    return (!nivel  || (a.nivel||'').toLowerCase().includes(nivel)) &&
+           (!buscar || (a.nombre||'').toLowerCase().includes(buscar));
+  });
+  renderAlumnos(filtered);
+}
+
+// Close modals on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('open'); });
+});
+</script>
+</body>
+</html>
