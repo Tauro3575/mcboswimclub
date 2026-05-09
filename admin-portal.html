@@ -917,8 +917,8 @@ function initApp() {
   document.getElementById('dash-fecha').textContent =
     now.toLocaleDateString('es-VE', {weekday:'long',year:'numeric',month:'long',day:'numeric'});
   document.getElementById('pagos-mes').value = now.toISOString().slice(0,7);
-  switchSubtab('pendientes');
-  setTimeout(function(){ switchSubtab('activos'); }, 200);
+  setTimeout(function(){ switchSubtab('pendientes'); }, 500);
+  setTimeout(function(){ switchSubtab('activos'); }, 700);
   document.getElementById('pago-fecha').value = now.toISOString().slice(0,10);
 
   // Mostrar nombre en topbar
@@ -1184,11 +1184,12 @@ async function loadAlumnos() {
     const data = await res.json();
     allAlumnos = data.alumnos || [];
     renderAlumnos(allAlumnos);
-    renderAlumnosStats(allAlumnos);
     populatePagoAlumnoSelect(allAlumnos);
-  } catch(e) { allAlumnos = []; renderAlumnos([]); }
-  // Cargar leads (en proceso)
-  loadLeads();
+  } catch(e) { 
+    allAlumnos = []; 
+    renderAlumnos([]); 
+  }
+  await loadLeads();
 }
 
 function renderAlumnos(list) {
