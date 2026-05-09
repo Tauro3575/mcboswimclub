@@ -413,6 +413,7 @@
               <div id="eb-nologro" style="background:var(--danger);transition:width .5s;"></div>
             </div>
           </div>
+          <div id="eval-chart-container"></div>
         </div>
       </div>
 
@@ -673,7 +674,7 @@ function switchTab(tab) {
 
 // ── DASHBOARD ─────────────────────────────────────────
 async function loadDashboard() {
-  // Welcome card
+  // ── Welcome card ──
   const initials = currentInstructor.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
   document.getElementById('dash-avatar').textContent = initials;
   document.getElementById('dash-nombre').textContent = '¡Hola, ' + currentInstructor + '!';
@@ -681,96 +682,99 @@ async function loadDashboard() {
 
   // Clases asignadas badges
   const badgesEl = document.getElementById('dash-clases-badges');
+  const nivelLabels = {burbuja:'🫧 Burbuja',iniciacion:'🎒 Iniciación',intermedio:'🏊 Intermedio',avanzado:'🏅 Avanzado',adultos:'🌊 Adultos',privada:'⭐ Privada'};
   if (currentClases.length > 0) {
     badgesEl.innerHTML = currentClases.map(c => {
       const nivel = c.split('-')[0];
-      const labels = {burbuja:'🫧 Burbuja',iniciacion:'🎒 Iniciación',intermedio:'🏊 Intermedio',avanzado:'🏅 Avanzado',adultos:'🌊 Adultos',privada:'⭐ Privada'};
-      return '<span class="welcome-badge">' + (labels[nivel]||nivel) + '</span>';
+      return '<span class="welcome-badge">' + (nivelLabels[nivel]||nivel) + '</span>';
     }).join('');
   } else {
     badgesEl.innerHTML = '<span class="welcome-badge">Sin clases asignadas aún</span>';
   }
 
   try {
-    // Cargar datos
-    const [rAlumnos, rHistorial, rEvals] = await Promise.all([
+    const [rAlumnos, rHistorial] = await Promise.all([
       fetch(API + '?action=obtenerTodosAlumnos').then(r=>r.json()).catch(()=>({alumnos:[]})),
-      fetch(API + '?action=obtenerHistorial').then(r=>r.json()).catch(()=>({reportes:[]})),
       fetch(API + '?action=obtenerHistorial').then(r=>r.json()).catch(()=>({reportes:[]})),
     ]);
 
-    const alumnos  = rAlumnos.alumnos || [];
-    const reportes = rHistorial.reportes || [];
-
-    // Filtrar por instructor
-    const misClases = reportes.filter(r => r.instructor === currentInstructor);
+    const todosAlumnos = rAlumnos.alumnos || [];
+    const todosReportes = rHistorial.reportes || [];
     const now = new Date();
-    const mesActual = now.getMonth() + 1;
+    const mesActual  = now.getMonth() + 1;
     const anioActual = now.getFullYear();
+    const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 
-    // Clases este mes
-    const clasesMes = misClases.filter(r => {
+    // ── Mis alumnos — sumatoria por clases asignadas ──
+    const horarioMap = {
+      'burbuja-lv-1530':'3:30','burbuja-sab-11':'11am',
+      'iniciacion-lv-1500':'3pm','iniciacion-lv-1600':'4pm',
+      'iniciacion-sab-900':'9am','intermedio-lv-1600':'4pm',
+      'intermedio-sab-1000':'10am','avanzado-lv-1700':'5pm',
+      'avanzado-sab-800':'8am','adultos-lv-1700':'5pm',
+      'adultos-lv-1800':'6pm','adultos-lv-1900':'7pm',
+      'adultos-sab-800':'8am','privada-lv-1400':'2pm','privada-sab-800':'8am'
+    };
+    const nivelMapInv = {'burbuja':'Burbuja','iniciacion':'Iniciación','intermedio':'Intermedio','avanzado':'Avanzado','adultos':'Adultos','privada':'Privada'};
+
+    // Contar alumnos por mis clases asignadas
+    let misAlumnosTotal = 0;
+    const alumnosPorClase = {};
+    currentClases.forEach(claseId => {
+      const nivelKey  = claseId.split('-')[0];
+      const nivelNom  = nivelMapInv[nivelKey] || nivelKey;
+      const hora      = horarioMap[claseId] || '';
+      const alumnosClase = todosAlumnos.filter(a =>
+        String(a.nivel||'').toLowerCase().includes(nivelKey) ||
+        String(a.nivel||'') === nivelNom
+      );
+      alumnosPorClase[claseId] = alumnosClase.length;
+      misAlumnosTotal += alumnosClase.length;
+    });
+
+    // ── Reportes de este instructor este mes ──
+    const misReportes = todosReportes.filter(r => r.instructor === currentInstructor);
+    const clasesMes   = misReportes.filter(r => {
       const partes = String(r.fecha).split('/');
-      if (partes.length >= 3) {
-        return parseInt(partes[1]) === mesActual && parseInt(partes[2].slice(0,4)) === anioActual;
-      }
-      return false;
+      if (partes.length >= 3) return parseInt(partes[1]) === mesActual && partes[2].startsWith(String(anioActual));
+      const f = new Date(r.fecha);
+      return f.getMonth()+1 === mesActual && f.getFullYear() === anioActual;
     });
 
-    // Promedio asistencia
-    let totalPresentes = 0, totalAlumnos = 0;
+    // ── Promedio asistencia ──
+    let totalPres = 0, totalAlum = 0;
     clasesMes.forEach(r => {
-      totalPresentes += r.presentes || 0;
-      totalAlumnos   += (r.presentes||0) + (r.ausentes||0) + (r.justificados||0);
+      totalPres  += parseInt(r.presentes)||0;
+      totalAlum  += (parseInt(r.presentes)||0) + (parseInt(r.ausentes)||0) + (parseInt(r.justificados)||0);
     });
-    const pctAsist = totalAlumnos > 0 ? Math.round(totalPresentes/totalAlumnos*100) : 0;
+    const pctAsist = totalAlum > 0 ? Math.round(totalPres/totalAlum*100) : 0;
 
-    // Mis alumnos (aproximado por clases asignadas)
-    document.getElementById('d-alumnos').textContent = alumnos.length;
+    // ── Logros totales del mes ──
+    let logrosTotal = 0, procesoTotal = 0, nologroTotal = 0;
+    clasesMes.forEach(r => {
+      logrosTotal  += parseInt(r.presentes)||0;   // aproximado
+      procesoTotal += Math.floor((parseInt(r.presentes)||0) * 0.3);
+      nologroTotal += Math.floor((parseInt(r.presentes)||0) * 0.1);
+    });
+
+    // ── Actualizar métricas ──
+    document.getElementById('d-alumnos').textContent    = misAlumnosTotal;
     document.getElementById('d-clases-mes').textContent = clasesMes.length;
-    document.getElementById('d-presentes').textContent = pctAsist + '%';
+    document.getElementById('d-presentes').textContent  = pctAsist + '%';
+    document.getElementById('d-logros').textContent     = logrosTotal;
 
-    // Cumpleaños este mes
-    const cumples = alumnos.filter(a => {
+    // ── Cumpleaños este mes — con nombres ──
+    const cumples = todosAlumnos.filter(a => {
       if (!a.fechaNac) return false;
       const nac = new Date(a.fechaNac);
-      return (nac.getMonth() + 1) === mesActual;
+      return (nac.getMonth()+1) === mesActual;
     });
     document.getElementById('d-cumples').textContent = cumples.length;
 
-    // Última clase
-    if (misClases.length > 0) {
-      const ultima = misClases[misClases.length - 1];
-      document.getElementById('ultima-clase-card').style.display = 'block';
-      document.getElementById('uc-clase').textContent = ultima.clase || '—';
-      document.getElementById('uc-fecha').textContent = ultima.fecha || '—';
-      document.getElementById('uc-presentes').textContent = (ultima.presentes||0) + ' presentes';
-      document.getElementById('uc-ausentes').textContent  = (ultima.ausentes||0) + ' ausentes';
-      document.getElementById('uc-justificados').textContent = (ultima.justificados||0) + ' justificados';
-      if (ultima.notas) {
-        document.getElementById('uc-notas').style.display = 'block';
-        document.getElementById('uc-notas').textContent = '📝 ' + ultima.notas;
-      }
-    }
-
-    // Evaluaciones del mes (simulado desde reportes)
-    const logros   = clasesMes.length * 3;
-    const proceso  = clasesMes.length * 2;
-    const nologro  = clasesMes.length * 1;
-    const totalE   = logros + proceso + nologro || 1;
-    document.getElementById('e-logros').textContent  = logros;
-    document.getElementById('e-proceso').textContent = proceso;
-    document.getElementById('e-nologro').textContent = nologro;
-    document.getElementById('d-logros').textContent  = logros;
-    document.getElementById('eb-logro').style.width   = Math.round(logros/totalE*100)  + '%';
-    document.getElementById('eb-proceso').style.width = Math.round(proceso/totalE*100) + '%';
-    document.getElementById('eb-nologro').style.width = Math.round(nologro/totalE*100) + '%';
-
-    // Cumpleaños este mes
     if (cumples.length > 0) {
       document.getElementById('birthday-section').innerHTML = `
         <div class="birthday-card">
-          <h3>🎂 Cumpleaños este mes</h3>
+          <h3>🎂 Cumpleaños en ${meses[now.getMonth()].charAt(0).toUpperCase() + meses[now.getMonth()].slice(1)}</h3>
           ${cumples.map(a => `
             <div class="birthday-item">
               <div class="birthday-avatar">🎉</div>
@@ -780,17 +784,120 @@ async function loadDashboard() {
               </div>
             </div>`).join('')}
         </div>`;
+    } else {
+      document.getElementById('birthday-section').innerHTML = '';
     }
 
+    // ── Última clase ──
+    if (misReportes.length > 0) {
+      const ultima = misReportes[misReportes.length-1];
+      document.getElementById('ultima-clase-card').style.display = 'block';
+      document.getElementById('uc-clase').textContent       = ultima.clase||'—';
+      document.getElementById('uc-fecha').textContent       = ultima.fecha||'—';
+      document.getElementById('uc-presentes').textContent   = (ultima.presentes||0) + ' presentes';
+      document.getElementById('uc-ausentes').textContent    = (ultima.ausentes||0) + ' ausentes';
+      document.getElementById('uc-justificados').textContent = (ultima.justificados||0) + ' justificados';
+      if (ultima.notas) {
+        document.getElementById('uc-notas').style.display = 'block';
+        document.getElementById('uc-notas').textContent = '📝 ' + ultima.notas;
+      }
+    }
+
+    // ── Evaluaciones por clase — DIAGRAMA DE BARRAS ──
+    document.getElementById('eval-mes-label').textContent = meses[now.getMonth()] + ' ' + anioActual;
+    renderEvalChart(clasesMes, currentClases, nivelLabels);
+
   } catch(e) {
-    console.log('Error dashboard:', e);
-    document.getElementById('d-alumnos').textContent   = '—';
-    document.getElementById('d-clases-mes').textContent = '—';
-    document.getElementById('d-presentes').textContent  = '—';
-    document.getElementById('d-logros').textContent     = '—';
-    document.getElementById('d-cumples').textContent    = '—';
+    console.error('Dashboard error:', e);
+    ['d-alumnos','d-clases-mes','d-presentes','d-logros','d-cumples'].forEach(id => {
+      document.getElementById(id).textContent = '—';
+    });
   }
 }
+
+function renderEvalChart(clasesMes, clasesAsignadas, nivelLabels) {
+  // Agrupar reportes por clase
+  const dataPorClase = {};
+  clasesAsignadas.forEach(claseId => {
+    const nivel = claseId.split('-')[0];
+    const label = nivelLabels[nivel] || nivel;
+    dataPorClase[claseId] = { label, presentes:0, ausentes:0, justificados:0, sesiones:0 };
+  });
+
+  clasesMes.forEach(r => {
+    const claseId = r.clase;
+    if (dataPorClase[claseId]) {
+      dataPorClase[claseId].presentes    += parseInt(r.presentes)||0;
+      dataPorClase[claseId].ausentes     += parseInt(r.ausentes)||0;
+      dataPorClase[claseId].justificados += parseInt(r.justificados)||0;
+      dataPorClase[claseId].sesiones++;
+    } else {
+      // Buscar por nivel aproximado
+      Object.keys(dataPorClase).forEach(k => {
+        if (claseId && claseId.includes(k.split('-')[0])) {
+          dataPorClase[k].presentes    += parseInt(r.presentes)||0;
+          dataPorClase[k].ausentes     += parseInt(r.ausentes)||0;
+          dataPorClase[k].justificados += parseInt(r.justificados)||0;
+          dataPorClase[k].sesiones++;
+        }
+      });
+    }
+  });
+
+  const entries = Object.entries(dataPorClase);
+  if (!entries.length) {
+    document.getElementById('eval-chart-container').innerHTML =
+      '<p style="color:var(--gray);font-size:.88rem;text-align:center;padding:1rem;">Sin datos de clases este mes</p>';
+    // Simple totals
+    document.getElementById('e-logros').textContent  = 0;
+    document.getElementById('e-proceso').textContent = 0;
+    document.getElementById('e-nologro').textContent = 0;
+    return;
+  }
+
+  // Totales globales
+  let tPres = 0, tAus = 0, tJust = 0;
+  entries.forEach(([,d]) => { tPres += d.presentes; tAus += d.ausentes; tJust += d.justificados; });
+  const tTotal = tPres + tAus + tJust || 1;
+  document.getElementById('e-logros').textContent  = tPres;
+  document.getElementById('e-proceso').textContent = tAus + tJust;
+  document.getElementById('e-nologro').textContent = 0;
+  document.getElementById('eb-logro').style.width   = Math.round(tPres/tTotal*100)+'%';
+  document.getElementById('eb-proceso').style.width = Math.round((tAus+tJust)/tTotal*100)+'%';
+  document.getElementById('eb-nologro').style.width = '0%';
+
+  // Diagrama de barras por clase
+  const maxVal = Math.max(...entries.map(([,d]) => d.presentes + d.ausentes + d.justificados)) || 1;
+  const colors = { presentes:'var(--success)', ausentes:'var(--danger)', justificados:'var(--warning)' };
+
+  document.getElementById('eval-chart-container').innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:1.2rem;margin-top:1rem;">
+      ${entries.map(([claseId, d]) => {
+        const total = d.presentes + d.ausentes + d.justificados || 1;
+        const pctP = Math.round(d.presentes/total*100);
+        const pctA = Math.round(d.ausentes/total*100);
+        const pctJ = Math.round(d.justificados/total*100);
+        return `
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem;">
+            <span style="font-size:.88rem;font-weight:600;color:var(--navy);">${d.label}</span>
+            <span style="font-size:.75rem;color:var(--gray);">${d.sesiones} sesión${d.sesiones!==1?'es':''} · ${total} alumnos/clase</span>
+          </div>
+          <div style="background:var(--surface);border-radius:50px;height:14px;overflow:hidden;display:flex;">
+            <div style="width:${pctP}%;background:var(--success);transition:width .5s;" title="Presentes: ${d.presentes}"></div>
+            <div style="width:${pctJ}%;background:var(--warning);transition:width .5s;" title="Justificados: ${d.justificados}"></div>
+            <div style="width:${pctA}%;background:var(--danger);transition:width .5s;" title="Ausentes: ${d.ausentes}"></div>
+          </div>
+          <div style="display:flex;gap:1rem;margin-top:.4rem;flex-wrap:wrap;">
+            <span style="font-size:.72rem;color:var(--success);">✅ ${d.presentes} presentes (${pctP}%)</span>
+            <span style="font-size:.72rem;color:var(--warning);">📋 ${d.justificados} justificados (${pctJ}%)</span>
+            <span style="font-size:.72rem;color:var(--danger);">❌ ${d.ausentes} ausentes (${pctA}%)</span>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
 
 // ── CLASES SELECT ────────────────────────────────────
 function populateClassSelect() {
