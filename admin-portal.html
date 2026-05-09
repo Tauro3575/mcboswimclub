@@ -255,7 +255,8 @@
       <span class="topbar-section">⚙️ Panel Admin</span>
     </div>
     <div class="topbar-right">
-      <div class="admin-badge"><span>👑 Administrador</span></div>
+      <a href="https://mcboswimclub.com" style="background:rgba(0,180,216,.15);border:1px solid rgba(0,180,216,.25);color:#00b4d8;border-radius:50px;padding:.4rem .9rem;font-size:.82rem;text-decoration:none;font-family:'Outfit',sans-serif;">🏠 Home</a>
+      <div class="admin-badge"><span id="topbar-admin-nombre">👑 Administrador</span></div>
       <button class="btn-logout" onclick="doLogout()">Salir</button>
     </div>
   </div>
@@ -842,6 +843,8 @@ let allInstructores = [];
 let allAlumnos = [];
 let currentModalInstructor = null;
 let currentModalClases = [];
+let currentRol = 'admin';
+let currentNombre = 'Administrador';
 
 // ═══════════════════════════════════════════════════════
 // LOGIN / LOGOUT
@@ -858,11 +861,15 @@ async function doLogin() {
   }
 
   const ADMIN_USERS = {
-    'admin@mcboswimclub.com': 'admin2025',
-    'waltertordecilla75@gmail.com': 'msc2025'
+    'waltertordecilla75@gmail.com': { pass: 'T3ln3tsa75',  rol: 'admin',     nombre: 'Walter Tordecilla' },
+    'gabriela.lorefice.gls@gmail.com': { pass: 'T3ln3ts@71', rol: 'admin',   nombre: 'Gabriela Lorefice' },
+    'juanpirela1302@gmail.com':      { pass: 'Mcb0SWC2026', rol: 'asistente', nombre: 'Juan Manuel Pirela' },
   };
 
-  if (ADMIN_USERS[email] && ADMIN_USERS[email] === pass) {
+  const user = ADMIN_USERS[email];
+  if (user && user.pass === pass) {
+    currentRol    = user.rol;
+    currentNombre = user.nombre;
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app').style.display = 'block';
     initApp();
@@ -890,9 +897,16 @@ async function doLogin() {
 }
 
 function doLogout() {
+  currentRol = 'admin';
+  currentNombre = 'Administrador';
   document.getElementById('login-screen').style.display = 'flex';
   document.getElementById('app').style.display = 'none';
   document.getElementById('login-pass').value = '';
+  document.getElementById('login-email').value = '';
+  // Restaurar tabs visibles
+  document.querySelectorAll('.tab-btn').forEach(function(btn) {
+    btn.style.display = '';
+  });
 }
 
 // ═══════════════════════════════════════════════════════
@@ -906,12 +920,34 @@ function initApp() {
   switchSubtab('pendientes');
   setTimeout(function(){ switchSubtab('activos'); }, 200);
   document.getElementById('pago-fecha').value = now.toISOString().slice(0,10);
+
+  // Mostrar nombre en topbar
+  document.getElementById('topbar-admin-nombre').textContent =
+    currentRol === 'admin' ? '👑 ' + currentNombre : '🔧 ' + currentNombre;
+
+  // Aplicar restricciones de rol
+  aplicarRol();
+
   loadDashboard();
   loadInstructores();
   loadTokens();
   loadAlumnos();
   loadAsignaciones();
 }
+
+function aplicarRol() {
+  if (currentRol === 'asistente') {
+    const tabs    = document.querySelectorAll('.tab-btn');
+    const tabIds  = ['dashboard','instructores','tokens','alumnos','pagos','asignacion'];
+    const permitidos = ['alumnos','pagos','asignacion'];
+    tabs.forEach(function(btn, idx) {
+      btn.style.display = permitidos.includes(tabIds[idx]) ? '' : 'none';
+    });
+    switchTab('alumnos');
+  }
+}
+
+
 
 // ═══════════════════════════════════════════════════════
 // TABS
@@ -949,7 +985,7 @@ async function loadDashboard() {
       return f.getMonth() === mesActual && f.getFullYear() === anioActual;
     });
     const ingresos = pagosMes.reduce((s,p) => s + (parseFloat(p.monto)||0), 0);
-    const pendientes = alumnos.filter(a => String(a.estadoPago).trim() === 'Pendiente').length;
+    const pendientes = alumnos.filter(a => a.estado_pago === 'Pendiente').length;
 
     document.getElementById('d-alumnos').textContent = alumnos.length;
     document.getElementById('d-instructores').textContent = instructores.length;
@@ -1148,11 +1184,10 @@ async function loadAlumnos() {
     const data = await res.json();
     allAlumnos = data.alumnos || [];
     renderAlumnos(allAlumnos);
+    renderAlumnosStats(allAlumnos);
     populatePagoAlumnoSelect(allAlumnos);
-  } catch(e) { 
-    allAlumnos = []; 
-    renderAlumnos([]); 
-  }
+  } catch(e) { allAlumnos = []; renderAlumnos([]); }
+  // Cargar leads (en proceso)
   loadLeads();
 }
 
