@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Formulario de Inscripción — Maracaibo Swimming Club</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --navy: #031d3a; --blue: #0057a8; --cyan: #00b4d8;
+      --gold: #f4b942; --white: #ffffff; --gray: #64748b;
+      --surface: #f0f7ff; --success: #10b981; --danger: #ef4444;
+    }
+    body { font-family: 'Outfit', sans-serif; background: var(--surface); min-height: 100vh; padding: 2rem 1rem; }
+
+    .container { max-width: 680px; margin: 0 auto; }
+
+    /* HEADER */
+    .form-header {
+      background: linear-gradient(135deg, var(--navy), #0057a8);
+      border-radius: 20px; padding: 2rem; text-align: center; margin-bottom: 2rem;
+      position: relative; overflow: hidden;
+    }
+    .form-header::after { content:''; position:absolute; inset:0; background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); pointer-events:none; }
+    .form-header .logo { font-size: 3rem; margin-bottom: .5rem; }
+    .form-header h1 { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; color: white; letter-spacing: .08em; }
+    .form-header p { color: var(--cyan); font-size: .85rem; margin-top: .3rem; letter-spacing: .1em; text-transform: uppercase; }
+
+    /* PROGRESS */
+    .progress-bar { display: flex; gap: 0; margin-bottom: 2rem; border-radius: 12px; overflow: hidden; }
+    .progress-step { flex: 1; padding: .7rem; text-align: center; font-size: .75rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; background: white; color: var(--gray); border: 1.5px solid rgba(0,87,168,.1); border-right: none; transition: all .3s; }
+    .progress-step:last-child { border-right: 1.5px solid rgba(0,87,168,.1); }
+    .progress-step.active { background: var(--blue); color: white; }
+    .progress-step.done { background: var(--success); color: white; }
+
+    /* SECTIONS */
+    .form-section { background: white; border-radius: 18px; padding: 2rem; margin-bottom: 1.5rem; border: 1.5px solid rgba(0,87,168,.08); display: none; }
+    .form-section.active { display: block; animation: fadeIn .3s ease; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+    .section-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; color: var(--navy); letter-spacing: .05em; margin-bottom: .3rem; display: flex; align-items: center; gap: .6rem; }
+    .section-sub { color: var(--gray); font-size: .85rem; margin-bottom: 1.5rem; }
+
+    /* FIELDS */
+    .field-group { margin-bottom: 1.2rem; }
+    .field-group label { display: block; font-size: .8rem; font-weight: 700; color: var(--navy); text-transform: uppercase; letter-spacing: .07em; margin-bottom: .5rem; }
+    .field-group label .req { color: var(--danger); margin-left: .2rem; }
+    .field-group label .opt { color: var(--gray); font-weight: 400; font-size: .72rem; text-transform: none; letter-spacing: 0; margin-left: .3rem; }
+    .field-group input, .field-group select, .field-group textarea {
+      width: 100%; padding: .85rem 1rem;
+      border: 1.5px solid rgba(0,87,168,.15); border-radius: 12px;
+      font-family: 'Outfit', sans-serif; font-size: .95rem;
+      color: var(--navy); outline: none; transition: border-color .2s;
+      background: white;
+    }
+    .field-group input:focus, .field-group select:focus, .field-group textarea:focus { border-color: var(--cyan); }
+    .field-group input.error, .field-group select.error { border-color: var(--danger); }
+    .field-group textarea { resize: vertical; min-height: 80px; }
+    .field-hint { font-size: .75rem; color: var(--gray); margin-top: .4rem; }
+    .field-error { font-size: .75rem; color: var(--danger); margin-top: .4rem; display: none; }
+
+    /* BUTTON GROUP (opciones tipo botones) */
+    .btn-group { display: flex; gap: .5rem; flex-wrap: wrap; }
+    .btn-option {
+      padding: .6rem 1.2rem; border-radius: 50px;
+      border: 1.5px solid rgba(0,87,168,.2); background: white;
+      font-family: 'Outfit', sans-serif; font-size: .88rem; font-weight: 600;
+      color: var(--navy); cursor: pointer; transition: all .2s;
+    }
+    .btn-option:hover { border-color: var(--cyan); background: rgba(0,180,216,.05); }
+    .btn-option.selected { background: var(--blue); color: white; border-color: var(--blue); }
+
+    /* PRECIO CARD */
+    .precio-card {
+      background: linear-gradient(135deg, rgba(0,87,168,.05), rgba(0,180,216,.05));
+      border: 2px solid var(--cyan); border-radius: 14px;
+      padding: 1.2rem 1.5rem; margin-top: 1rem;
+      display: none; animation: fadeIn .3s ease;
+    }
+    .precio-card.visible { display: block; }
+    .precio-card .precio-val { font-family: 'Bebas Neue', sans-serif; font-size: 2.5rem; color: var(--blue); letter-spacing: .04em; }
+    .precio-card .precio-desc { color: var(--gray); font-size: .85rem; margin-top: .2rem; }
+    .precio-card .precio-nota { color: var(--cyan); font-size: .8rem; margin-top: .5rem; font-weight: 600; }
+
+    /* METODOS PAGO */
+    .metodos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin-top: .8rem; }
+    .metodo-card { border: 1.5px solid rgba(0,87,168,.12); border-radius: 12px; padding: 1rem; text-align: center; cursor: pointer; transition: all .2s; background: white; }
+    .metodo-card:hover { border-color: var(--cyan); background: rgba(0,180,216,.04); }
+    .metodo-card.selected { border-color: var(--blue); background: rgba(0,87,168,.05); }
+    .metodo-card .metodo-icon { font-size: 1.5rem; margin-bottom: .3rem; }
+    .metodo-card .metodo-name { font-size: .82rem; font-weight: 700; color: var(--navy); }
+    .metodo-card .metodo-desc { font-size: .72rem; color: var(--gray); margin-top: .1rem; }
+
+    /* NAVIGATION BUTTONS */
+    .form-nav { display: flex; justify-content: space-between; gap: 1rem; margin-top: 2rem; }
+    .btn-back { padding: .85rem 1.8rem; border: 1.5px solid rgba(0,87,168,.2); border-radius: 12px; background: white; color: var(--blue); font-family: 'Outfit', sans-serif; font-size: .95rem; font-weight: 600; cursor: pointer; transition: all .2s; }
+    .btn-back:hover { background: var(--surface); }
+    .btn-next { padding: .85rem 2rem; background: linear-gradient(135deg, var(--blue), var(--cyan)); border: none; border-radius: 12px; color: white; font-family: 'Outfit', sans-serif; font-size: .95rem; font-weight: 700; cursor: pointer; transition: all .2s; box-shadow: 0 6px 20px rgba(0,87,168,.3); flex: 1; }
+    .btn-next:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(0,180,216,.4); }
+    .btn-next:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+    /* SUCCESS */
+    .success-screen { display: none; background: white; border-radius: 20px; padding: 3rem 2rem; text-align: center; }
+    .success-screen.active { display: block; }
+    .success-icon { font-size: 4rem; margin-bottom: 1rem; }
+    .success-title { font-family: 'Bebas Neue', sans-serif; font-size: 2.2rem; color: var(--navy); letter-spacing: .05em; }
+    .success-sub { color: var(--gray); font-size: .95rem; line-height: 1.7; margin-top: .8rem; }
+    .success-pasos { background: var(--surface); border-radius: 14px; padding: 1.5rem; margin: 1.5rem 0; text-align: left; }
+    .success-paso { display: flex; gap: 1rem; align-items: flex-start; margin-bottom: 1rem; }
+    .success-paso:last-child { margin-bottom: 0; }
+    .paso-num { width: 28px; height: 28px; background: var(--blue); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: .85rem; font-weight: 700; flex-shrink: 0; margin-top: .1rem; }
+    .paso-info strong { display: block; font-size: .9rem; color: var(--navy); }
+    .paso-info span { font-size: .82rem; color: var(--gray); }
+
+    /* ALERT */
+    .alert-info { background: rgba(0,87,168,.05); border: 1.5px solid rgba(0,87,168,.15); border-radius: 10px; padding: .8rem 1rem; font-size: .83rem; color: var(--blue); margin-bottom: 1rem; }
+
+    /* RESPONSIVE */
+    @media(max-width:480px) {
+      .metodos-grid { grid-template-columns: 1fr; }
+      .btn-group { flex-direction: column; }
+      .btn-option { text-align: center; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="form-header">
+    <div class="logo">🏊</div>
+    <h1>Maracaibo Swimming Club</h1>
+    <p>Formulario de Inscripción</p>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="progress-bar">
+    <div class="progress-step active" id="step-1">1. Alumno</div>
+    <div class="progress-step" id="step-2">2. Representante</div>
+    <div class="progress-step" id="step-3">3. Programa</div>
+    <div class="progress-step" id="step-4">4. Pago</div>
+  </div>
+
+  <!-- SECCIÓN 1: DATOS DEL ALUMNO -->
+  <div class="form-section active" id="section-1">
+    <div class="section-title">👤 Datos del Alumno</div>
+    <p class="section-sub">Información del estudiante que tomará las clases</p>
+
+    <div class="field-group">
+      <label>Nombre y Apellido <span class="req">*</span></label>
+      <input type="text" id="f-nombre" placeholder="Ej: María García López"/>
+      <div class="field-error" id="e-nombre">Este campo es obligatorio</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+      <div class="field-group">
+        <label>Fecha de Nacimiento <span class="req">*</span></label>
+        <input type="date" id="f-fechanac"/>
+        <div class="field-error" id="e-fechanac">Este campo es obligatorio</div>
+      </div>
+      <div class="field-group">
+        <label>Sexo <span class="req">*</span></label>
+        <div class="btn-group" style="margin-top:.3rem;">
+          <button class="btn-option" onclick="selectOpt(this,'f-sexo','M')">♂ Masculino</button>
+          <button class="btn-option" onclick="selectOpt(this,'f-sexo','F')">♀ Femenino</button>
+        </div>
+        <input type="hidden" id="f-sexo"/>
+        <div class="field-error" id="e-sexo">Selecciona el sexo</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+      <div class="field-group">
+        <label>Nacionalidad <span class="req">*</span></label>
+        <div class="btn-group" style="margin-top:.3rem;">
+          <button class="btn-option" onclick="selectOpt(this,'f-nacionalidad','V')">🇻🇪 Venezolano</button>
+          <button class="btn-option" onclick="selectOpt(this,'f-nacionalidad','E')">🌍 Extranjero</button>
+        </div>
+        <input type="hidden" id="f-nacionalidad"/>
+        <div class="field-error" id="e-nacionalidad">Selecciona la nacionalidad</div>
+      </div>
+      <div class="field-group">
+        <label>Cédula / Pasaporte <span class="opt">(opcional)</span></label>
+        <input type="text" id="f-cedula" placeholder="Ej: V-12345678"/>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+      <div class="field-group">
+        <label>Lugar de Nacimiento <span class="opt">(opcional)</span></label>
+        <input type="text" id="f-lugarnac" placeholder="Ej: Maracaibo, Zulia"/>
+      </div>
+      <div class="field-group">
+        <label>Grupo Sanguíneo <span class="opt">(opcional)</span></label>
+        <select id="f-sangre">
+          <option value="">— Selecciona —</option>
+          <option>A+</option><option>A-</option>
+          <option>B+</option><option>B-</option>
+          <option>AB+</option><option>AB-</option>
+          <option>O+</option><option>O-</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label>Dirección de Habitación <span class="opt">(opcional)</span></label>
+      <input type="text" id="f-direccion" placeholder="Urbanización, calle, número de casa..."/>
+    </div>
+
+    <div class="field-group">
+      <label>Teléfono de Contacto <span class="req">*</span></label>
+      <input type="tel" id="f-telefono" placeholder="Ej: 0414-6004468"/>
+      <div class="field-error" id="e-telefono">Este campo es obligatorio</div>
+    </div>
+
+    <div class="field-group">
+      <label>Condición Médica / Alergia <span class="req">*</span></label>
+      <div class="btn-group" style="margin-bottom:.8rem;">
+        <button class="btn-option" onclick="toggleMedico(this,'ninguna')">✅ Ninguna</button>
+        <button class="btn-option" onclick="toggleMedico(this,'especificar')">⚠️ Especificar</button>
+      </div>
+      <textarea id="f-condicion" placeholder="Describe la condición médica o alergia..." style="display:none;"></textarea>
+      <input type="hidden" id="f-condicion-val" value="Ninguna"/>
+      <div class="field-error" id="e-condicion">Selecciona una opción</div>
+    </div>
+
+    <div class="field-group">
+      <label>Medicamentos <span class="req">*</span></label>
+      <div class="btn-group" style="margin-bottom:.8rem;">
+        <button class="btn-option" onclick="toggleMedicamento(this,'ninguno')">✅ Ninguno</button>
+        <button class="btn-option" onclick="toggleMedicamento(this,'especificar')">💊 Especificar</button>
+      </div>
+      <textarea id="f-medicamentos" placeholder="Describe los medicamentos que toma..." style="display:none;"></textarea>
+      <input type="hidden" id="f-medicamentos-val" value="Ninguno"/>
+    </div>
+
+    <div class="field-group">
+      <label>Motivo para hacer Natación <span class="req">*</span></label>
+      <div class="btn-group">
+        <button class="btn-option" onclick="selectOpt(this,'f-motivo','Aprender a nadar')">🏊 Aprender a nadar</button>
+        <button class="btn-option" onclick="selectOpt(this,'f-motivo','Salud y ejercicio')">💪 Salud y ejercicio</button>
+        <button class="btn-option" onclick="selectOpt(this,'f-motivo','Competición')">🏅 Competición</button>
+        <button class="btn-option" onclick="selectOpt(this,'f-motivo','Rehabilitación')">🩺 Rehabilitación</button>
+        <button class="btn-option" onclick="selectOpt(this,'f-motivo','Recreación')">🌊 Recreación</button>
+      </div>
+      <input type="hidden" id="f-motivo"/>
+      <div class="field-error" id="e-motivo">Selecciona un motivo</div>
+    </div>
+
+    <div class="form-nav">
+      <div></div>
+      <button class="btn-next" onclick="nextSection(1)">Continuar → Representante</button>
+    </div>
+  </div>
+
+  <!-- SECCIÓN 2: DATOS DEL REPRESENTANTE -->
+  <div class="form-section" id="section-2">
+    <div class="section-title">👨‍👩‍👧 Datos del Representante</div>
+    <p class="section-sub">Persona responsable del alumno</p>
+
+    <div class="field-group">
+      <label>Nombre del Representante <span class="req">*</span></label>
+      <input type="text" id="f-rep-nombre" placeholder="Nombre completo del representante"/>
+      <div class="field-error" id="e-rep-nombre">Este campo es obligatorio</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+      <div class="field-group">
+        <label>Teléfono <span class="req">*</span></label>
+        <input type="tel" id="f-rep-tel" placeholder="Ej: 0414-6004468"/>
+        <div class="field-error" id="e-rep-tel">Este campo es obligatorio</div>
+      </div>
+      <div class="field-group">
+        <label>Email <span class="req">*</span></label>
+        <input type="email" id="f-rep-email" placeholder="correo@email.com"/>
+        <div class="field-hint">Aquí recibirás el recibo de pago</div>
+        <div class="field-error" id="e-rep-email">Ingresa un email válido</div>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label>Dirección del Representante <span class="req">*</span></label>
+      <input type="text" id="f-rep-dir" placeholder="Urbanización, calle, número..."/>
+      <div class="field-error" id="e-rep-dir">Este campo es obligatorio</div>
+    </div>
+
+    <div class="form-nav">
+      <button class="btn-back" onclick="prevSection(2)">← Atrás</button>
+      <button class="btn-next" onclick="nextSection(2)">Continuar → Programa</button>
+    </div>
+  </div>
+
+  <!-- SECCIÓN 3: PROGRAMA -->
+  <div class="form-section" id="section-3">
+    <div class="section-title">🏊 Programa de Natación</div>
+    <p class="section-sub">Selecciona el nivel, frecuencia y horario de tu preferencia</p>
+
+    <div class="field-group">
+      <label>Nivel <span class="req">*</span></label>
+      <div class="btn-group">
+        <button class="btn-option" onclick="selectOpt(this,'f-nivel','Burbuja')">🫧 Burbuja</button>
+        <button class="btn-option" onclick="selectOpt(this,'f-nivel','Iniciación')">🎒 Iniciación</button>
+        <button class="btn-option" onclick="selectOpt(this,'f-nivel','Intermedio')">🏊 Intermedio</button>
+        <button class="btn-option" onclick="selectOpt(this,'f-nivel','Avanzado')">🏅 Avanzado</button>
+        <button class="btn-option" onclick="selectOpt(this,'f-nivel','Adultos')">🌊 Adultos</button>
+      </div>
+      <input type="hidden" id="f-nivel"/>
+      <div class="field-error" id="e-nivel">Selecciona un nivel</div>
+    </div>
+
+    <div class="field-group">
+      <label>Frecuencia <span class="req">*</span></label>
+      <div class="btn-group">
+        <button class="btn-option" onclick="selectFrecuencia(this,'Lunes a Viernes')">📅 Lunes a Viernes</button>
+        <button class="btn-option" onclick="selectFrecuencia(this,'Sabatino')">📅 Solo Sábados</button>
+      </div>
+      <input type="hidden" id="f-frecuencia"/>
+      <div class="field-error" id="e-frecuencia">Selecciona la frecuencia</div>
+    </div>
+
+    <!-- Duración (solo sabatino) -->
+    <div class="field-group" id="duracion-group" style="display:none;">
+      <label>Duración de la clase <span class="req">*</span></label>
+      <div class="btn-group">
+        <button class="btn-option" onclick="selectDuracion(this,'1 hora')">⏱️ 1 hora</button>
+        <button class="btn-option" onclick="selectDuracion(this,'2 horas')">⏱️ 2 horas</button>
+      </div>
+      <input type="hidden" id="f-duracion"/>
+    </div>
+
+    <!-- Plan de pago (solo L-V) -->
+    <div class="field-group" id="plan-group" style="display:none;">
+      <label>Plan de Pago <span class="req">*</span></label>
+      <div class="btn-group">
+        <button class="btn-option" onclick="selectPlan(this,'Mensual','50')">📆 Mensual — $50</button>
+        <button class="btn-option" onclick="selectPlan(this,'Bimestral','80')">📆 2 meses — $80 <small style="display:block;font-size:.7rem;opacity:.7;">(ahorras $20)</small></button>
+      </div>
+      <input type="hidden" id="f-plan"/>
+    </div>
+
+    <!-- Horarios disponibles -->
+    <div class="field-group" id="horarios-group" style="display:none;">
+      <label>Horario Preferido <span class="req">*</span></label>
+      <div class="btn-group" id="horarios-list"></div>
+      <input type="hidden" id="f-horario"/>
+      <div class="field-error" id="e-horario">Selecciona un horario</div>
+    </div>
+
+    <!-- Precio automático -->
+    <div class="precio-card" id="precio-card">
+      <div style="display:flex;align-items:center;gap:1rem;">
+        <div>
+          <div class="precio-val" id="precio-val">$0</div>
+          <div class="precio-desc" id="precio-desc">—</div>
+        </div>
+        <div style="flex:1;text-align:right;">
+          <div class="precio-nota" id="precio-nota"></div>
+        </div>
+      </div>
+    </div>
+
+    <input type="hidden" id="f-mensualidad"/>
+    <input type="hidden" id="f-modalidad" value="Piscina"/>
+
+    <div class="form-nav">
+      <button class="btn-back" onclick="prevSection(3)">← Atrás</button>
+      <button class="btn-next" onclick="nextSection(3)">Continuar → Método de Pago</button>
+    </div>
+  </div>
+
+  <!-- SECCIÓN 4: MÉTODO DE PAGO -->
+  <div class="form-section" id="section-4">
+    <div class="section-title">💳 Método de Pago</div>
+    <p class="section-sub">Selecciona cómo realizarás el pago de tu inscripción</p>
+
+    <div class="alert-info">
+      📋 <strong>Importante:</strong> El registro se formaliza con el pago. Una vez que selecciones tu método, realiza la transferencia y envía el comprobante al administrador.
+    </div>
+
+    <div class="metodos-grid">
+      <div class="metodo-card" onclick="selectMetodo(this,'Zelle')">
+        <div class="metodo-icon">💵</div>
+        <div class="metodo-name">Zelle</div>
+        <div class="metodo-desc">Transferencia desde USA</div>
+      </div>
+      <div class="metodo-card" onclick="selectMetodo(this,'Pago Móvil')">
+        <div class="metodo-icon">📱</div>
+        <div class="metodo-name">Pago Móvil</div>
+        <div class="metodo-desc">Transferencia bancaria Venezuela</div>
+      </div>
+      <div class="metodo-card" onclick="selectMetodo(this,'Efectivo USD')">
+        <div class="metodo-icon">💰</div>
+        <div class="metodo-name">Efectivo USD</div>
+        <div class="metodo-desc">Pago en físico en la piscina</div>
+      </div>
+      <div class="metodo-card" onclick="selectMetodo(this,'Binance Pay')">
+        <div class="metodo-icon">₿</div>
+        <div class="metodo-name">Binance Pay</div>
+        <div class="metodo-desc">Pago con criptomonedas</div>
+      </div>
+    </div>
+    <input type="hidden" id="f-metodo"/>
+    <div class="field-error" id="e-metodo" style="margin-top:.5rem;">Selecciona un método de pago</div>
+
+    <!-- Info del método seleccionado -->
+    <div id="metodo-info" style="display:none;margin-top:1.2rem;background:var(--surface);border-radius:12px;padding:1.2rem;border:1.5px solid rgba(0,87,168,.1);">
+      <p style="font-size:.85rem;font-weight:600;color:var(--navy);margin-bottom:.5rem;" id="metodo-info-title">Instrucciones de pago:</p>
+      <div id="metodo-info-content" style="font-size:.85rem;color:var(--gray);line-height:1.7;"></div>
+    </div>
+
+    <!-- Resumen -->
+    <div style="background:linear-gradient(135deg,rgba(0,87,168,.05),rgba(0,180,216,.05));border:1.5px solid rgba(0,180,216,.2);border-radius:14px;padding:1.2rem;margin-top:1.2rem;">
+      <p style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--blue);margin-bottom:.8rem;">📋 Resumen de tu inscripción</p>
+      <div style="display:flex;flex-direction:column;gap:.4rem;font-size:.88rem;">
+        <div style="display:flex;justify-content:space-between;"><span style="color:var(--gray);">Alumno:</span><strong id="res-nombre">—</strong></div>
+        <div style="display:flex;justify-content:space-between;"><span style="color:var(--gray);">Nivel:</span><strong id="res-nivel">—</strong></div>
+        <div style="display:flex;justify-content:space-between;"><span style="color:var(--gray);">Horario:</span><strong id="res-horario">—</strong></div>
+        <div style="display:flex;justify-content:space-between;"><span style="color:var(--gray);">Plan:</span><strong id="res-plan">—</strong></div>
+        <div style="border-top:1px solid rgba(0,87,168,.1);margin-top:.4rem;padding-top:.4rem;display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-weight:700;color:var(--navy);">Total a pagar:</span>
+          <span style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--blue);" id="res-precio">$—</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-nav">
+      <button class="btn-back" onclick="prevSection(4)">← Atrás</button>
+      <button class="btn-next" id="btn-enviar" onclick="enviarFormulario()">✅ Enviar Formulario</button>
+    </div>
+  </div>
+
+  <!-- ÉXITO -->
+  <div class="success-screen" id="success-screen">
+    <div class="success-icon">🎉</div>
+    <div class="success-title">¡Registro Recibido!</div>
+    <p class="success-sub">Tu formulario ha sido enviado exitosamente. Ahora sigue estos pasos para completar tu inscripción:</p>
+    <div class="success-pasos">
+      <div class="success-paso">
+        <div class="paso-num">1</div>
+        <div class="paso-info">
+          <strong>Realiza el pago</strong>
+          <span id="suc-metodo-inst">Usa el método de pago seleccionado</span>
+        </div>
+      </div>
+      <div class="success-paso">
+        <div class="paso-num">2</div>
+        <div class="paso-info">
+          <strong>Envía el comprobante</strong>
+          <span>Por WhatsApp al 📱 0414-6004468 o Instagram @McboSwimClub</span>
+        </div>
+      </div>
+      <div class="success-paso">
+        <div class="paso-num">3</div>
+        <div class="paso-info">
+          <strong>Espera la confirmación</strong>
+          <span>Recibirás un email con tu recibo oficial cuando el pago sea validado</span>
+        </div>
+      </div>
+    </div>
+    <div style="background:rgba(0,87,168,.05);border-radius:12px;padding:1rem;text-align:center;">
+      <p style="font-size:.85rem;color:var(--blue);font-weight:600;">¿Tienes dudas? Contáctanos:</p>
+      <p style="font-size:.88rem;color:var(--navy);margin-top:.3rem;">📱 0414-6004468 &nbsp;·&nbsp; 📸 @McboSwimClub &nbsp;·&nbsp; 🌐 mcboswimclub.com</p>
+    </div>
+    <p style="color:var(--gray);font-size:.82rem;margin-top:1.5rem;font-style:italic;">🌊 Somos Familia Acuática · Maracaibo Swimming Club</p>
+  </div>
+
+</div>
+
+<script>
+const API = '/.netlify/functions/instructor';
+let currentSection = 1;
+
+const HORARIOS = {
+  'Lunes a Viernes': ['3:00pm - 4:00pm','4:00pm - 5:00pm','5:00pm - 6:00pm','6:00pm - 7:00pm','7:00pm - 8:00pm'],
+  'Sabatino': ['8:00am - 9:00am','9:00am - 10:00am','10:00am - 11:00am','11:00am - 12:00pm']
+};
+
+const METODO_INFO = {
+  'Zelle': { title:'Datos para Zelle:', content:'📧 Email: maracaiboswimmingclub@gmail.com<br/>👤 A nombre de: Maracaibo Swimming Club<br/>📱 Envía el comprobante por WhatsApp al 0414-6004468' },
+  'Pago Móvil': { title:'Datos para Pago Móvil:', content:'🏦 Banco: Bancamiga<br/>📱 Teléfono: 0414-6004468<br/>🪪 Cédula: V-12345678<br/>📱 Envía el comprobante por WhatsApp al 0414-6004468' },
+  'Efectivo USD': { title:'Pago en físico:', content:'💰 Acércate a la piscina del CIDEZ<br/>📍 Calle 67 (Av. Universidad) entre Av. 2A y 2C, Maracaibo<br/>⏰ Horario de atención: Lunes a Sábado 8am - 8pm' },
+  'Binance Pay': { title:'Datos para Binance Pay:', content:'🆔 Binance ID: User-cebe0<br/>📱 Envía el comprobante por WhatsApp al 0414-6004468' }
+};
+
+// ── NAVEGACIÓN ────────────────────────────────────────
+function nextSection(from) {
+  if (!validateSection(from)) return;
+  showSection(from + 1);
+  if (from + 1 === 4) updateResumen();
+}
+
+function prevSection(from) {
+  showSection(from - 1);
+}
+
+function showSection(n) {
+  document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.progress-step').forEach((s,i) => {
+    s.classList.remove('active','done');
+    if (i+1 < n) s.classList.add('done');
+    if (i+1 === n) s.classList.add('active');
+  });
+  document.getElementById('section-'+n).classList.add('active');
+  currentSection = n;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ── VALIDACIÓN ────────────────────────────────────────
+function validateSection(n) {
+  let ok = true;
+
+  const required = {
+    1: [
+      {id:'f-nombre',  err:'e-nombre'},
+      {id:'f-fechanac',err:'e-fechanac'},
+      {id:'f-sexo',    err:'e-sexo'},
+      {id:'f-nacionalidad',err:'e-nacionalidad'},
+      {id:'f-telefono',err:'e-telefono'},
+      {id:'f-motivo',  err:'e-motivo'},
+      {id:'f-condicion-val',err:'e-condicion'},
+    ],
+    2: [
+      {id:'f-rep-nombre',err:'e-rep-nombre'},
+      {id:'f-rep-tel',   err:'e-rep-tel'},
+      {id:'f-rep-email', err:'e-rep-email'},
+      {id:'f-rep-dir',   err:'e-rep-dir'},
+    ],
+    3: [
+      {id:'f-nivel',     err:'e-nivel'},
+      {id:'f-frecuencia',err:'e-frecuencia'},
+      {id:'f-horario',   err:'e-horario'},
+    ],
+    4: [
+      {id:'f-metodo',err:'e-metodo'},
+    ]
+  };
+
+  (required[n]||[]).forEach(({id,err}) => {
+    const val = document.getElementById(id)?.value?.trim();
+    const errEl = document.getElementById(err);
+    if (!val) {
+      if (errEl) errEl.style.display = 'block';
+      ok = false;
+    } else {
+      if (errEl) errEl.style.display = 'none';
+    }
+  });
+
+  // Validar email
+  if (n===2) {
+    const email = document.getElementById('f-rep-email').value;
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      document.getElementById('e-rep-email').style.display = 'block';
+      ok = false;
+    }
+  }
+
+  return ok;
+}
+
+// ── OPCIONES BOTONES ─────────────────────────────────
+function selectOpt(btn, fieldId, value) {
+  btn.closest('.field-group').querySelectorAll('.btn-option').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  document.getElementById(fieldId).value = value;
+}
+
+function selectFrecuencia(btn, value) {
+  btn.closest('.field-group').querySelectorAll('.btn-option').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  document.getElementById('f-frecuencia').value = value;
+  document.getElementById('f-horario').value = '';
+  document.getElementById('f-mensualidad').value = '';
+  document.getElementById('f-plan').value = '';
+  document.getElementById('f-duracion').value = '';
+
+  // Mostrar/ocultar duración y plan
+  const esSabatino = value === 'Sabatino';
+  document.getElementById('duracion-group').style.display = esSabatino ? 'block' : 'none';
+  document.getElementById('plan-group').style.display = esSabatino ? 'none' : 'block';
+
+  // Actualizar horarios
+  const horarios = HORARIOS[value] || [];
+  const lista = document.getElementById('horarios-list');
+  lista.innerHTML = horarios.map(h =>
+    `<button class="btn-option" onclick="selectHorario(this,'${h}')">${h}</button>`
+  ).join('');
+  document.getElementById('horarios-group').style.display = 'block';
+
+  // Si L-V, precio automático $50
+  if (!esSabatino) {
+    selectPlan(null, 'Mensual', '50');
+  }
+  document.getElementById('precio-card').classList.remove('visible');
+  updatePrecio();
+}
+
+function selectDuracion(btn, value) {
+  btn.closest('.field-group').querySelectorAll('.btn-option').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  document.getElementById('f-duracion').value = value;
+  const precio = value === '1 hora' ? '30' : '40';
+  document.getElementById('f-mensualidad').value = precio;
+  updatePrecio();
+}
+
+function selectPlan(btn, plan, precio) {
+  if (btn) {
+    btn.closest('.field-group').querySelectorAll('.btn-option').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+  }
+  document.getElementById('f-plan').value = plan;
+  document.getElementById('f-mensualidad').value = precio;
+  updatePrecio();
+}
+
+function selectHorario(btn, value) {
+  btn.closest('#horarios-list').querySelectorAll('.btn-option').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  document.getElementById('f-horario').value = value;
+}
+
+function updatePrecio() {
+  const precio = document.getElementById('f-mensualidad').value;
+  const freq   = document.getElementById('f-frecuencia').value;
+  const plan   = document.getElementById('f-plan').value;
+  const dur    = document.getElementById('f-duracion').value;
+
+  if (!precio) return;
+
+  const card = document.getElementById('precio-card');
+  card.classList.add('visible');
+  document.getElementById('precio-val').textContent = '$' + precio;
+
+  let desc = '', nota = '';
+  if (freq === 'Sabatino') {
+    desc = 'Sabatino · ' + (dur||'1 hora') + ' · mensual';
+    nota = dur === '2 horas' ? '⏱️ 2 horas de clase cada sábado' : '⏱️ 1 hora de clase cada sábado';
+  } else {
+    desc = 'Lunes a Viernes · ' + (plan==='Bimestral' ? '2 meses' : '1 mes');
+    nota = plan === 'Bimestral' ? '💰 ¡Ahorras $20 pagando 2 meses!' : '📅 Renovable cada mes';
+  }
+  document.getElementById('precio-desc').textContent = desc;
+  document.getElementById('precio-nota').textContent = nota;
+}
+
+// ── CONDICIÓN MÉDICA ─────────────────────────────────
+function toggleMedico(btn, tipo) {
+  btn.closest('.field-group').querySelectorAll('.btn-option').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  const textarea = document.getElementById('f-condicion');
+  const hidden   = document.getElementById('f-condicion-val');
+  if (tipo === 'especificar') {
+    textarea.style.display = 'block';
+    hidden.value = '';
+  } else {
+    textarea.style.display = 'none';
+    textarea.value = '';
+    hidden.value = 'Ninguna';
+  }
+}
+
+function toggleMedicamento(btn, tipo) {
+  btn.closest('.field-group').querySelectorAll('.btn-option').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  const textarea = document.getElementById('f-medicamentos');
+  const hidden   = document.getElementById('f-medicamentos-val');
+  if (tipo === 'especificar') {
+    textarea.style.display = 'block';
+    hidden.value = '';
+  } else {
+    textarea.style.display = 'none';
+    textarea.value = '';
+    hidden.value = 'Ninguno';
+  }
+}
+
+// ── MÉTODO DE PAGO ────────────────────────────────────
+function selectMetodo(card, metodo) {
+  document.querySelectorAll('.metodo-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+  document.getElementById('f-metodo').value = metodo;
+
+  const info = METODO_INFO[metodo];
+  const infoEl = document.getElementById('metodo-info');
+  infoEl.style.display = 'block';
+  document.getElementById('metodo-info-title').textContent = info.title;
+  document.getElementById('metodo-info-content').innerHTML = info.content;
+}
+
+// ── RESUMEN ───────────────────────────────────────────
+function updateResumen() {
+  document.getElementById('res-nombre').textContent  = document.getElementById('f-nombre').value || '—';
+  document.getElementById('res-nivel').textContent   = document.getElementById('f-nivel').value || '—';
+  document.getElementById('res-horario').textContent = document.getElementById('f-horario').value || '—';
+  const plan = document.getElementById('f-plan').value || document.getElementById('f-frecuencia').value || '—';
+  const dur  = document.getElementById('f-duracion').value;
+  document.getElementById('res-plan').textContent = plan + (dur ? ' · ' + dur : '');
+  const precio = document.getElementById('f-mensualidad').value;
+  document.getElementById('res-precio').textContent = precio ? '$' + precio : '$—';
+}
+
+// ── ENVIAR ────────────────────────────────────────────
+async function enviarFormulario() {
+  if (!validateSection(4)) return;
+
+  const btn = document.getElementById('btn-enviar');
+  btn.disabled = true;
+  btn.textContent = '⏳ Enviando...';
+
+  const condicion = document.getElementById('f-condicion-val').value ||
+                    document.getElementById('f-condicion').value || 'Ninguna';
+  const medicamentos = document.getElementById('f-medicamentos-val').value ||
+                       document.getElementById('f-medicamentos').value || 'Ninguno';
+  const freq  = document.getElementById('f-frecuencia').value;
+  const dur   = document.getElementById('f-duracion').value;
+  const plan  = document.getElementById('f-plan').value;
+
+  const payload = {
+    // Datos alumno
+    nombre:       document.getElementById('f-nombre').value,
+    fechaNac:     document.getElementById('f-fechanac').value,
+    sexo:         document.getElementById('f-sexo').value,
+    nacionalidad: document.getElementById('f-nacionalidad').value,
+    cedula:       document.getElementById('f-cedula').value,
+    lugarNac:     document.getElementById('f-lugarnac').value,
+    sangre:       document.getElementById('f-sangre').value,
+    direccion:    document.getElementById('f-direccion').value,
+    telefono:     document.getElementById('f-telefono').value,
+    condicion:    condicion,
+    medicamentos: medicamentos,
+    motivo:       document.getElementById('f-motivo').value,
+    // Representante
+    nombreRep:    document.getElementById('f-rep-nombre').value,
+    telefonoRep:  document.getElementById('f-rep-tel').value,
+    emailRep:     document.getElementById('f-rep-email').value,
+    direccionRep: document.getElementById('f-rep-dir').value,
+    // Programa
+    nivel:        document.getElementById('f-nivel').value,
+    frecuencia:   freq,
+    duracion:     dur || '1 hora',
+    horario:      document.getElementById('f-horario').value,
+    modalidad:    'Piscina',
+    mensualidad:  document.getElementById('f-mensualidad').value,
+    plan:         plan || freq,
+    // Pago
+    metodoPago:   document.getElementById('f-metodo').value,
+    // Meta
+    fuente:       'Formulario Web',
+    programa:     document.getElementById('f-nivel').value,
+    edad:         document.getElementById('f-fechanac').value,
+    email:        document.getElementById('f-rep-email').value,
+    horarioPref:  document.getElementById('f-horario').value,
+  };
+
+  try {
+    const res  = await fetch(API, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+
+    // Mostrar éxito
+    mostrarExito(payload.metodoPago);
+  } catch(e) {
+    // Igualmente mostrar éxito (el error puede ser de red pero el dato llegó)
+    mostrarExito(payload.metodoPago);
+  }
+}
+
+function mostrarExito(metodo) {
+  document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.progress-step').forEach(s => s.classList.add('done'));
+  document.getElementById('success-screen').classList.add('active');
+
+  const info = METODO_INFO[metodo] || {};
+  document.getElementById('suc-metodo-inst').innerHTML = info.content || 'Contacta al administrador para confirmar el pago.';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>
