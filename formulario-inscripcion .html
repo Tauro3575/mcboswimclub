@@ -297,12 +297,17 @@
 
     <div class="field-group">
       <label>Nivel <span class="req">*</span></label>
-      <div class="btn-group">
+      <div class="btn-group" id="niveles-container">
         <button class="btn-option" onclick="selectOpt(this,'f-nivel','Burbuja')">🫧 Burbuja</button>
         <button class="btn-option" onclick="selectOpt(this,'f-nivel','Iniciación')">🎒 Iniciación</button>
         <button class="btn-option" onclick="selectOpt(this,'f-nivel','Intermedio')">🏊 Intermedio</button>
         <button class="btn-option" onclick="selectOpt(this,'f-nivel','Avanzado')">🏅 Avanzado</button>
         <button class="btn-option" onclick="selectOpt(this,'f-nivel','Adultos')">🌊 Adultos</button>
+      </div>
+      <!-- Promociones activas -->
+      <div id="promos-container" style="margin-top:.8rem;display:none;">
+        <div style="font-size:.75rem;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem;">🎁 Promociones Disponibles</div>
+        <div class="btn-group" id="promos-btns"></div>
       </div>
       <input type="hidden" id="f-nivel"/>
       <div class="field-error" id="e-nivel">Selecciona un nivel</div>
@@ -469,6 +474,85 @@
 <script>
 const API = '/.netlify/functions/instructor';
 let currentSection = 1;
+let promos = { promo2x1: { activa: false }, promoTemporada: { activa: false } };
+
+// Cargar promos al iniciar
+window.addEventListener('load', async function() {
+  try {
+    const res  = await fetch(API + '?action=obtenerPromos');
+    const data = await res.json();
+    promos = data.promos || promos;
+    mostrarPromos();
+  } catch(e) {
+    console.log('Error cargando promos:', e);
+  }
+});
+
+function mostrarPromos() {
+  const container = document.getElementById('promos-container');
+  const btns      = document.getElementById('promos-btns');
+  const promosActivas = [];
+
+  if (promos.promo2x1?.activa) {
+    promosActivas.push({
+      id: 'Promo 2x1',
+      label: '🎁 Promo 2x1 Hermanos — $30 c/u',
+      precio: '30',
+      frecuencia: 'Lunes a Viernes'
+    });
+  }
+  if (promos.promoTemporada?.activa) {
+    promosActivas.push({
+      id: 'Promo Temporada',
+      label: '📅 Inicio de Temporada — 20% desc',
+      precio: null,
+      frecuencia: null
+    });
+  }
+
+  if (promosActivas.length > 0) {
+    container.style.display = 'block';
+    btns.innerHTML = promosActivas.map(p =>
+      `<button class="btn-option" style="border-color:var(--gold);color:#92400e;" onclick="selectPromo(this,'${p.id}','${p.precio || ''}','${p.frecuencia || ''}')">${p.label}</button>`
+    ).join('');
+  } else {
+    container.style.display = 'none';
+  }
+}
+
+function selectPromo(btn, promoId, precio, frecuencia) {
+  // Deseleccionar niveles
+  document.querySelectorAll('#niveles-container .btn-option').forEach(b => b.classList.remove('selected'));
+  document.querySelectorAll('#promos-btns .btn-option').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  document.getElementById('f-nivel').value = promoId;
+
+  if (promoId === 'Promo 2x1') {
+    // Forzar frecuencia L-V y precio $30
+    document.getElementById('f-mensualidad').value = '30';
+    document.getElementById('f-frecuencia').value  = 'Lunes a Viernes';
+    document.getElementById('f-plan').value        = 'Promo 2x1';
+    // Ocultar sabatino, mostrar solo L-V
+    document.getElementById('duracion-group').style.display = 'none';
+    document.getElementById('plan-group').style.display     = 'none';
+    document.getElementById('horarios-group').style.display = 'block';
+    const lista = document.getElementById('horarios-list');
+    lista.innerHTML = HORARIOS['Lunes a Viernes'].map(h =>
+      `<button class="btn-option" onclick="selectHorario(this,'${h}')">${h}</button>`
+    ).join('');
+    document.getElementById('precio-card').classList.add('visible');
+    document.getElementById('precio-val').textContent  = '$30';
+    document.getElementById('precio-desc').textContent = 'Promo 2x1 · Hermanos · L-V';
+    document.getElementById('precio-nota').textContent = '🎁 ¡Precio especial para dos hermanos!';
+  } else if (promoId === 'Promo Temporada') {
+    // Mostrar opciones normales pero con 20% descuento
+    document.getElementById('f-plan').value = 'Promo Temporada';
+    document.getElementById('precio-card').classList.add('visible');
+    document.getElementById('precio-val').textContent  = '20% OFF';
+    document.getElementById('precio-desc').textContent = 'Descuento aplicado al primer mes';
+    document.getElementById('precio-nota').textContent = '📅 ¡Promo de inicio de temporada!';
+  }
+}
 
 const HORARIOS = {
   'Lunes a Viernes': ['3:00pm - 4:00pm','4:00pm - 5:00pm','5:00pm - 6:00pm','6:00pm - 7:00pm','7:00pm - 8:00pm'],
@@ -476,7 +560,7 @@ const HORARIOS = {
 };
 
 const METODO_INFO = {
-  'Zelle': { title:'Datos para Zelle:', content:'📧 Email: daniellatordecilla@gmail.com<br/>👤 A nombre de: Daniella Tordecilla<br/>📱 Envía el comprobante por WhatsApp al 0414-6004468' },
+  'Zelle': { title:'Datos para Zelle:', content:'📧 Email: maracaiboswimmingclub@gmail.com<br/>👤 A nombre de: Maracaibo Swimming Club<br/>📱 Envía el comprobante por WhatsApp al 0414-6004468' },
   'Pago Móvil': { title:'Datos para Pago Móvil:', content:'🏦 Banco: Bancamiga<br/>📱 Teléfono: 0414-6004468<br/>🪪 Cédula: V-12345678<br/>📱 Envía el comprobante por WhatsApp al 0414-6004468' },
   'Efectivo USD': { title:'Pago en físico:', content:'💰 Acércate a la piscina del CIDEZ<br/>📍 Calle 67 (Av. Universidad) entre Av. 2A y 2C, Maracaibo<br/>⏰ Horario de atención: Lunes a Sábado 8am - 8pm' },
   'Binance Pay': { title:'Datos para Binance Pay:', content:'🆔 Binance ID: User-cebe0<br/>📱 Envía el comprobante por WhatsApp al 0414-6004468' }
