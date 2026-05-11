@@ -472,7 +472,7 @@
 </div>
 
 <script>
-<script>const API = 'https://mcboswimclub.com/.netlify/functions/instructor';
+const API = '/.netlify/functions/instructor';
 let currentSection = 1;
 let promos = { promo2x1: { activa: false }, promoTemporada: { activa: false } };
 
@@ -491,30 +491,12 @@ window.addEventListener('load', async function() {
 function mostrarPromos() {
   const container = document.getElementById('promos-container');
   const btns      = document.getElementById('promos-btns');
-  const promosActivas = [];
 
-  if (promos.promo2x1?.activa) {
-    promosActivas.push({
-      id: 'Promo 2x1',
-      label: '🎁 Promo 2x1 Hermanos — $30 c/u',
-      precio: '30',
-      frecuencia: 'Lunes a Viernes'
-    });
-  }
+  // Solo mostrar Promo Temporada en el formulario público
+  // La Promo 2x1 solo la aplica el Admin desde el panel
   if (promos.promoTemporada?.activa) {
-    promosActivas.push({
-      id: 'Promo Temporada',
-      label: '📅 Inicio de Temporada — 20% desc',
-      precio: null,
-      frecuencia: null
-    });
-  }
-
-  if (promosActivas.length > 0) {
     container.style.display = 'block';
-    btns.innerHTML = promosActivas.map(p =>
-      `<button class="btn-option" style="border-color:var(--gold);color:#92400e;" onclick="selectPromo(this,'${p.id}','${p.precio || ''}','${p.frecuencia || ''}')">${p.label}</button>`
-    ).join('');
+    btns.innerHTML = `<button class="btn-option" style="border-color:var(--gold);color:#92400e;background:rgba(244,185,66,.08);" onclick="selectPromo(this,'Promo Temporada','','')">📅 Promo Inicio de Temporada — 20% descuento primer mes</button>`;
   } else {
     container.style.display = 'none';
   }
