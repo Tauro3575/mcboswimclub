@@ -256,7 +256,6 @@
     </div>
     <div class="topbar-right">
       <a href="https://mcboswimclub.com" style="background:rgba(0,180,216,.15);border:1px solid rgba(0,180,216,.25);color:#00b4d8;border-radius:50px;padding:.4rem .9rem;font-size:.82rem;text-decoration:none;font-family:'Outfit',sans-serif;">🏠 Home</a>
-      <button onclick="actualizarDatos()" style="background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.25);color:#10b981;border-radius:50px;padding:.4rem .9rem;font-size:.82rem;cursor:pointer;font-family:'Outfit',sans-serif;">🔄 Actualizar</button>>
       <div class="admin-badge"><span id="topbar-admin-nombre">👑 Administrador</span></div>
       <button class="btn-logout" onclick="doLogout()">Salir</button>
     </div>
@@ -271,6 +270,7 @@
       <button class="tab-btn" onclick="switchTab('alumnos')">🏊 Alumnos</button>
       <button class="tab-btn" onclick="switchTab('pagos')">💳 Pagos</button>
       <button class="tab-btn" onclick="switchTab('asignacion')">📋 Asignación</button>
+      <button class="tab-btn" id="tab-btn-promos" onclick="switchTab('promos')">🎁 Promociones</button>
     </div>
 
     <!-- ══ TAB: DASHBOARD ══ -->
@@ -589,6 +589,62 @@
       </div>
     </div>
 
+    <!-- ══ TAB: PROMOCIONES ══ -->
+    <div class="tab-content" id="tab-promos">
+      <div class="page-header">
+        <h2>Gestión de Promociones</h2>
+        <p>Activa o desactiva las promociones disponibles. Solo administradores pueden modificar.</p>
+      </div>
+
+      <div class="section-card">
+        <div class="section-card-header">
+          <h3>🎁 Promo 2x1 Hermanos</h3>
+          <span style="color:var(--gray);font-size:.85rem;">Solo aplica Lunes a Viernes</span>
+        </div>
+        <div style="padding:1.5rem;">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+            <div>
+              <p style="font-weight:600;color:var(--navy);margin-bottom:.4rem;">Dos hermanos inscritos juntos — $30 c/u</p>
+              <p style="font-size:.85rem;color:var(--gray);">Precio regular: $50/mes · Ahorro: $20 por alumno · Solo horarios Lunes a Viernes</p>
+            </div>
+            <div style="display:flex;align-items:center;gap:1rem;">
+              <span id="badge-2x1" class="badge inactive">Inactiva</span>
+              <button id="btn-2x1" class="btn btn-primary" onclick="togglePromo('2x1')">Activar</button>
+            </div>
+          </div>
+          <div style="margin-top:1.2rem;background:var(--surface);border-radius:12px;padding:1rem;border:1.5px solid rgba(0,87,168,.08);">
+            <p style="font-size:.82rem;color:var(--gray);">📋 <strong>Cómo funciona:</strong> Al activar, aparece como opción en el formulario de inscripción y en el modal de pago. El precio se calcula automáticamente a $30 por alumno.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <div class="section-card-header">
+          <h3>📅 Promo Inicio de Temporada</h3>
+          <span style="color:var(--gray);font-size:.85rem;">Enero y Septiembre</span>
+        </div>
+        <div style="padding:1.5rem;">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+            <div>
+              <p style="font-weight:600;color:var(--navy);margin-bottom:.4rem;">20% de descuento en el primer mes</p>
+              <p style="font-size:.85rem;color:var(--gray);">Precio regular $50 → con descuento $40 · Activar en diciembre y agosto para promover</p>
+            </div>
+            <div style="display:flex;align-items:center;gap:1rem;">
+              <span id="badge-temporada" class="badge inactive">Inactiva</span>
+              <button id="btn-temporada" class="btn btn-primary" onclick="togglePromo('temporada')">Activar</button>
+            </div>
+          </div>
+          <div style="margin-top:1.2rem;background:var(--surface);border-radius:12px;padding:1rem;border:1.5px solid rgba(0,87,168,.08);">
+            <p style="font-size:.82rem;color:var(--gray);">📋 <strong>Cómo funciona:</strong> Al activar, aparece como opción en el formulario y en el modal de pago. Aplica 20% de descuento sobre el precio regular del nivel seleccionado.</p>
+          </div>
+        </div>
+      </div>
+
+      <div style="background:rgba(244,185,66,.08);border:1.5px solid rgba(244,185,66,.25);border-radius:14px;padding:1.2rem 1.5rem;">
+        <p style="font-size:.85rem;color:#92400e;">⚠️ <strong>Importante:</strong> Las promociones activas aparecen automáticamente en el formulario de inscripción y en el modal de pago. El asistente puede seleccionarlas pero no activarlas o desactivarlas.</p>
+      </div>
+    </div>
+
     <!-- ══ TAB: ASIGNACIÓN ══ -->
     <div class="tab-content" id="tab-asignacion">
       <div class="page-header">
@@ -712,8 +768,9 @@
           <option value="Sabatino 1h" data-monto="30">Sabatino · 1h — $30</option>
           <option value="Sabatino 2h" data-monto="40">Sabatino · 2h — $40</option>
           <option value="Trimestral" data-monto="135">Trimestral — $135</option>
-          <option value="Promo 2x1" data-monto="25">Promo 2x1 — $25 c/u</option>
           <option value="Privada" data-monto="15">Clase Privada — $15</option>
+          <option value="Promo 2x1" data-monto="30" id="opt-2x1" style="display:none;">🎁 Promo 2x1 Hermanos — $30 c/u</option>
+          <option value="Promo Temporada" data-monto="40" id="opt-temporada" style="display:none;">📅 Promo Inicio Temporada — 20% desc</option>
         </select>
       </div>
       <div class="form-group-light">
@@ -918,8 +975,8 @@ function initApp() {
   document.getElementById('dash-fecha').textContent =
     now.toLocaleDateString('es-VE', {weekday:'long',year:'numeric',month:'long',day:'numeric'});
   document.getElementById('pagos-mes').value = now.toISOString().slice(0,7);
-  setTimeout(function(){ switchSubtab('pendientes'); }, 500);
-  setTimeout(function(){ switchSubtab('activos'); }, 700);
+  switchSubtab('pendientes');
+  setTimeout(function(){ switchSubtab('activos'); }, 200);
   document.getElementById('pago-fecha').value = now.toISOString().slice(0,10);
 
   // Mostrar nombre en topbar
@@ -934,6 +991,7 @@ function initApp() {
   loadTokens();
   loadAlumnos();
   loadAsignaciones();
+  loadPromos();
 }
 
 function aplicarRol() {
@@ -941,6 +999,7 @@ function aplicarRol() {
     const tabs    = document.querySelectorAll('.tab-btn');
     const tabIds  = ['dashboard','instructores','tokens','alumnos','pagos','asignacion'];
     const permitidos = ['alumnos','pagos','asignacion'];
+    // Promos tab también oculto para asistente
     tabs.forEach(function(btn, idx) {
       btn.style.display = permitidos.includes(tabIds[idx]) ? '' : 'none';
     });
@@ -956,7 +1015,7 @@ function aplicarRol() {
 function switchTab(tab) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-  const tabs = ['dashboard','instructores','tokens','alumnos','pagos','asignacion'];
+  const tabs = ['dashboard','instructores','tokens','alumnos','pagos','asignacion','promos'];
   const idx = tabs.indexOf(tab);
   document.querySelectorAll('.tab-btn')[idx].classList.add('active');
   document.getElementById('tab-'+tab).classList.add('active');
@@ -986,7 +1045,7 @@ async function loadDashboard() {
       return f.getMonth() === mesActual && f.getFullYear() === anioActual;
     });
     const ingresos = pagosMes.reduce((s,p) => s + (parseFloat(p.monto)||0), 0);
-    const pendientes = alumnos.filter(a => String(a.estadoPago).trim() === 'Pendiente').length;
+    const pendientes = alumnos.filter(a => a.estado_pago === 'Pendiente').length;
 
     document.getElementById('d-alumnos').textContent = alumnos.length;
     document.getElementById('d-instructores').textContent = instructores.length;
@@ -1185,12 +1244,11 @@ async function loadAlumnos() {
     const data = await res.json();
     allAlumnos = data.alumnos || [];
     renderAlumnos(allAlumnos);
+    renderAlumnosStats(allAlumnos);
     populatePagoAlumnoSelect(allAlumnos);
-  } catch(e) { 
-    allAlumnos = []; 
-    renderAlumnos([]); 
-  }
-  await loadLeads();
+  } catch(e) { allAlumnos = []; renderAlumnos([]); }
+  // Cargar leads (en proceso)
+  loadLeads();
 }
 
 function renderAlumnos(list) {
@@ -1656,6 +1714,84 @@ function filtrarAlumnos() {
            (!buscar || (a.nombre||'').toLowerCase().includes(buscar));
   });
   renderAlumnos(filtered);
+}
+
+// ═══════════════════════════════════════════════════════
+// SISTEMA DE PROMOCIONES
+// ═══════════════════════════════════════════════════════
+var promoActiva2x1 = false;
+var promoActivaTemporada = false;
+
+async function loadPromos() {
+  try {
+    const res  = await fetch(API + '?action=obtenerPromos');
+    const data = await res.json();
+    const promos = data.promos || {};
+
+    promoActiva2x1       = promos.promo2x1?.activa || false;
+    promoActivaTemporada = promos.promoTemporada?.activa || false;
+
+    updatePromoBadge('2x1', promoActiva2x1);
+    updatePromoBadge('temporada', promoActivaTemporada);
+  } catch(e) {
+    console.log('Error cargando promos:', e);
+  }
+}
+
+function updatePromoBadge(promo, activa) {
+  const badge = document.getElementById('badge-' + promo);
+  const btn   = document.getElementById('btn-' + promo);
+  if (!badge || !btn) return;
+
+  if (activa) {
+    badge.textContent = 'Activa';
+    badge.className   = 'badge active';
+    btn.textContent   = '🚫 Desactivar';
+    btn.className     = 'btn btn-danger';
+  } else {
+    badge.textContent = 'Inactiva';
+    badge.className   = 'badge inactive';
+    btn.textContent   = '✅ Activar';
+    btn.className     = 'btn btn-success';
+  }
+}
+
+async function togglePromo(promo) {
+  // Solo admins pueden activar/desactivar
+  if (currentRol !== 'admin') {
+    showToast('⚠️','Sin permisos','Solo los administradores pueden modificar promociones');
+    return;
+  }
+
+  const activa = promo === '2x1' ? !promoActiva2x1 : !promoActivaTemporada;
+  const nombre = promo === '2x1' ? 'Promo 2x1 Hermanos' : 'Promo Inicio de Temporada';
+  const accion = activa ? 'activar' : 'desactivar';
+
+  confirmar('🎁', accion.charAt(0).toUpperCase() + accion.slice(1) + ' ' + nombre,
+    '¿Deseas ' + accion + ' esta promoción? Aparecerá/desaparecerá del formulario y modal de pago.',
+    async () => {
+      showLoading('Actualizando promoción...');
+      try {
+        const res  = await fetch(API, {
+          method: 'POST', headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({ accion: 'togglePromo', promo, activa })
+        });
+        const data = await res.json();
+        hideLoading();
+        if (data.success) {
+          if (promo === '2x1') promoActiva2x1 = activa;
+          else promoActivaTemporada = activa;
+          updatePromoBadge(promo, activa);
+          showToast('✅', nombre, activa ? '¡Promoción activada!' : 'Promoción desactivada');
+        } else {
+          showToast('❌','Error', data.error||'No se pudo actualizar');
+        }
+      } catch(e) {
+        hideLoading();
+        showToast('❌','Error de conexión','Intenta de nuevo');
+      }
+    }
+  );
 }
 
 // Close modals on overlay click
