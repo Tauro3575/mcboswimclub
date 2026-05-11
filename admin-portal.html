@@ -1596,7 +1596,15 @@ async function loadAsignaciones() {
 // ═══════════════════════════════════════════════════════
 // UI HELPERS
 // ═══════════════════════════════════════════════════════
-function openModal(id) { document.getElementById(id).classList.add('open'); }
+function openModal(id) { 
+  document.getElementById(id).classList.add('open');
+  if (id === 'modal-pago') {
+    var opt2x1 = document.getElementById('opt-2x1');
+    var optTemp = document.getElementById('opt-temporada');
+    if (opt2x1) opt2x1.style.display = promoActiva2x1 ? '' : 'none';
+    if (optTemp) optTemp.style.display = promoActivaTemporada ? '' : 'none';
+  }
+}
 function closeModal(id) {
   document.getElementById(id).classList.remove('open');
   if (id === 'modal-token') {
