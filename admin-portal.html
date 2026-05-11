@@ -1727,17 +1727,20 @@ async function loadPromos() {
     const res  = await fetch(API + '?action=obtenerPromos');
     const data = await res.json();
     const promos = data.promos || {};
-
     promoActiva2x1       = promos.promo2x1?.activa || false;
     promoActivaTemporada = promos.promoTemporada?.activa || false;
-
     updatePromoBadge('2x1', promoActiva2x1);
     updatePromoBadge('temporada', promoActivaTemporada);
   } catch(e) {
     console.log('Error cargando promos:', e);
   }
+  // Mostrar/ocultar opciones de promo en modal de pago
+  var opt2x1 = document.getElementById('opt-2x1');
+  var optTemp = document.getElementById('opt-temporada');
+  if (opt2x1) opt2x1.style.display = promoActiva2x1 ? '' : 'none';
+  if (optTemp) optTemp.style.display = promoActivaTemporada ? '' : 'none';
 }
-
+  
 function updatePromoBadge(promo, activa) {
   const badge = document.getElementById('badge-' + promo);
   const btn   = document.getElementById('btn-' + promo);
