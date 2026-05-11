@@ -1406,15 +1406,28 @@ function toggleCamposPago() {
 }
 
 function autocompletarMonto() {
-  const plan = document.getElementById('pago-plan');
+  const plan  = document.getElementById('pago-plan');
   const monto = document.getElementById('pago-monto');
   const opt   = plan.options[plan.selectedIndex];
-  if (opt && opt.dataset.monto) monto.value = opt.dataset.monto;
+  
+  if (opt && opt.dataset.monto) {
+    // Si es promo temporada aplicar 20% descuento
+    if (plan.value === 'Promo Temporada') {
+      // Tomar precio base según nivel del alumno
+      const alumno = document.getElementById('pago-alumno').value;
+      const alumnoObj = allAlumnos.find(a => a.nombre === alumno);
+      const precioBase = parseFloat(alumnoObj?.mensualidad || 50);
+      const descuento  = Math.round(precioBase * 0.20);
+      monto.value = precioBase - descuento;
+    } else {
+      monto.value = opt.dataset.monto;
+    }
+  }
 
   // Preview email
   const alumno = document.getElementById('pago-alumno').value;
   const alumnoObj = allAlumnos.find(a => a.nombre === alumno);
-  const previewEl  = document.getElementById('preview-email');
+  const previewEl = document.getElementById('preview-email');
   previewEl.textContent = alumnoObj ? (alumnoObj.email || 'sin email registrado') : '— selecciona un alumno —';
 }
 
