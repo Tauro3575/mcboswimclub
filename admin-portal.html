@@ -1045,7 +1045,7 @@ async function loadDashboard() {
       return f.getMonth() === mesActual && f.getFullYear() === anioActual;
     });
     const ingresos = pagosMes.reduce((s,p) => s + (parseFloat(p.monto)||0), 0);
-    const pendientes = alumnos.filter(a => a.estado_pago === 'Pendiente').length;
+    const pendientes = alumnos.filter(a => String(a.estadoPago).trim() === 'Pendiente').length;
 
     document.getElementById('d-alumnos').textContent = alumnos.length;
     document.getElementById('d-instructores').textContent = instructores.length;
@@ -1244,10 +1244,11 @@ async function loadAlumnos() {
     const data = await res.json();
     allAlumnos = data.alumnos || [];
     renderAlumnos(allAlumnos);
-    renderAlumnosStats(allAlumnos);
     populatePagoAlumnoSelect(allAlumnos);
-  } catch(e) { allAlumnos = []; renderAlumnos([]); }
-  // Cargar leads (en proceso)
+  } catch(e) { 
+    allAlumnos = []; 
+    renderAlumnos([]); 
+  }
   loadLeads();
 }
 
