@@ -213,6 +213,18 @@
     @media(max-width:480px) {
       .dash-grid { grid-template-columns: 1fr; }
     }
+    .btn-refresh-float {
+      position: fixed; bottom: 1.5rem; right: 1.5rem;
+      width: 48px; height: 48px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--blue), var(--cyan));
+      color: white; border: none; font-size: 1.2rem; cursor: pointer;
+      box-shadow: 0 4px 16px rgba(0,87,168,.3);
+      display: flex; align-items: center; justify-content: center;
+      transition: .3s; z-index: 999;
+    }
+    .btn-refresh-float:hover { transform: scale(1.1); box-shadow: 0 6px 24px rgba(0,87,168,.4); }
+    .btn-refresh-float.spinning { animation: spin360 .6s linear; }
+    @keyframes spin360 { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
@@ -2046,6 +2058,33 @@ async function togglePromo(promo) {
 document.querySelectorAll('.modal-overlay').forEach(overlay => {
   overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('open'); });
 });
+
+// ── Función actualizar tab activa ──
+function actualizarTabActiva() {
+  const btn = document.getElementById('btn-refresh-global');
+  btn.classList.add('spinning');
+  setTimeout(() => btn.classList.remove('spinning'), 600);
+
+  const tabs = ['dashboard','instructores','tokens','alumnos','pagos','asignacion','promos'];
+  const activa = tabs.find(t => document.getElementById('tab-'+t)?.classList.contains('active'));
+
+  switch(activa) {
+    case 'dashboard':    loadDashboard(); break;
+    case 'instructores': loadInstructores(); break;
+    case 'tokens':       loadTokens(); break;
+    case 'alumnos':      loadAlumnos(); break;
+    case 'pagos':        loadPagos(); break;
+    case 'asignacion':   loadAsignaciones(); break;
+    case 'promos':       loadPromos && loadPromos(); break;
+  }
+  showToast('🔄','Actualizando...','Datos del panel recargados');
+}
 </script>
+
+<!-- BOTÓN FLOTANTE DE ACTUALIZAR -->
+<button class="btn-refresh-float" id="btn-refresh-global" onclick="actualizarTabActiva()" title="Actualizar datos">
+  🔄
+</button>
+
 </body>
 </html>
