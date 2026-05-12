@@ -251,7 +251,24 @@ let TOKEN    = '';
 let ALUMNO   = {};
 let MONEDA   = 'USD';
 
-// ── Init ──
+// ── Función helper para llamadas al API ──
+async function apiGet(params) {
+  const url = API + '?' + new URLSearchParams(params).toString();
+  const res = await fetch(url, { redirect: 'follow' });
+  const text = await res.text();
+  try { return JSON.parse(text); } catch(e) { throw new Error('Respuesta inválida: ' + text.substring(0,100)); }
+}
+
+async function apiPost(body) {
+  const res = await fetch(API, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify(body),
+    redirect: 'follow'
+  });
+  const text = await res.text();
+  try { return JSON.parse(text); } catch(e) { throw new Error('Respuesta inválida'); }
+}
 window.addEventListener('load', async () => {
   const params = new URLSearchParams(window.location.search);
   TOKEN = params.get('token') || '';
@@ -263,8 +280,7 @@ window.addEventListener('load', async () => {
   }
 
   try {
-    const res  = await fetch(API + '?action=validarTokenRenovacion&token=' + encodeURIComponent(TOKEN));
-    const data = await res.json();
+    const data = await apiGet({ action: 'validarTokenRenovacion', token: TOKEN });
 
     if (!data.valido) {
       document.getElementById('error-msg').textContent = data.error || 'Enlace no válido.';
@@ -406,10 +422,7 @@ async function enviarPago() {
   btn.textContent = '⏳ Enviando...';
 
   try {
-    const res = await fetch(API, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+    const data = await apiPost({
         accion:     'registrarPagoRenovacion',
         token:      TOKEN,
         nombre:     ALUMNO.nombre    || '',
@@ -426,9 +439,7 @@ async function enviarPago() {
         monto,
         montoBS,
         meses,
-      })
-    });
-    const data = await res.json();
+      });
     if (data.success) {
       showState('success');
     } else {
