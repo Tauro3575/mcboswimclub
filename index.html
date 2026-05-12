@@ -659,6 +659,7 @@ function guardarEnSheets(dataStr) {
     if (k && v) campos[k] = v;
   });
   var payload = {
+    accion: 'guardarChatbot',
     nombre: campos.nombre || '',
     telefono: campos.telefono || '',
     email: campos.email || '',
