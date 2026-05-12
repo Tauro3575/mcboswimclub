@@ -765,13 +765,27 @@
       <div class="form-group-light">
         <label>Plan</label>
         <select id="pago-plan" onchange="calcularMonto()">
-          <option value="Mensual 1h" data-usd="50">Mensual · 1h — $50</option>
-          <option value="Mensual 2h" data-usd="80">Mensual · 2h — $80</option>
-          <option value="Sabatino 1h" data-usd="30">Sabatino · 1h — $30</option>
-          <option value="Sabatino 2h" data-usd="40">Sabatino · 2h — $40</option>
-          <option value="Privada" data-usd="15">Clase Privada — $15</option>
-          <option value="Promo 2x1" data-usd="30" id="opt-2x1" style="display:none;">🎁 Promo 2x1 — $30 c/u</option>
-          <option value="Promo Temporada" data-usd="40" id="opt-temporada" style="display:none;">📅 Promo Temporada — 20% desc</option>
+          <optgroup label="— Mensual (sin descuento) —">
+            <option value="Mensual 1h"   data-usd="50">Mensual · 1h L-V — $50</option>
+            <option value="Mensual 2h"   data-usd="80">Mensual · 2h L-V — $80</option>
+            <option value="Sabatino 1h"  data-usd="30">Sabatino · 1h — $30</option>
+            <option value="Sabatino 2h"  data-usd="40">Sabatino · 2h — $40</option>
+            <option value="Privada"      data-usd="15">Clase Privada — $15</option>
+          </optgroup>
+          <optgroup label="— Planes con descuento (solo USD) —">
+            <option value="6 meses 1h"   data-usd="50" data-meses="6" data-desc="20">6 meses · 1h L-V — 20% off</option>
+            <option value="6 meses 2h"   data-usd="80" data-meses="6" data-desc="20">6 meses · 2h L-V — 20% off</option>
+            <option value="6 meses Sab1" data-usd="30" data-meses="6" data-desc="20">6 meses · Sab 1h — 20% off</option>
+            <option value="6 meses Sab2" data-usd="40" data-meses="6" data-desc="20">6 meses · Sab 2h — 20% off</option>
+            <option value="12 meses 1h"  data-usd="50" data-meses="12" data-desc="30">12 meses · 1h L-V — 30% off</option>
+            <option value="12 meses 2h"  data-usd="80" data-meses="12" data-desc="30">12 meses · 2h L-V — 30% off</option>
+            <option value="12 meses Sab1" data-usd="30" data-meses="12" data-desc="30">12 meses · Sab 1h — 30% off</option>
+            <option value="12 meses Sab2" data-usd="40" data-meses="12" data-desc="30">12 meses · Sab 2h — 30% off</option>
+          </optgroup>
+          <optgroup label="— Promociones —">
+            <option value="Promo 2x1"       data-usd="30" id="opt-2x1"       style="display:none;">🎁 Promo 2x1 Hermanos — $30 c/u</option>
+            <option value="Promo Temporada" data-usd="40" id="opt-temporada" style="display:none;">📅 Promo Temporada — 20% desc</option>
+          </optgroup>
         </select>
       </div>
       <div class="form-group-light">
@@ -825,6 +839,7 @@
       <div class="form-group-light">
         <label id="label-monto">Monto (USD)</label>
         <input type="number" id="pago-monto" placeholder="50" min="0" step="0.01" oninput="actualizarPreview()"/>
+        <div id="ahorro-info" style="display:none;margin-top:.4rem;font-size:.82rem;"></div>
       </div>
       <div class="form-group-light" id="monto-bs-group" style="display:none;">
         <label>Monto (BS)</label>
@@ -1512,26 +1527,39 @@ function selectMoneda(moneda) {
   actualizarPreview();
 }
 
-function renderMesesSelector() {
+function renderMesesSelector(mesesFijos) {
   const moneda = document.getElementById('pago-moneda').value;
   const esBS   = moneda === 'BS';
   const ahora  = new Date();
   const anio   = ahora.getFullYear();
-  const mesAct = ahora.getMonth(); // 0-based
+  const mesAct = ahora.getMonth();
   const cont   = document.getElementById('meses-selector');
-  // Mostrar mes actual + 2 siguientes para USD, solo mes actual para BS
-  const mesesMostrar = esBS ? 1 : 4;
+
+  const totalMostrar = mesesFijos || (esBS ? 1 : 4);
   let html = '';
-  for (let i = 0; i < mesesMostrar; i++) {
-    const idx  = (mesAct + i) % 12;
+  for (let i = 0; i < totalMostrar; i++) {
+    const idx   = (mesAct + i) % 12;
     const anioM = anio + Math.floor((mesAct + i) / 12);
-    const val  = MESES_NOMBRES[idx] + ' ' + anioM;
-    html += `<button type="button" class="btn btn-outline" id="mes-btn-${i}"
+    const val   = MESES_NOMBRES[idx] + ' ' + anioM;
+    const seleccionado = mesesFijos ? 'btn btn-primary' : 'btn btn-outline';
+    html += `<button type="button" class="${seleccionado}" id="mes-btn-${i}"
       style="font-size:.78rem;padding:.3rem .7rem;"
       onclick="toggleMes(this,'${val}')">${MESES_NOMBRES[idx]} ${anioM}</button>`;
   }
   cont.innerHTML = html;
-  document.getElementById('pago-meses').value = '';
+
+  // Si hay meses fijos, marcarlos todos y guardar el valor
+  if (mesesFijos) {
+    const seleccionados = [];
+    for (let i = 0; i < mesesFijos; i++) {
+      const idx   = (mesAct + i) % 12;
+      const anioM = anio + Math.floor((mesAct + i) / 12);
+      seleccionados.push(MESES_NOMBRES[idx] + ' ' + anioM);
+    }
+    document.getElementById('pago-meses').value = seleccionados.join(', ');
+  } else {
+    document.getElementById('pago-meses').value = '';
+  }
 }
 
 function toggleMes(btn, val) {
@@ -1555,16 +1583,40 @@ function toggleMes(btn, val) {
 }
 
 function calcularMonto() {
-  const plan   = document.getElementById('pago-plan');
-  const opt    = plan.options[plan.selectedIndex];
-  const base   = parseFloat(opt?.dataset?.usd || 0);
-  const meses  = document.getElementById('pago-meses').value;
-  const moneda = document.getElementById('pago-moneda').value;
-  if (moneda === 'USD' && meses) {
-    const numMeses = meses.split(',').length;
-    document.getElementById('pago-monto').value = (base * numMeses).toFixed(2);
-  } else if (base > 0) {
-    document.getElementById('pago-monto').value = base.toFixed(2);
+  const plan    = document.getElementById('pago-plan');
+  const opt     = plan.options[plan.selectedIndex];
+  const base    = parseFloat(opt?.dataset?.usd || 0);
+  const desc    = parseInt(opt?.dataset?.desc || 0);
+  const mesesPlan = parseInt(opt?.dataset?.meses || 0);
+  const moneda  = document.getElementById('pago-moneda').value;
+
+  // Si el plan tiene meses fijos (6 o 12), marcarlos automáticamente
+  if (mesesPlan > 0) {
+    renderMesesSelector(mesesPlan);
+    // Solo USD para planes con descuento
+    if (moneda === 'BS') selectMoneda('USD');
+  }
+
+  const meses   = document.getElementById('pago-meses').value;
+  const numMeses = mesesPlan || (meses ? meses.split(',').length : 1);
+  const total   = base * numMeses;
+  const descMonto = total * (desc / 100);
+  const final   = total - descMonto;
+
+  document.getElementById('pago-monto').value = final.toFixed(2);
+
+  // Mostrar desglose de ahorro
+  const ahorroDiv = document.getElementById('ahorro-info');
+  if (ahorroDiv) {
+    if (desc > 0) {
+      ahorroDiv.style.display = '';
+      ahorroDiv.innerHTML = `
+        <span style="color:var(--gray);text-decoration:line-through;">Normal: $${total.toFixed(2)}</span>
+        <span style="color:#16a34a;font-weight:500;margin-left:.8rem;">↓ ${desc}% off → $${final.toFixed(2)}</span>
+        <span style="background:#dcfce7;color:#15803d;border-radius:6px;padding:.1rem .5rem;margin-left:.6rem;font-size:.78rem;">Ahorras $${descMonto.toFixed(2)}</span>`;
+    } else {
+      ahorroDiv.style.display = 'none';
+    }
   }
   actualizarPreview();
 }
