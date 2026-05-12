@@ -3,6 +3,7 @@
 /admin                    /admin-portal.html             200
 /instructor               /portal-instructor.html        200
 /registro                 /registro-instructor.html      200
+/portal-pago              /portal-pago.html              200
 
 # Fallback — todo lo demás al index
 /*                        /index.html                    200
