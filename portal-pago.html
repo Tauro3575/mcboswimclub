@@ -301,7 +301,7 @@ window.addEventListener('load', async () => {
     showState('form');
 
   } catch(e) {
-    document.getElementById('error-msg').textContent = 'Error de conexión. Intenta más tarde.';
+    document.getElementById('error-msg').textContent = 'Error: ' + e.message;
     showState('error');
   }
 });
