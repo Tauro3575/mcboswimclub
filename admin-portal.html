@@ -1435,7 +1435,7 @@ async function loadPagos() {
   table.style.display = 'none';
 
   try {
-    const res  = await fetch(`${API_ADMIN}?action=obtenerPagos`);
+    const res  = await fetch(`${API}?action=obtenerPagos`);
     const data = await res.json();
     let pagos  = data.pagos || [];
 
