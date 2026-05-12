@@ -580,7 +580,8 @@ function addBotMessage(text) {
   var msgs = document.getElementById('chat-messages');
   var div = document.createElement('div');
   div.className = 'msg bot';
-  div.innerHTML = '<div class="msg-avatar">&#x1F30A;</div><div class="msg-bubble">' + text + '</div>';
+  var linked = text.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" style="color:var(--cyan);text-decoration:underline;word-break:break-all;">$1</a>');
+  div.innerHTML = '<div class="msg-avatar">&#x1F30A;</div><div class="msg-bubble">' + linked + '</div>';
   msgs.appendChild(div);
   msgs.scrollTop = msgs.scrollHeight;
 }
