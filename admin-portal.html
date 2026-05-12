@@ -542,49 +542,125 @@
     <!-- ══ TAB: PAGOS ══ -->
     <div class="tab-content" id="tab-pagos">
       <div class="page-header">
-        <h2>Control de Pagos</h2>
-        <p>Registro de mensualidades y pagos recibidos</p>
+        <h2>Reporte Financiero</h2>
+        <p>Control de ingresos por moneda, método y período</p>
       </div>
 
+      <!-- TOTALES USD / BS -->
       <div class="stats-bar">
         <div class="stat-mini">
           <div>
-            <div class="sm-val" id="p-total-mes">—</div>
-            <div class="sm-label">Total del mes</div>
+            <div class="sm-val" id="p-total-usd">$—</div>
+            <div class="sm-label">Total USD</div>
+          </div>
+        </div>
+        <div class="stat-mini">
+          <div>
+            <div class="sm-val" id="p-total-bs">Bs.—</div>
+            <div class="sm-label">Total Bs.</div>
           </div>
         </div>
         <div class="stat-mini">
           <div>
             <div class="sm-val" id="p-cantidad">—</div>
-            <div class="sm-label">Pagos recibidos</div>
+            <div class="sm-label">Transacciones</div>
           </div>
         </div>
         <div class="stat-mini">
           <div>
             <div class="sm-val" id="p-pendientes">—</div>
-            <div class="sm-label">Pendientes</div>
+            <div class="sm-label">Pendientes pago</div>
           </div>
         </div>
       </div>
 
-      <div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-bottom:1.2rem;align-items:center;">
-        <input type="month" id="pagos-mes" style="padding:.55rem 1rem;border:1.5px solid rgba(0,87,168,.15);border-radius:10px;font-family:'Outfit',sans-serif;font-size:.88rem;color:var(--navy);outline:none;"/>
-        <select id="pagos-metodo" style="padding:.55rem 1rem;border:1.5px solid rgba(0,87,168,.15);border-radius:10px;font-family:'Outfit',sans-serif;font-size:.88rem;color:var(--navy);background:white;outline:none;">
-          <option value="">Todos los métodos</option>
-          <option value="Binance">₿ Binance Pay</option>
-          <option value="Zelle">💵 Zelle</option>
-          <option value="Efectivo">💰 Efectivo</option>
-          <option value="Pago Movil">📱 Pago Móvil</option>
-          <option value="PayPal">🌐 PayPal</option>
-        </select>
-        <button class="btn btn-primary" onclick="loadPagos()">🔍 Buscar</button>
-        <button class="btn btn-gold" onclick="openModal('modal-pago')">+ Registrar Pago</button>
+      <!-- FILTROS -->
+      <div style="background:white;border-radius:14px;padding:1rem 1.2rem;margin-bottom:1.2rem;border:1.5px solid rgba(0,87,168,.08);display:flex;flex-wrap:wrap;gap:.8rem;align-items:flex-end;">
+        <div style="display:flex;flex-direction:column;gap:.3rem;">
+          <label style="font-size:.72rem;font-weight:600;color:var(--navy);letter-spacing:.06em;text-transform:uppercase;">Filtro</label>
+          <select id="filtro-tipo" onchange="toggleFiltroFechas()" style="padding:.5rem .8rem;border:1.5px solid rgba(0,87,168,.15);border-radius:8px;font-family:'Outfit',sans-serif;font-size:.85rem;color:var(--navy);background:white;outline:none;">
+            <option value="mes">Por mes</option>
+            <option value="rango">Por rango de fechas</option>
+          </select>
+        </div>
+        <div id="filtro-mes-wrap">
+          <label style="font-size:.72rem;font-weight:600;color:var(--navy);letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:.3rem;">Mes</label>
+          <input type="month" id="pagos-mes" style="padding:.5rem .8rem;border:1.5px solid rgba(0,87,168,.15);border-radius:8px;font-family:'Outfit',sans-serif;font-size:.85rem;color:var(--navy);outline:none;"/>
+        </div>
+        <div id="filtro-rango-wrap" style="display:none;display:flex;gap:.5rem;">
+          <div>
+            <label style="font-size:.72rem;font-weight:600;color:var(--navy);letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:.3rem;">Desde</label>
+            <input type="date" id="pagos-desde" style="padding:.5rem .8rem;border:1.5px solid rgba(0,87,168,.15);border-radius:8px;font-family:'Outfit',sans-serif;font-size:.85rem;color:var(--navy);outline:none;"/>
+          </div>
+          <div>
+            <label style="font-size:.72rem;font-weight:600;color:var(--navy);letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:.3rem;">Hasta</label>
+            <input type="date" id="pagos-hasta" style="padding:.5rem .8rem;border:1.5px solid rgba(0,87,168,.15);border-radius:8px;font-family:'Outfit',sans-serif;font-size:.85rem;color:var(--navy);outline:none;"/>
+          </div>
+        </div>
+        <div>
+          <label style="font-size:.72rem;font-weight:600;color:var(--navy);letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:.3rem;">Moneda</label>
+          <select id="filtro-moneda" style="padding:.5rem .8rem;border:1.5px solid rgba(0,87,168,.15);border-radius:8px;font-family:'Outfit',sans-serif;font-size:.85rem;color:var(--navy);background:white;outline:none;">
+            <option value="">Todas</option>
+            <option value="USD">💵 USD</option>
+            <option value="BS">🇻🇪 Bolívares</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:.72rem;font-weight:600;color:var(--navy);letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:.3rem;">Método</label>
+          <select id="pagos-metodo" style="padding:.5rem .8rem;border:1.5px solid rgba(0,87,168,.15);border-radius:8px;font-family:'Outfit',sans-serif;font-size:.85rem;color:var(--navy);background:white;outline:none;">
+            <option value="">Todos</option>
+            <option value="Zelle">💵 Zelle</option>
+            <option value="Transferencia USD">🏦 Transferencia USD</option>
+            <option value="Efectivo USD">💰 Efectivo USD</option>
+            <option value="Pago Movil">📱 Pago Móvil</option>
+            <option value="Transferencia BS">🏦 Transferencia BS</option>
+          </select>
+        </div>
+        <div style="display:flex;gap:.5rem;margin-top:auto;">
+          <button class="btn btn-primary" onclick="loadPagos()">🔍 Buscar</button>
+          <button class="btn btn-gold" onclick="openModal('modal-pago')">+ Registrar Pago</button>
+          <button class="btn btn-outline" onclick="exportarExcel()" title="Exportar Excel">📊 Excel</button>
+          <button class="btn btn-outline" onclick="exportarPDF()" title="Exportar PDF">📄 PDF</button>
+        </div>
       </div>
 
+      <!-- RESUMEN USD vs BS -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.2rem;" id="resumen-monedas" style="display:none;">
+        <div style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1.5px solid #86efac;border-radius:14px;padding:1.2rem;">
+          <div style="font-size:.72rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#16a34a;margin-bottom:.5rem;">💵 Ingresos USD</div>
+          <div id="resumen-usd-detalle" style="font-size:.82rem;color:#15803d;line-height:1.8;"></div>
+          <div style="font-size:1.6rem;font-weight:900;color:#14532d;margin-top:.5rem;" id="resumen-usd-total">$0.00</div>
+        </div>
+        <div style="background:linear-gradient(135deg,#eff6ff,#dbeafe);border:1.5px solid #93c5fd;border-radius:14px;padding:1.2rem;">
+          <div style="font-size:.72rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#1d4ed8;margin-bottom:.5rem;">🇻🇪 Ingresos BS</div>
+          <div id="resumen-bs-detalle" style="font-size:.82rem;color:#1e40af;line-height:1.8;"></div>
+          <div style="font-size:1.6rem;font-weight:900;color:#1e3a8a;margin-top:.5rem;" id="resumen-bs-total">Bs. 0</div>
+        </div>
+      </div>
+
+      <!-- TABLA DE TRANSACCIONES -->
       <div class="section-card">
-        <div class="section-card-header"><h3>💳 Pagos Registrados</h3></div>
-        <div id="pagos-list" style="padding:.5rem 0;">
-          <div style="text-align:center;padding:2rem;color:var(--gray);">Selecciona un mes y presiona Buscar</div>
+        <div class="section-card-header"><h3>💳 Transacciones</h3></div>
+        <div style="overflow-x:auto;">
+          <table id="pagos-table" style="width:100%;border-collapse:collapse;font-size:.82rem;display:none;">
+            <thead>
+              <tr style="background:rgba(0,87,168,.05);border-bottom:2px solid rgba(0,87,168,.1);">
+                <th style="padding:.7rem 1rem;text-align:left;font-weight:600;color:var(--navy);">N° Recibo</th>
+                <th style="padding:.7rem 1rem;text-align:left;font-weight:600;color:var(--navy);">Alumno</th>
+                <th style="padding:.7rem 1rem;text-align:left;font-weight:600;color:var(--navy);">Período</th>
+                <th style="padding:.7rem 1rem;text-align:left;font-weight:600;color:var(--navy);">Fecha</th>
+                <th style="padding:.7rem 1rem;text-align:left;font-weight:600;color:var(--navy);">Método</th>
+                <th style="padding:.7rem 1rem;text-align:left;font-weight:600;color:var(--navy);">Referencia</th>
+                <th style="padding:.7rem 1rem;text-align:right;font-weight:600;color:var(--navy);">Monto</th>
+                <th style="padding:.7rem 1rem;text-align:center;font-weight:600;color:var(--navy);">Moneda</th>
+              </tr>
+            </thead>
+            <tbody id="pagos-tbody"></tbody>
+            <tfoot id="pagos-tfoot"></tfoot>
+          </table>
+          <div id="pagos-list" style="padding:.5rem 0;">
+            <div style="text-align:center;padding:2rem;color:var(--gray);">Selecciona un período y presiona Buscar</div>
+          </div>
         </div>
       </div>
     </div>
@@ -745,47 +821,49 @@
 
 <!-- ═══ MODAL: REGISTRAR PAGO ═══ -->
 <div class="modal-overlay" id="modal-pago">
-  <div class="modal" style="position:relative;max-width:600px;max-height:90vh;overflow-y:auto;">
+  <div class="modal" style="position:relative;max-width:560px;">
     <button class="modal-close" onclick="closeModal('modal-pago')">✕</button>
     <h3>💳 Registrar Pago</h3>
-    <p style="font-size:.85rem;color:var(--gray);">Completa los datos del pago. Se generará recibo automático y se enviará al representante.</p>
+    <p>Completa los datos del pago recibido. Se enviará recibo automático al representante.</p>
 
-    <!-- ALUMNO -->
     <div class="form-row">
       <div class="form-group-light" style="grid-column:1/-1;">
         <label>Alumno</label>
-        <select id="pago-alumno" onchange="onAlumnoChange()">
+        <select id="pago-alumno" onchange="autocompletarMonto()">
           <option value="">— Selecciona alumno —</option>
         </select>
       </div>
     </div>
 
-    <!-- PLAN -->
     <div class="form-row">
       <div class="form-group-light">
         <label>Plan</label>
-        <select id="pago-plan" onchange="calcularMonto()">
-          <optgroup label="— Mensual (sin descuento) —">
-            <option value="Mensual 1h"   data-usd="50">Mensual · 1h L-V — $50</option>
-            <option value="Mensual 2h"   data-usd="80">Mensual · 2h L-V — $80</option>
-            <option value="Sabatino 1h"  data-usd="30">Sabatino · 1h — $30</option>
-            <option value="Sabatino 2h"  data-usd="40">Sabatino · 2h — $40</option>
-            <option value="Privada"      data-usd="15">Clase Privada — $15</option>
-          </optgroup>
-          <optgroup label="— Planes con descuento (solo USD) —">
-            <option value="6 meses 1h"   data-usd="50" data-meses="6" data-desc="20">6 meses · 1h L-V — 20% off</option>
-            <option value="6 meses 2h"   data-usd="80" data-meses="6" data-desc="20">6 meses · 2h L-V — 20% off</option>
-            <option value="6 meses Sab1" data-usd="30" data-meses="6" data-desc="20">6 meses · Sab 1h — 20% off</option>
-            <option value="6 meses Sab2" data-usd="40" data-meses="6" data-desc="20">6 meses · Sab 2h — 20% off</option>
-            <option value="12 meses 1h"  data-usd="50" data-meses="12" data-desc="30">12 meses · 1h L-V — 30% off</option>
-            <option value="12 meses 2h"  data-usd="80" data-meses="12" data-desc="30">12 meses · 2h L-V — 30% off</option>
-            <option value="12 meses Sab1" data-usd="30" data-meses="12" data-desc="30">12 meses · Sab 1h — 30% off</option>
-            <option value="12 meses Sab2" data-usd="40" data-meses="12" data-desc="30">12 meses · Sab 2h — 30% off</option>
-          </optgroup>
-          <optgroup label="— Promociones —">
-            <option value="Promo 2x1"       data-usd="30" id="opt-2x1"       style="display:none;">🎁 Promo 2x1 Hermanos — $30 c/u</option>
-            <option value="Promo Temporada" data-usd="40" id="opt-temporada" style="display:none;">📅 Promo Temporada — 20% desc</option>
-          </optgroup>
+        <select id="pago-plan" onchange="autocompletarMonto()">
+          <option value="Mensual 1h" data-monto="50">Mensual · 1h — $50</option>
+          <option value="Mensual 2h" data-monto="80">Mensual · 2h — $80</option>
+          <option value="Sabatino 1h" data-monto="30">Sabatino · 1h — $30</option>
+          <option value="Sabatino 2h" data-monto="40">Sabatino · 2h — $40</option>
+          <option value="Trimestral" data-monto="135">Trimestral — $135</option>
+          <option value="Privada" data-monto="15">Clase Privada — $15</option>
+          <option value="Promo 2x1" data-monto="30" id="opt-2x1" style="display:none;">🎁 Promo 2x1 Hermanos — $30 c/u</option>
+          <option value="Promo Temporada" data-monto="40" id="opt-temporada" style="display:none;">📅 Promo Inicio Temporada — 20% desc</option>
+        </select>
+      </div>
+      <div class="form-group-light">
+        <label>Monto Recibido (USD)</label>
+        <input type="number" id="pago-monto" placeholder="50" min="0" step="0.01"/>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group-light">
+        <label>Método de Pago</label>
+        <select id="pago-metodo" onchange="toggleCamposPago()">
+          <option value="Zelle">💵 Zelle</option>
+          <option value="Pago Movil">📱 Pago Móvil</option>
+          <option value="Efectivo USD">💰 Efectivo USD</option>
+          <option value="Binance Pay">₿ Binance Pay</option>
+          <option value="PayPal">🌐 PayPal</option>
         </select>
       </div>
       <div class="form-group-light">
@@ -794,72 +872,18 @@
       </div>
     </div>
 
-    <!-- MONEDA -->
-    <div class="form-group-light">
-      <label>Moneda</label>
-      <div style="display:flex;gap:.6rem;margin-top:.3rem;">
-        <button id="btn-usd" class="btn btn-primary" onclick="selectMoneda('USD')" style="flex:1;">💵 Dólares (USD)</button>
-        <button id="btn-bs"  class="btn btn-outline" onclick="selectMoneda('BS')"  style="flex:1;">🇻🇪 Bolívares (BS)</button>
-      </div>
-      <input type="hidden" id="pago-moneda" value="USD"/>
-    </div>
-
-    <!-- MÉTODO USD -->
-    <div id="metodos-usd">
-      <div class="form-group-light">
-        <label>Método de Pago</label>
-        <select id="pago-metodo-usd" onchange="toggleCamposPago()">
-          <option value="Zelle">💵 Zelle</option>
-          <option value="Transferencia USD">🏦 Transferencia bancaria</option>
-          <option value="Efectivo USD">💰 Efectivo USD</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- MÉTODO BS -->
-    <div id="metodos-bs" style="display:none;">
-      <div class="form-group-light">
-        <label>Método de Pago</label>
-        <select id="pago-metodo-bs" onchange="toggleCamposPago()">
-          <option value="Pago Movil">📱 Pago Móvil</option>
-          <option value="Transferencia BS">🏦 Transferencia bancaria</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- MESES CUBIERTOS -->
-    <div class="form-group-light" id="meses-group">
-      <label>Mes(es) cubiertos <span id="meses-nota" style="color:var(--gray);font-weight:400;font-size:.78rem;"></span></label>
-      <div id="meses-selector" style="display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.4rem;"></div>
-      <input type="hidden" id="pago-meses"/>
-    </div>
-
-    <!-- MONTO -->
-    <div class="form-row">
-      <div class="form-group-light">
-        <label id="label-monto">Monto (USD)</label>
-        <input type="number" id="pago-monto" placeholder="50" min="0" step="0.01" oninput="actualizarPreview()"/>
-        <div id="ahorro-info" style="display:none;margin-top:.4rem;font-size:.82rem;"></div>
-      </div>
-      <div class="form-group-light" id="monto-bs-group" style="display:none;">
-        <label>Monto (BS)</label>
-        <input type="number" id="pago-monto-bs" placeholder="Monto en Bs." min="0" step="1" oninput="actualizarPreview()"/>
-      </div>
-    </div>
-
-    <!-- CÓDIGO DE TRANSACCIÓN -->
-    <div id="campos-codigo">
+    <!-- Campos dinámicos según método -->
+    <div id="campos-transferencia">
       <div class="form-row">
-        <div class="form-group-light" id="ref-group">
-          <label id="label-ref">Código de confirmación</label>
-          <input type="text" id="pago-ref" placeholder="Código de transacción" oninput="actualizarPreview()"/>
+        <div class="form-group-light">
+          <label>N° Referencia / Comprobante</label>
+          <input type="text" id="pago-ref" placeholder="Ej: 202505070123456"/>
         </div>
-        <div class="form-group-light" id="banco-group">
-          <label>Banco</label>
-          <input type="text" id="pago-banco" placeholder="Ej: Banesco, Mercantil..."/>
+        <div class="form-group-light">
+          <label>Banco <span id="banco-label" style="color:var(--gray);font-weight:400;">(opcional)</span></label>
+          <input type="text" id="pago-banco" placeholder="Ej: Banesco, Bank of America..."/>
         </div>
       </div>
-      <!-- Pago móvil extra -->
       <div class="form-row" id="campos-pago-movil" style="display:none;">
         <div class="form-group-light">
           <label>Teléfono Pago Móvil</label>
@@ -872,26 +896,15 @@
       </div>
     </div>
 
-    <!-- OBSERVACIONES -->
     <div class="form-group-light">
       <label>Observaciones <span style="color:var(--gray);font-weight:400;">(opcional)</span></label>
-      <textarea id="pago-obs" rows="2" placeholder="Ej: descuento aplicado, pago parcial, etc."></textarea>
+      <textarea id="pago-obs" placeholder="Ej: Pago correspondiente a 2 meses, descuento aplicado, etc." rows="2"></textarea>
     </div>
 
-    <!-- PREVIEW RECIBO -->
-    <div id="pago-preview" style="background:var(--surface);border-radius:10px;padding:.9rem 1.2rem;border:1.5px solid rgba(0,87,168,.1);margin-bottom:.5rem;font-size:.82rem;line-height:1.7;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem;">
-        <strong style="color:var(--navy);">📋 Vista previa del recibo</strong>
-        <span id="preview-recibo-num" style="font-family:monospace;font-size:.8rem;color:var(--gray);">MSC-2026-???</span>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.2rem .8rem;font-size:.8rem;">
-        <span style="color:var(--gray);">Alumno:</span>      <span id="prev-alumno">—</span>
-        <span style="color:var(--gray);">Mes(es):</span>     <span id="prev-meses">—</span>
-        <span style="color:var(--gray);">Método:</span>      <span id="prev-metodo">—</span>
-        <span style="color:var(--gray);">Referencia:</span>  <span id="prev-ref">—</span>
-        <span style="color:var(--gray);">Monto:</span>       <span id="prev-monto">—</span>
-        <span style="color:var(--gray);">Email:</span>       <span id="preview-email">—</span>
-      </div>
+    <!-- Preview del recibo -->
+    <div id="pago-preview" style="background:var(--surface);border-radius:10px;padding:.9rem 1.2rem;border:1.5px solid rgba(0,87,168,.1);margin-bottom:.5rem;font-size:.82rem;">
+      <strong style="color:var(--navy);">📧 Se enviará recibo a:</strong>
+      <span id="preview-email" style="color:var(--gray);margin-left:.4rem;">— selecciona un alumno —</span>
     </div>
 
     <div class="modal-footer">
@@ -1399,52 +1412,193 @@ function populatePagoAlumnoSelect(alumnos) {
 // ═══════════════════════════════════════════════════════
 // PAGOS
 // ═══════════════════════════════════════════════════════
+function toggleFiltroFechas() {
+  const tipo = document.getElementById('filtro-tipo').value;
+  document.getElementById('filtro-mes-wrap').style.display   = tipo === 'mes'   ? '' : 'none';
+  document.getElementById('filtro-rango-wrap').style.display = tipo === 'rango' ? 'flex' : 'none';
+}
+
+let pagosData = []; // cache para exportar
+
 async function loadPagos() {
-  const mes = document.getElementById('pagos-mes').value;
+  const tipo   = document.getElementById('filtro-tipo').value;
+  const mes    = document.getElementById('pagos-mes').value;
+  const desde  = document.getElementById('pagos-desde').value;
+  const hasta  = document.getElementById('pagos-hasta').value;
+  const moneda = document.getElementById('filtro-moneda').value;
   const metodo = document.getElementById('pagos-metodo').value;
-  const list = document.getElementById('pagos-list');
+  const list   = document.getElementById('pagos-list');
+  const table  = document.getElementById('pagos-table');
+
   list.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--gray);">⏳ Cargando...</div>';
+  list.style.display = '';
+  table.style.display = 'none';
 
   try {
-    const res = await fetch(`${API}?action=obtenerPagos`);
+    const res  = await fetch(`${API_ADMIN}?action=obtenerPagos`);
     const data = await res.json();
-    let pagos = data.pagos || [];
+    let pagos  = data.pagos || [];
 
-    if (mes) {
-      const [anio, mesNum] = mes.split('-');
-      pagos = pagos.filter(p => {
-        const f = new Date(p.fecha);
-        return f.getFullYear()==anio && (f.getMonth()+1)==parseInt(mesNum);
-      });
-    }
-    if (metodo) pagos = pagos.filter(p => (p.metodo||p.fuente||'').includes(metodo));
+    // Filtrar por período
+    pagos = pagos.filter(p => {
+      const fechaPago = p.fechaPago || p.fecha || '';
+      if (!fechaPago) return true;
+      const partes = fechaPago.split('/');
+      if (partes.length < 3) return true;
+      const fPago = new Date(partes[2], partes[1]-1, partes[0]);
 
-    const totalMes = pagos.reduce((s,p)=>s+(parseFloat(p.monto)||0),0);
-    document.getElementById('p-total-mes').textContent = '$'+totalMes.toFixed(0);
-    document.getElementById('p-cantidad').textContent = pagos.length;
+      if (tipo === 'mes' && mes) {
+        const [anio, mesNum] = mes.split('-');
+        return fPago.getFullYear() == anio && (fPago.getMonth()+1) == parseInt(mesNum);
+      }
+      if (tipo === 'rango' && desde && hasta) {
+        return fPago >= new Date(desde) && fPago <= new Date(hasta);
+      }
+      return true;
+    });
+
+    // Filtrar por moneda y método
+    if (moneda) pagos = pagos.filter(p => (p.moneda||'USD') === moneda);
+    if (metodo) pagos = pagos.filter(p => (p.metodo||'').includes(metodo));
+
+    pagosData = pagos; // guardar para exportar
+
+    // Calcular totales
+    const totalUSD = pagos.filter(p => (p.moneda||'USD') === 'USD').reduce((s,p) => s + (parseFloat(p.monto)||0), 0);
+    const totalBS  = pagos.filter(p => p.moneda === 'BS').reduce((s,p) => s + (parseFloat(p.montoBS)||parseFloat(p.monto)||0), 0);
+
+    // Desglose por método USD
+    const metUSD = {};
+    pagos.filter(p => (p.moneda||'USD') === 'USD').forEach(p => {
+      const m = p.metodo || 'Otro';
+      metUSD[m] = (metUSD[m] || 0) + (parseFloat(p.monto)||0);
+    });
+    const metBS = {};
+    pagos.filter(p => p.moneda === 'BS').forEach(p => {
+      const m = p.metodo || 'Otro';
+      metBS[m] = (metBS[m] || 0) + (parseFloat(p.montoBS)||parseFloat(p.monto)||0);
+    });
+
+    // Actualizar stats
+    document.getElementById('p-total-usd').textContent = '$' + totalUSD.toFixed(2);
+    document.getElementById('p-total-bs').textContent  = 'Bs. ' + totalBS.toLocaleString('es-VE');
+    document.getElementById('p-cantidad').textContent  = pagos.length;
     document.getElementById('p-pendientes').textContent = allAlumnos.filter(a=>a.estado_pago==='Pendiente').length;
+
+    // Resumen USD
+    document.getElementById('resumen-usd-detalle').innerHTML = Object.entries(metUSD)
+      .map(([m,v]) => `<span>${m}: <strong>$${v.toFixed(2)}</strong></span>`).join('<br/>') || 'Sin pagos USD';
+    document.getElementById('resumen-usd-total').textContent = '$' + totalUSD.toFixed(2);
+    document.getElementById('resumen-bs-detalle').innerHTML = Object.entries(metBS)
+      .map(([m,v]) => `<span>${m}: <strong>Bs. ${v.toLocaleString('es-VE')}</strong></span>`).join('<br/>') || 'Sin pagos BS';
+    document.getElementById('resumen-bs-total').textContent = 'Bs. ' + totalBS.toLocaleString('es-VE');
+    document.getElementById('resumen-monedas').style.display = 'grid';
 
     if (!pagos.length) {
       list.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--gray);">Sin pagos para ese filtro</div>';
       return;
     }
-    list.innerHTML = pagos.map(p => {
-      const ini = (p.nombre||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
-      const fecha = p.fecha ? new Date(p.fecha).toLocaleDateString('es-VE') : '—';
-      return `<div class="payment-row">
-        <div class="payment-avatar">${ini}</div>
-        <div class="payment-info"><strong>${p.nombre||'—'}</strong><span>${p.plan||p.programa||'—'} · ${fecha}</span></div>
-        <span class="payment-method">${p.metodo||p.fuente||'—'}</span>
-        ${p.referencia?`<span style="font-family:monospace;font-size:.75rem;color:var(--gray);">${p.referencia}</span>`:''}
-        <span class="payment-amount">$${parseFloat(p.monto||0).toFixed(0)}</span>
-      </div>`;
+
+    // Renderizar tabla
+    const tbody = document.getElementById('pagos-tbody');
+    tbody.innerHTML = pagos.map((p, i) => {
+      const esUSD = (p.moneda||'USD') === 'USD';
+      const montoStr = esUSD ? '$' + parseFloat(p.monto||0).toFixed(2) : 'Bs. ' + parseFloat(p.montoBS||p.monto||0).toLocaleString('es-VE');
+      const bg = i % 2 === 0 ? '' : 'background:rgba(0,87,168,.02);';
+      return `<tr style="${bg}border-bottom:1px solid rgba(0,87,168,.06);">
+        <td style="padding:.6rem 1rem;font-family:monospace;font-size:.75rem;color:var(--blue);">${p.recibo||p.id||'—'}</td>
+        <td style="padding:.6rem 1rem;font-weight:600;color:var(--navy);">${p.nombre||'—'}</td>
+        <td style="padding:.6rem 1rem;color:var(--gray);font-size:.8rem;">${p.meses||p.mes||'—'}</td>
+        <td style="padding:.6rem 1rem;color:var(--gray);font-size:.8rem;">${p.fechaPago||p.fecha||'—'}</td>
+        <td style="padding:.6rem 1rem;">${p.metodo||'—'}</td>
+        <td style="padding:.6rem 1rem;font-family:monospace;font-size:.75rem;color:var(--gray);">${p.referencia||'—'}</td>
+        <td style="padding:.6rem 1rem;text-align:right;font-weight:700;color:${esUSD?'#16a34a':'#1d4ed8'};">${montoStr}</td>
+        <td style="padding:.6rem 1rem;text-align:center;">
+          <span style="background:${esUSD?'#dcfce7':'#dbeafe'};color:${esUSD?'#15803d':'#1e40af'};font-size:.7rem;font-weight:700;padding:.2rem .6rem;border-radius:50px;">${p.moneda||'USD'}</span>
+        </td>
+      </tr>`;
     }).join('');
+
+    // Totales en pie de tabla
+    document.getElementById('pagos-tfoot').innerHTML = `
+      <tr style="background:rgba(0,87,168,.05);font-weight:700;border-top:2px solid rgba(0,87,168,.15);">
+        <td colspan="6" style="padding:.8rem 1rem;color:var(--navy);">TOTAL (${pagos.length} transacciones)</td>
+        <td style="padding:.8rem 1rem;text-align:right;color:#16a34a;">$${totalUSD.toFixed(2)}</td>
+        <td style="padding:.8rem 1rem;text-align:center;color:#1d4ed8;font-size:.75rem;">Bs. ${totalBS.toLocaleString('es-VE')}</td>
+      </tr>`;
+
+    list.style.display = 'none';
+    table.style.display = 'table';
+
   } catch(e) {
-    list.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--gray);">Sin datos de pagos aún</div>';
-    document.getElementById('p-total-mes').textContent = '—';
-    document.getElementById('p-cantidad').textContent = '—';
-    document.getElementById('p-pendientes').textContent = '—';
+    list.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--gray);">Error cargando pagos</div>';
   }
+}
+
+function exportarExcel() {
+  if (!pagosData.length) { showToast('⚠️','Sin datos','Busca pagos primero'); return; }
+  const rows = [['N° Recibo','Alumno','Período','Fecha','Método','Referencia','Monto USD','Monto BS','Moneda']];
+  pagosData.forEach(p => {
+    rows.push([
+      p.recibo||p.id||'', p.nombre||'', p.meses||p.mes||'',
+      p.fechaPago||p.fecha||'', p.metodo||'', p.referencia||'',
+      p.monto||0, p.montoBS||'', p.moneda||'USD'
+    ]);
+  });
+  const csv = rows.map(r => r.map(v => '"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const blob = new Blob(['\ufeff'+csv], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = 'MSC_Reporte_Pagos_' + new Date().toISOString().split('T')[0] + '.csv';
+  link.click();
+}
+
+function exportarPDF() {
+  if (!pagosData.length) { showToast('⚠️','Sin datos','Busca pagos primero'); return; }
+  const totalUSD = pagosData.filter(p=>(p.moneda||'USD')==='USD').reduce((s,p)=>s+(parseFloat(p.monto)||0),0);
+  const totalBS  = pagosData.filter(p=>p.moneda==='BS').reduce((s,p)=>s+(parseFloat(p.montoBS||p.monto)||0),0);
+  const filas = pagosData.map(p => {
+    const esUSD = (p.moneda||'USD') === 'USD';
+    const montoStr = esUSD ? '$'+parseFloat(p.monto||0).toFixed(2) : 'Bs.'+parseFloat(p.montoBS||p.monto||0).toLocaleString('es-VE');
+    return `<tr>
+      <td>${p.recibo||p.id||'—'}</td><td>${p.nombre||'—'}</td><td>${p.meses||p.mes||'—'}</td>
+      <td>${p.fechaPago||p.fecha||'—'}</td><td>${p.metodo||'—'}</td>
+      <td>${p.referencia||'—'}</td><td style="text-align:right;font-weight:bold;">${montoStr}</td>
+      <td style="text-align:center;">${p.moneda||'USD'}</td>
+    </tr>`;
+  }).join('');
+
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"/>
+  <title>Reporte Financiero MSC</title>
+  <style>
+    body{font-family:Arial,sans-serif;margin:2rem;color:#031d3a;}
+    h1{color:#0057a8;margin-bottom:.3rem;}
+    .sub{color:#64748b;font-size:.85rem;margin-bottom:1.5rem;}
+    .totales{display:flex;gap:2rem;margin-bottom:1.5rem;}
+    .tot-box{background:#f0f7ff;border:1.5px solid #bfdbfe;border-radius:10px;padding:.8rem 1.2rem;}
+    .tot-label{font-size:.72rem;color:#64748b;text-transform:uppercase;letter-spacing:.1em;}
+    .tot-val{font-size:1.4rem;font-weight:900;color:#031d3a;}
+    table{width:100%;border-collapse:collapse;font-size:.8rem;}
+    th{background:#0057a8;color:white;padding:.5rem .7rem;text-align:left;}
+    td{padding:.45rem .7rem;border-bottom:1px solid #e2e8f0;}
+    tr:nth-child(even){background:#f8fafc;}
+    .footer{margin-top:2rem;font-size:.72rem;color:#94a3b8;text-align:center;}
+  </style></head><body>
+  <h1>🏊 Maracaibo Swimming Club</h1>
+  <div class="sub">Reporte Financiero · Generado el ${new Date().toLocaleDateString('es-VE')} · ${pagosData.length} transacciones</div>
+  <div class="totales">
+    <div class="tot-box"><div class="tot-label">💵 Total USD</div><div class="tot-val">$${totalUSD.toFixed(2)}</div></div>
+    <div class="tot-box"><div class="tot-label">🇻🇪 Total BS</div><div class="tot-val">Bs. ${totalBS.toLocaleString('es-VE')}</div></div>
+  </div>
+  <table><thead><tr><th>N° Recibo</th><th>Alumno</th><th>Período</th><th>Fecha</th><th>Método</th><th>Referencia</th><th>Monto</th><th>Moneda</th></tr></thead>
+  <tbody>${filas}</tbody></table>
+  <div class="footer">Maracaibo Swimming Club · mcboswimclub.com · Reporte confidencial</div>
+  </body></html>`;
+
+  const win = window.open('', '_blank');
+  win.document.write(html);
+  win.document.close();
+  setTimeout(() => win.print(), 500);
 }
 
 function toggleCamposPago() {
@@ -1494,235 +1648,41 @@ function autocompletarMonto() {
   previewEl.textContent = alumnoObj ? (alumnoObj.email || 'sin email registrado') : '— selecciona un alumno —';
 }
 
-// ═══════════════════════════════════════════════════════
-// MODAL DE PAGO — LÓGICA COMPLETA
-// ═══════════════════════════════════════════════════════
-const MESES_NOMBRES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-
-function initModalPago() {
-  // Fecha de hoy por defecto
-  document.getElementById('pago-fecha').value = new Date().toISOString().split('T')[0];
-  // Moneda USD por defecto
-  selectMoneda('USD');
-  // Renderizar selector de meses
-  renderMesesSelector();
-  actualizarPreview();
-}
-
-function selectMoneda(moneda) {
-  document.getElementById('pago-moneda').value = moneda;
-  const esUSD = moneda === 'USD';
-  document.getElementById('btn-usd').className = esUSD ? 'btn btn-primary' : 'btn btn-outline';
-  document.getElementById('btn-bs').className  = esUSD ? 'btn btn-outline' : 'btn btn-primary';
-  document.getElementById('metodos-usd').style.display = esUSD ? '' : 'none';
-  document.getElementById('metodos-bs').style.display  = esUSD ? 'none' : '';
-  document.getElementById('label-monto').textContent = esUSD ? 'Monto (USD)' : 'Monto equivalente (USD)';
-  document.getElementById('monto-bs-group').style.display = esUSD ? 'none' : '';
-  // BS solo permite 1 mes
-  document.getElementById('meses-nota').textContent = esUSD ? '(puedes seleccionar varios)' : '(solo 1 mes en Bs.)';
-  // Limpiar selección de meses al cambiar moneda
-  renderMesesSelector();
-  toggleCamposPago();
-  calcularMonto();
-  actualizarPreview();
-}
-
-function renderMesesSelector(mesesFijos) {
-  const moneda = document.getElementById('pago-moneda').value;
-  const esBS   = moneda === 'BS';
-  const ahora  = new Date();
-  const anio   = ahora.getFullYear();
-  const mesAct = ahora.getMonth();
-  const cont   = document.getElementById('meses-selector');
-
-  const totalMostrar = mesesFijos || (esBS ? 1 : 4);
-  let html = '';
-  for (let i = 0; i < totalMostrar; i++) {
-    const idx   = (mesAct + i) % 12;
-    const anioM = anio + Math.floor((mesAct + i) / 12);
-    const val   = MESES_NOMBRES[idx] + ' ' + anioM;
-    const seleccionado = mesesFijos ? 'btn btn-primary' : 'btn btn-outline';
-    html += `<button type="button" class="${seleccionado}" id="mes-btn-${i}"
-      style="font-size:.78rem;padding:.3rem .7rem;"
-      onclick="toggleMes(this,'${val}')">${MESES_NOMBRES[idx]} ${anioM}</button>`;
-  }
-  cont.innerHTML = html;
-
-  // Si hay meses fijos, marcarlos todos y guardar el valor
-  if (mesesFijos) {
-    const seleccionados = [];
-    for (let i = 0; i < mesesFijos; i++) {
-      const idx   = (mesAct + i) % 12;
-      const anioM = anio + Math.floor((mesAct + i) / 12);
-      seleccionados.push(MESES_NOMBRES[idx] + ' ' + anioM);
-    }
-    document.getElementById('pago-meses').value = seleccionados.join(', ');
-  } else {
-    document.getElementById('pago-meses').value = '';
-  }
-}
-
-function toggleMes(btn, val) {
-  const moneda = document.getElementById('pago-moneda').value;
-  const esBS   = moneda === 'BS';
-  if (esBS) {
-    // Solo 1 mes en BS
-    document.querySelectorAll('#meses-selector .btn').forEach(b => {
-      b.className = 'btn btn-outline'; b.style.fontSize='.78rem'; b.style.padding='.3rem .7rem';
-    });
-    btn.className = 'btn btn-primary'; btn.style.fontSize='.78rem'; btn.style.padding='.3rem .7rem';
-    document.getElementById('pago-meses').value = val;
-  } else {
-    btn.classList.toggle('btn-primary');
-    btn.classList.toggle('btn-outline');
-    const seleccionados = [...document.querySelectorAll('#meses-selector .btn-primary')].map(b => b.textContent.trim());
-    document.getElementById('pago-meses').value = seleccionados.join(', ');
-    calcularMonto();
-  }
-  actualizarPreview();
-}
-
-function calcularMonto() {
-  const plan    = document.getElementById('pago-plan');
-  const opt     = plan.options[plan.selectedIndex];
-  const base    = parseFloat(opt?.dataset?.usd || 0);
-  const desc    = parseInt(opt?.dataset?.desc || 0);
-  const mesesPlan = parseInt(opt?.dataset?.meses || 0);
-  const moneda  = document.getElementById('pago-moneda').value;
-
-  // Si el plan tiene meses fijos (6 o 12), marcarlos automáticamente
-  if (mesesPlan > 0) {
-    renderMesesSelector(mesesPlan);
-    // Solo USD para planes con descuento
-    if (moneda === 'BS') selectMoneda('USD');
-  }
-
-  const meses   = document.getElementById('pago-meses').value;
-  const numMeses = mesesPlan || (meses ? meses.split(',').length : 1);
-  const total   = base * numMeses;
-  const descMonto = total * (desc / 100);
-  const final   = total - descMonto;
-
-  document.getElementById('pago-monto').value = final.toFixed(2);
-
-  // Mostrar desglose de ahorro
-  const ahorroDiv = document.getElementById('ahorro-info');
-  if (ahorroDiv) {
-    if (desc > 0) {
-      ahorroDiv.style.display = '';
-      ahorroDiv.innerHTML = `
-        <span style="color:var(--gray);text-decoration:line-through;">Normal: $${total.toFixed(2)}</span>
-        <span style="color:#16a34a;font-weight:500;margin-left:.8rem;">↓ ${desc}% off → $${final.toFixed(2)}</span>
-        <span style="background:#dcfce7;color:#15803d;border-radius:6px;padding:.1rem .5rem;margin-left:.6rem;font-size:.78rem;">Ahorras $${descMonto.toFixed(2)}</span>`;
-    } else {
-      ahorroDiv.style.display = 'none';
-    }
-  }
-  actualizarPreview();
-}
-
-function toggleCamposPago() {
-  const moneda = document.getElementById('pago-moneda').value;
-  const metodo = moneda === 'USD'
-    ? document.getElementById('pago-metodo-usd').value
-    : document.getElementById('pago-metodo-bs').value;
-
-  const esEfectivo = metodo === 'Efectivo USD';
-  const esPagoMovil = metodo === 'Pago Movil';
-
-  document.getElementById('ref-group').style.display    = esEfectivo ? 'none' : '';
-  document.getElementById('banco-group').style.display  = (esEfectivo || esPagoMovil) ? 'none' : '';
-  document.getElementById('campos-pago-movil').style.display = esPagoMovil ? '' : 'none';
-
-  // Label dinámico del código
-  const labels = {
-    'Zelle': 'Código de confirmación Zelle',
-    'Transferencia USD': 'N° de referencia bancaria',
-    'Pago Movil': 'Código de confirmación Pago Móvil',
-    'Transferencia BS': 'N° de referencia bancaria',
-  };
-  const lbl = document.getElementById('label-ref');
-  if (lbl) lbl.textContent = labels[metodo] || 'Código de confirmación';
-
-  actualizarPreview();
-}
-
-function onAlumnoChange() {
-  const sel    = document.getElementById('pago-alumno');
-  const alumno = allAlumnos.find(a => a.nombre === sel.value);
-  if (alumno) {
-    document.getElementById('preview-email').textContent = alumno.emailRep || alumno.email || '(sin email)';
-    // Autocompletar plan según el alumno
-    if (alumno.plan) {
-      const planSel = document.getElementById('pago-plan');
-      for (let i = 0; i < planSel.options.length; i++) {
-        if (planSel.options[i].value === alumno.plan) { planSel.selectedIndex = i; break; }
-      }
-    }
-    calcularMonto();
-  }
-  actualizarPreview();
-}
-
-function actualizarPreview() {
-  const alumnoVal = document.getElementById('pago-alumno').value;
-  const moneda    = document.getElementById('pago-moneda').value;
-  const metodo    = moneda === 'USD'
-    ? document.getElementById('pago-metodo-usd')?.value
-    : document.getElementById('pago-metodo-bs')?.value;
-  const meses     = document.getElementById('pago-meses').value;
-  const monto     = document.getElementById('pago-monto').value;
-  const ref       = document.getElementById('pago-ref')?.value || '—';
-
-  document.getElementById('prev-alumno').textContent  = alumnoVal || '—';
-  document.getElementById('prev-meses').textContent   = meses || '—';
-  document.getElementById('prev-metodo').textContent  = (metodo||'—') + ' · ' + moneda;
-  document.getElementById('prev-ref').textContent     = metodo === 'Efectivo USD' ? '(auto-generado)' : (ref||'—');
-  document.getElementById('prev-monto').textContent   = monto ? (moneda === 'USD' ? '$' : 'Bs.') + monto : '—';
-}
-
 async function registrarPago() {
-  const alumno  = document.getElementById('pago-alumno').value;
-  const monto   = document.getElementById('pago-monto').value;
-  const moneda  = document.getElementById('pago-moneda').value;
-  const metodo  = moneda === 'USD'
-    ? document.getElementById('pago-metodo-usd').value
-    : document.getElementById('pago-metodo-bs').value;
-  const plan    = document.getElementById('pago-plan').value;
-  const fecha   = document.getElementById('pago-fecha').value;
-  const meses   = document.getElementById('pago-meses').value;
-  const ref     = document.getElementById('pago-ref')?.value.trim() || '';
-  const banco   = document.getElementById('pago-banco')?.value.trim() || '';
-  const tel     = document.getElementById('pago-telefono')?.value.trim() || '';
-  const titular = document.getElementById('pago-titular')?.value.trim() || '';
-  const obs     = document.getElementById('pago-obs')?.value.trim() || '';
-  const montobs = document.getElementById('pago-monto-bs')?.value || '';
+  const alumno = document.getElementById('pago-alumno').value;
+  const monto  = document.getElementById('pago-monto').value;
+  const metodo = document.getElementById('pago-metodo').value;
+  const plan   = document.getElementById('pago-plan').value;
+  const fecha  = document.getElementById('pago-fecha').value;
+  const ref    = document.getElementById('pago-ref').value.trim();
+  const banco  = document.getElementById('pago-banco')?.value.trim() || '';
+  const tel    = document.getElementById('pago-telefono')?.value.trim() || '';
+  const titular= document.getElementById('pago-titular')?.value.trim() || '';
+  const obs    = document.getElementById('pago-obs')?.value.trim() || '';
 
   if (!alumno) { showToast('⚠️','Falta alumno','Selecciona el alumno'); return; }
-  if (!monto || parseFloat(monto) <= 0) { showToast('⚠️','Falta monto','Ingresa el monto'); return; }
-  if (!meses) { showToast('⚠️','Falta mes','Selecciona al menos un mes cubierto'); return; }
+  if (!monto || parseFloat(monto) <= 0) { showToast('⚠️','Falta monto','Ingresa el monto recibido'); return; }
   if (metodo !== 'Efectivo USD' && !ref) {
-    showToast('⚠️','Falta código','Ingresa el código o referencia de la transacción'); return;
+    showToast('⚠️','Falta referencia','Ingresa el número de referencia o comprobante'); return;
   }
 
-  showLoading('Registrando pago y generando recibo...');
+  showLoading('Registrando pago y enviando recibo...');
   try {
     const res = await fetch(API, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         accion: 'registrarPago',
-        nombre: alumno, monto, moneda, metodo, plan, fecha, meses,
-        referencia: ref, banco, telefono: tel, titular,
-        montoBS: montobs, observacion: obs, fuente: 'Admin Panel'
+        nombre: alumno, monto, metodo, plan, fecha,
+        referencia: ref, banco, telefono: tel, titular, observacion: obs,
+        fuente: 'Admin Panel'
       })
     });
     const data = await res.json();
     hideLoading();
     if (data.success) {
       closeModal('modal-pago');
-      const numRecibo = data.numeroRecibo || '';
-      showToast('✅', 'Pago registrado · ' + (numRecibo||plan),
-        data.emailEnviado ? 'Recibo enviado al representante' : 'Guardado (sin email)');
+      const msg = data.emailEnviado ? 'Recibo enviado al representante' : 'Pago guardado (sin email registrado)';
+      showToast('✅', 'Pago registrado · ' + plan, msg);
       loadPagos(); loadDashboard();
     } else {
       showToast('❌', 'Error', data.error || 'No se pudo registrar');
@@ -1730,7 +1690,7 @@ async function registrarPago() {
   } catch(e) {
     hideLoading();
     closeModal('modal-pago');
-    showToast('✅', 'Demo · Pago registrado', `$${monto} · ${meses}`);
+    showToast('✅', 'Demo · Pago registrado', `$${monto} de ${alumno}`);
     loadDashboard();
   }
 }
@@ -1856,7 +1816,6 @@ async function loadAsignaciones() {
 function openModal(id) { 
   document.getElementById(id).classList.add('open');
   if (id === 'modal-pago') {
-    initModalPago();
     var opt2x1 = document.getElementById('opt-2x1');
     var optTemp = document.getElementById('opt-temporada');
     if (opt2x1) opt2x1.style.display = promoActiva2x1 ? '' : 'none';
