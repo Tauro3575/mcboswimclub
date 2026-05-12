@@ -1441,18 +1441,24 @@ async function loadPagos() {
 
     // Filtrar por período
     pagos = pagos.filter(p => {
-      const fechaPago = p.fechaPago || p.fecha || '';
-      if (!fechaPago) return true;
-      const partes = fechaPago.split('/');
-      if (partes.length < 3) return true;
-      const fPago = new Date(partes[2], partes[1]-1, partes[0]);
+      const fechaStr = p.fechaPago || p.fecha || '';
+      if (!fechaStr) return true;
+      // Soportar dd/MM/yyyy y yyyy-MM-dd
+      let fPago;
+      if (fechaStr.includes('/')) {
+        const partes = fechaStr.split('/');
+        if (partes.length === 3) fPago = new Date(partes[2], partes[1]-1, partes[0]);
+      } else {
+        fPago = new Date(fechaStr);
+      }
+      if (!fPago || isNaN(fPago)) return true;
 
       if (tipo === 'mes' && mes) {
         const [anio, mesNum] = mes.split('-');
         return fPago.getFullYear() == anio && (fPago.getMonth()+1) == parseInt(mesNum);
       }
       if (tipo === 'rango' && desde && hasta) {
-        return fPago >= new Date(desde) && fPago <= new Date(hasta);
+        return fPago >= new Date(desde) && fPago <= new Date(hasta + 'T23:59:59');
       }
       return true;
     });
