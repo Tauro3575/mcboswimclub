@@ -875,24 +875,8 @@
 const API = '/.netlify/functions/instructor';
 const API_ADMIN = '/.netlify/functions/admin';
 
-// Clases disponibles para asignar
-const CLASES_DISPONIBLES = [
-  { id:'burbuja-lv-1530',   label:'🫧 Burbuja · L-V 3:30pm' },
-  { id:'burbuja-sab-11',    label:'🫧 Burbuja · Sáb 11am' },
-  { id:'iniciacion-lv-1500',label:'🎒 Iniciación · L-V 3pm (2h)' },
-  { id:'iniciacion-lv-1600',label:'🎒 Iniciación · L-V 4pm (1h)' },
-  { id:'iniciacion-sab-900',label:'🎒 Iniciación · Sáb 9am' },
-  { id:'intermedio-lv-1600',label:'🏊 Intermedio · L-V 4pm' },
-  { id:'intermedio-sab-1000',label:'🏊 Intermedio · Sáb 10am' },
-  { id:'avanzado-lv-1700',  label:'🏅 Avanzado · L-V 5pm' },
-  { id:'avanzado-sab-800',  label:'🏅 Avanzado · Sáb 8am' },
-  { id:'adultos-lv-1700',   label:'🌊 Adultos · L-V 5pm' },
-  { id:'adultos-lv-1800',   label:'🌊 Adultos · L-V 6pm' },
-  { id:'adultos-lv-1900',   label:'🌊 Adultos · L-V 7pm' },
-  { id:'adultos-sab-800',   label:'🌊 Adultos · Sáb 8am' },
-  { id:'privada-lv-1400',   label:'⭐ Privada · L-V 2pm' },
-  { id:'privada-sab-800',   label:'⭐ Privada · Sáb 8am' },
-];
+// Clases disponibles — se cargan dinámicamente desde la Sheet Horarios
+let CLASES_DISPONIBLES = [];
 
 // ═══════════════════════════════════════════════════════
 // STATE
@@ -1568,28 +1552,38 @@ async function guardarAsignacionModal() {
 
 async function loadAsignaciones() {
   try {
-    const res = await fetch(`${API}?action=obtenerInstructores`);
-    const data = await res.json();
-    const instructores = data.instructores || [];
+    const [resH, resI] = await Promise.all([
+      fetch(`${API}?action=obtenerHorarios`),
+      fetch(`${API}?action=obtenerInstructores`)
+    ]);
+    const dataH = await resH.json();
+    const dataI = await resI.json();
+    CLASES_DISPONIBLES = (dataH.horarios || []).map(h => ({
+      id:    h.id,
+      label: h.label,
+      nivel: h.nivel,
+      horario: h.horario
+    }));
+    const instructores = dataI.instructores || [];
     const tbody = document.getElementById('asig-table-body');
+    const nivelEmoji = { 'Burbuja':'🫧','Iniciación':'🎒','Intermedio':'🏊','Avanzado':'🏅','Adultos':'🌊','Privada':'⭐' };
 
-    const rows = [];
-    CLASES_DISPONIBLES.forEach(clase => {
+    const rows = CLASES_DISPONIBLES.map(clase => {
       const inst = instructores.find(i => Array.isArray(i.clases) && i.clases.includes(clase.id));
-      const nivel = clase.id.split('-')[0];
-      const nivelLabels = {burbuja:'🫧 Burbuja',iniciacion:'🎒 Iniciación',intermedio:'🏊 Intermedio',avanzado:'🏅 Avanzado',adultos:'🌊 Adultos',privada:'⭐ Privada'};
-      rows.push(`<tr>
-        <td><strong>${clase.label.split('·')[1]?.trim()||clase.label}</strong></td>
-        <td><span class="badge semanal">${nivelLabels[nivel]||nivel}</span></td>
+      const nivelKey = Object.keys(nivelEmoji).find(k => clase.nivel.includes(k)) || '';
+      const emoji = nivelEmoji[nivelKey] || '🏊';
+      return `<tr>
+        <td><strong>${clase.horario}</strong></td>
+        <td><span class="badge semanal">${emoji} ${clase.nivel}</span></td>
         <td>${inst?`<strong>${inst.nombre}</strong>`:'<span style="color:var(--gray);">Sin asignar</span>'}</td>
         <td style="color:var(--gray);">—</td>
         <td><span class="badge ${inst?'active':'pending'}">${inst?'Asignado':'Disponible'}</span></td>
-      </tr>`);
+      </tr>`;
     });
-    tbody.innerHTML = rows.join('');
+    tbody.innerHTML = rows.join('') || '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--gray);">Sin horarios configurados</td></tr>';
   } catch(e) {
     document.getElementById('asig-table-body').innerHTML =
-      '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--gray);">Sin datos de asignaciones</td></tr>';
+      '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--gray);">Error cargando asignaciones</td></tr>';
   }
 }
 
