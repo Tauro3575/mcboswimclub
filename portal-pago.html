@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Portal de Pago — Maracaibo Swimming Club</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --navy:#031d3a;
+  --blue:#0057a8;
+  --cyan:#00b4d8;
+  --gold:#f4b942;
+  --green:#16a34a;
+  --red:#dc2626;
+  --surface:#f0f7ff;
+  --white:#ffffff;
+  --gray:#64748b;
+  --border:rgba(0,87,168,.12);
+  --radius:16px;
+}
+body{font-family:'Outfit',sans-serif;background:var(--surface);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1.5rem;}
+
+/* CARD PRINCIPAL */
+.card{background:var(--white);border-radius:24px;box-shadow:0 8px 40px rgba(0,59,92,.14);width:100%;max-width:520px;overflow:hidden;}
+
+/* HEADER */
+.card-header{background:linear-gradient(135deg,var(--navy) 0%,var(--blue) 60%,var(--cyan) 100%);padding:2rem;text-align:center;}
+.card-header .logo{font-size:2.5rem;margin-bottom:.4rem;}
+.card-header h1{font-family:'Bebas Neue',sans-serif;color:var(--white);font-size:1.6rem;letter-spacing:.05em;margin:0;}
+.card-header p{color:var(--gold);font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;margin:.3rem 0 0;}
+
+/* ESTADOS */
+.state{display:none;padding:2rem;}
+.state.active{display:block;}
+
+/* LOADING */
+#state-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3rem;gap:1rem;}
+.spinner{width:48px;height:48px;border:4px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ERROR */
+#state-error{text-align:center;padding:3rem 2rem;}
+.error-icon{font-size:3rem;margin-bottom:1rem;}
+.error-title{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--red);margin-bottom:.5rem;}
+.error-msg{color:var(--gray);font-size:.9rem;line-height:1.6;}
+
+/* INFO ALUMNO */
+.alumno-card{background:linear-gradient(135deg,rgba(0,87,168,.06),rgba(0,180,216,.06));border:1.5px solid var(--border);border-radius:var(--radius);padding:1.2rem 1.4rem;margin-bottom:1.5rem;}
+.alumno-nombre{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:var(--navy);margin-bottom:.4rem;}
+.alumno-tags{display:flex;flex-wrap:wrap;gap:.4rem;}
+.tag{background:rgba(0,87,168,.08);color:var(--blue);font-size:.75rem;font-weight:600;padding:.25rem .7rem;border-radius:50px;}
+
+/* FORM */
+.form-section{margin-bottom:1.2rem;}
+.form-label{font-size:.78rem;font-weight:600;color:var(--navy);letter-spacing:.06em;text-transform:uppercase;margin-bottom:.5rem;display:block;}
+.form-note{font-size:.72rem;color:var(--gray);font-weight:400;text-transform:none;letter-spacing:0;}
+
+/* MONEDA TOGGLE */
+.moneda-toggle{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.5rem;}
+.moneda-btn{padding:.7rem;border:2px solid var(--border);border-radius:10px;background:var(--white);color:var(--gray);font-family:'Outfit',sans-serif;font-size:.85rem;font-weight:600;cursor:pointer;transition:.2s;}
+.moneda-btn.active{border-color:var(--blue);background:rgba(0,87,168,.06);color:var(--blue);}
+
+select,input[type=text],input[type=number],textarea{
+  width:100%;padding:.7rem .9rem;border:1.5px solid var(--border);border-radius:10px;
+  font-family:'Outfit',sans-serif;font-size:.9rem;color:var(--navy);
+  background:var(--white);transition:.2s;outline:none;
+}
+select:focus,input:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,87,168,.08);}
+textarea{resize:vertical;min-height:70px;}
+
+/* MESES */
+.meses-grid{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.4rem;}
+.mes-btn{padding:.35rem .8rem;border:1.5px solid var(--border);border-radius:8px;background:var(--white);color:var(--gray);font-size:.78rem;font-weight:600;cursor:pointer;transition:.2s;font-family:'Outfit',sans-serif;}
+.mes-btn.sel{background:var(--blue);border-color:var(--blue);color:var(--white);}
+
+/* PREVIEW */
+.preview-box{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:1rem 1.2rem;margin-top:1rem;font-size:.82rem;}
+.preview-box .preview-title{font-weight:600;color:var(--navy);margin-bottom:.6rem;font-size:.85rem;}
+.preview-row{display:flex;justify-content:space-between;padding:.25rem 0;border-bottom:1px solid rgba(0,87,168,.06);}
+.preview-row:last-child{border:none;}
+.preview-key{color:var(--gray);}
+.preview-val{font-weight:600;color:var(--navy);}
+
+/* BTN */
+.btn-submit{width:100%;padding:1rem;background:linear-gradient(135deg,var(--blue),var(--cyan));color:var(--white);border:none;border-radius:12px;font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:.08em;cursor:pointer;transition:.2s;margin-top:1rem;}
+.btn-submit:hover{opacity:.9;transform:translateY(-1px);}
+.btn-submit:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+
+/* SUCCESS */
+#state-success{text-align:center;padding:2.5rem 2rem;}
+.success-icon{font-size:3.5rem;margin-bottom:1rem;}
+.success-title{font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--green);margin-bottom:.5rem;}
+.success-msg{color:var(--gray);font-size:.9rem;line-height:1.7;}
+.success-box{background:#f0fdf4;border:1.5px solid #86efac;border-radius:12px;padding:1rem 1.2rem;margin:1.2rem 0;text-align:left;font-size:.85rem;color:#15803d;}
+
+/* FOOTER */
+.portal-footer{margin-top:1.5rem;text-align:center;font-size:.78rem;color:var(--gray);}
+.portal-footer a{color:var(--blue);text-decoration:none;}
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="card-header">
+    <div class="logo">🏊</div>
+    <h1>Maracaibo Swimming Club</h1>
+    <p>Portal de Renovación de Cupo</p>
+  </div>
+
+  <!-- LOADING -->
+  <div id="state-loading" class="state active">
+    <div class="spinner"></div>
+    <p style="color:var(--gray);font-size:.9rem;">Verificando tu enlace...</p>
+  </div>
+
+  <!-- ERROR -->
+  <div id="state-error" class="state">
+    <div class="error-icon">⛔</div>
+    <div class="error-title">Enlace no válido</div>
+    <p class="error-msg" id="error-msg">Este enlace ha expirado o ya fue utilizado.</p>
+    <div style="margin-top:1.5rem;">
+      <a href="https://wa.me/584146004468" style="display:inline-flex;align-items:center;gap:.5rem;background:#25d366;color:white;padding:.7rem 1.4rem;border-radius:50px;text-decoration:none;font-weight:600;font-size:.85rem;">📱 Contactar por WhatsApp</a>
+    </div>
+  </div>
+
+  <!-- FORMULARIO DE PAGO -->
+  <div id="state-form" class="state">
+    <div style="padding:1.5rem 1.5rem 0;">
+      <p style="font-size:.85rem;color:var(--gray);margin-bottom:1rem;">Completa los datos de tu pago para renovar el cupo.</p>
+
+      <!-- ALUMNO INFO -->
+      <div class="alumno-card">
+        <div class="alumno-nombre" id="alumno-nombre">—</div>
+        <div class="alumno-tags">
+          <span class="tag" id="alumno-nivel">—</span>
+          <span class="tag" id="alumno-horario">—</span>
+          <span class="tag" id="alumno-plan">—</span>
+        </div>
+      </div>
+
+      <!-- MONEDA -->
+      <div class="form-section">
+        <label class="form-label">Moneda de pago</label>
+        <div class="moneda-toggle">
+          <button class="moneda-btn active" id="btn-usd" onclick="setMoneda('USD')">💵 Dólares (USD)</button>
+          <button class="moneda-btn" id="btn-bs" onclick="setMoneda('BS')">🇻🇪 Bolívares (BS)</button>
+        </div>
+        <p style="font-size:.72rem;color:var(--gray);" id="moneda-nota">Los planes de 6 y 12 meses solo están disponibles en USD.</p>
+      </div>
+
+      <!-- MÉTODO -->
+      <div class="form-section">
+        <label class="form-label">Método de pago</label>
+        <div id="metodos-usd">
+          <select id="metodo-usd" onchange="updatePreview()">
+            <option value="Zelle">💵 Zelle</option>
+            <option value="Transferencia USD">🏦 Transferencia bancaria</option>
+            <option value="Efectivo USD">💰 Efectivo USD</option>
+          </select>
+        </div>
+        <div id="metodos-bs" style="display:none;">
+          <select id="metodo-bs" onchange="updatePreview()">
+            <option value="Pago Movil">📱 Pago Móvil</option>
+            <option value="Transferencia BS">🏦 Transferencia bancaria</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- MES(ES) -->
+      <div class="form-section">
+        <label class="form-label">Mes(es) que cancelas <span class="form-note" id="meses-nota">(puedes seleccionar varios en USD)</span></label>
+        <div class="meses-grid" id="meses-grid"></div>
+        <input type="hidden" id="meses-val"/>
+      </div>
+
+      <!-- MONTO -->
+      <div class="form-section">
+        <label class="form-label">Monto <span class="form-note" id="label-moneda-monto">(USD)</span></label>
+        <input type="number" id="monto" placeholder="50.00" step="0.01" min="0" oninput="updatePreview()"/>
+        <div id="monto-bs-wrap" style="display:none;margin-top:.5rem;">
+          <label class="form-label">Monto en Bolívares</label>
+          <input type="number" id="monto-bs" placeholder="Monto en Bs." step="1" min="0"/>
+        </div>
+      </div>
+
+      <!-- REFERENCIA -->
+      <div class="form-section" id="ref-wrap">
+        <label class="form-label" id="label-ref">Código de confirmación</label>
+        <input type="text" id="referencia" placeholder="Código de transacción" oninput="updatePreview()"/>
+      </div>
+
+      <!-- BANCO -->
+      <div class="form-section" id="banco-wrap">
+        <label class="form-label">Banco <span class="form-note">(opcional)</span></label>
+        <input type="text" id="banco" placeholder="Ej: Banesco, BOFA..."/>
+      </div>
+
+      <!-- PAGO MÓVIL EXTRA -->
+      <div id="pagomovil-wrap" style="display:none;">
+        <div class="form-section">
+          <label class="form-label">Teléfono Pago Móvil</label>
+          <input type="text" id="tel-movil" placeholder="Ej: 0414-6004468"/>
+        </div>
+      </div>
+
+      <!-- PREVIEW -->
+      <div class="preview-box">
+        <div class="preview-title">📋 Resumen del pago</div>
+        <div class="preview-row"><span class="preview-key">Alumno</span><span class="preview-val" id="prev-nombre">—</span></div>
+        <div class="preview-row"><span class="preview-key">Mes(es)</span><span class="preview-val" id="prev-meses">—</span></div>
+        <div class="preview-row"><span class="preview-key">Método</span><span class="preview-val" id="prev-metodo">—</span></div>
+        <div class="preview-row"><span class="preview-key">Referencia</span><span class="preview-val" id="prev-ref">—</span></div>
+        <div class="preview-row"><span class="preview-key">Monto</span><span class="preview-val" id="prev-monto">—</span></div>
+      </div>
+
+      <button class="btn-submit" id="btn-submit" onclick="enviarPago()">✅ Confirmar Pago</button>
+      <p style="font-size:.72rem;color:var(--gray);text-align:center;margin-top:.8rem;">Al confirmar, el administrador revisará tu pago y te enviará el recibo por email.</p>
+    </div>
+    <div style="height:1.5rem;"></div>
+  </div>
+
+  <!-- ÉXITO -->
+  <div id="state-success" class="state">
+    <div class="success-icon">✅</div>
+    <div class="success-title">¡Pago Recibido!</div>
+    <p class="success-msg">Tu información de pago fue enviada correctamente al equipo de MSC.</p>
+    <div class="success-box">
+      <strong>¿Qué sigue?</strong><br/>
+      El administrador verificará tu pago y te enviará el recibo oficial por correo electrónico. Este proceso toma menos de 24 horas en días hábiles.
+    </div>
+    <p style="font-size:.82rem;color:var(--gray);">¿Tienes dudas? Escríbenos por WhatsApp.</p>
+    <div style="margin-top:1rem;">
+      <a href="https://wa.me/584146004468" style="display:inline-flex;align-items:center;gap:.5rem;background:#25d366;color:white;padding:.6rem 1.2rem;border-radius:50px;text-decoration:none;font-weight:600;font-size:.82rem;">📱 WhatsApp</a>
+    </div>
+  </div>
+</div>
+
+<div class="portal-footer">
+  <a href="https://mcboswimclub.com">mcboswimclub.com</a> · 
+  <a href="https://wa.me/584146004468">WhatsApp</a> · 
+  <a href="https://instagram.com/mcboswimclub">@mcboswimclub</a>
+</div>
+
+<script>
+const API = 'https://script.google.com/macros/s/AKfycbxmzFLQCgJDNQeawz_N8bvBnwjAPAv8K2LQpg8v1YHRFbI3DnnXEWBwbW1nJa4V9sV9/exec';
+const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+let TOKEN    = '';
+let ALUMNO   = {};
+let MONEDA   = 'USD';
+
+// ── Init ──
+window.addEventListener('load', async () => {
+  const params = new URLSearchParams(window.location.search);
+  TOKEN = params.get('token') || '';
+
+  if (!TOKEN) {
+    showState('error');
+    document.getElementById('error-msg').textContent = 'No se encontró un token de acceso en este enlace.';
+    return;
+  }
+
+  try {
+    const res  = await fetch(API + '?action=validarTokenRenovacion&token=' + encodeURIComponent(TOKEN));
+    const data = await res.json();
+
+    if (!data.valido) {
+      document.getElementById('error-msg').textContent = data.error || 'Enlace no válido.';
+      showState('error');
+      return;
+    }
+
+    ALUMNO = data.alumno || {};
+    document.getElementById('alumno-nombre').textContent  = ALUMNO.nombre  || '—';
+    document.getElementById('alumno-nivel').textContent   = ALUMNO.nivel   || '—';
+    document.getElementById('alumno-horario').textContent = ALUMNO.horario || '—';
+    document.getElementById('alumno-plan').textContent    = ALUMNO.plan    || '—';
+    document.getElementById('prev-nombre').textContent    = ALUMNO.nombre  || '—';
+
+    renderMeses();
+    updateMetodo();
+    updatePreview();
+    showState('form');
+
+  } catch(e) {
+    document.getElementById('error-msg').textContent = 'Error de conexión. Intenta más tarde.';
+    showState('error');
+  }
+});
+
+function showState(s) {
+  ['loading','error','form','success'].forEach(id => {
+    document.getElementById('state-' + id).classList.toggle('active', id === s);
+  });
+}
+
+function setMoneda(m) {
+  MONEDA = m;
+  document.getElementById('btn-usd').classList.toggle('active', m === 'USD');
+  document.getElementById('btn-bs').classList.toggle('active',  m === 'BS');
+  document.getElementById('metodos-usd').style.display = m === 'USD' ? '' : 'none';
+  document.getElementById('metodos-bs').style.display  = m === 'BS'  ? '' : 'none';
+  document.getElementById('monto-bs-wrap').style.display = m === 'BS' ? '' : 'none';
+  document.getElementById('label-moneda-monto').textContent = m === 'USD' ? '(USD)' : '(equivalente en USD)';
+  document.getElementById('meses-nota').textContent = m === 'BS'
+    ? '(solo 1 mes en Bs.)' : '(puedes seleccionar varios en USD)';
+  renderMeses();
+  updateMetodo();
+  updatePreview();
+}
+
+function renderMeses() {
+  const ahora  = new Date();
+  const mesAct = ahora.getMonth();
+  const anio   = ahora.getFullYear();
+  const total  = MONEDA === 'BS' ? 1 : 4;
+  const grid   = document.getElementById('meses-grid');
+  grid.innerHTML = '';
+  for (let i = 0; i < total; i++) {
+    const idx   = (mesAct + i) % 12;
+    const anioM = anio + Math.floor((mesAct + i) / 12);
+    const val   = MESES[idx] + ' ' + anioM;
+    const btn   = document.createElement('button');
+    btn.className = 'mes-btn' + (i === 0 ? ' sel' : '');
+    btn.textContent = MESES[idx] + ' ' + anioM;
+    btn.onclick = () => toggleMes(btn, val);
+    grid.appendChild(btn);
+  }
+  // Marcar primero por defecto
+  const first = MESES[mesAct] + ' ' + anio;
+  document.getElementById('meses-val').value = first;
+  updatePreview();
+}
+
+function toggleMes(btn, val) {
+  if (MONEDA === 'BS') {
+    document.querySelectorAll('.mes-btn').forEach(b => b.classList.remove('sel'));
+    btn.classList.add('sel');
+    document.getElementById('meses-val').value = val;
+  } else {
+    btn.classList.toggle('sel');
+    const sel = [...document.querySelectorAll('.mes-btn.sel')].map(b => b.textContent);
+    document.getElementById('meses-val').value = sel.join(', ');
+  }
+  updatePreview();
+}
+
+function updateMetodo() {
+  const metodo = MONEDA === 'USD'
+    ? document.getElementById('metodo-usd').value
+    : document.getElementById('metodo-bs').value;
+
+  const esEfectivo  = metodo === 'Efectivo USD';
+  const esPagoMovil = metodo === 'Pago Movil';
+
+  document.getElementById('ref-wrap').style.display       = esEfectivo ? 'none' : '';
+  document.getElementById('banco-wrap').style.display     = (esEfectivo || esPagoMovil) ? 'none' : '';
+  document.getElementById('pagomovil-wrap').style.display = esPagoMovil ? '' : 'none';
+
+  const labels = {
+    'Zelle': 'Código de confirmación Zelle',
+    'Transferencia USD': 'N° de referencia bancaria',
+    'Pago Movil': 'Código de confirmación Pago Móvil',
+    'Transferencia BS': 'N° de referencia bancaria',
+  };
+  document.getElementById('label-ref').textContent = labels[metodo] || 'Código de confirmación';
+  updatePreview();
+}
+
+document.getElementById('metodo-usd').addEventListener('change', updateMetodo);
+document.getElementById('metodo-bs').addEventListener('change', updateMetodo);
+
+function updatePreview() {
+  const metodo = MONEDA === 'USD'
+    ? document.getElementById('metodo-usd').value
+    : document.getElementById('metodo-bs').value;
+  const meses  = document.getElementById('meses-val').value;
+  const monto  = document.getElementById('monto').value;
+  const ref    = document.getElementById('referencia').value;
+
+  document.getElementById('prev-meses').textContent  = meses  || '—';
+  document.getElementById('prev-metodo').textContent = metodo + ' · ' + MONEDA;
+  document.getElementById('prev-ref').textContent    = metodo === 'Efectivo USD' ? '(auto-generado)' : (ref || '—');
+  document.getElementById('prev-monto').textContent  = monto ? (MONEDA === 'USD' ? '$' : 'Bs. ') + monto : '—';
+}
+
+async function enviarPago() {
+  const metodo  = MONEDA === 'USD'
+    ? document.getElementById('metodo-usd').value
+    : document.getElementById('metodo-bs').value;
+  const meses   = document.getElementById('meses-val').value;
+  const monto   = document.getElementById('monto').value;
+  const montoBS = document.getElementById('monto-bs').value;
+  const ref     = document.getElementById('referencia').value.trim();
+  const banco   = document.getElementById('banco').value.trim();
+  const telMov  = document.getElementById('tel-movil').value.trim();
+
+  if (!meses)  { alert('Selecciona al menos un mes'); return; }
+  if (!monto || parseFloat(monto) <= 0) { alert('Ingresa el monto pagado'); return; }
+  if (metodo !== 'Efectivo USD' && !ref) { alert('Ingresa el código o referencia de la transacción'); return; }
+
+  const btn = document.getElementById('btn-submit');
+  btn.disabled = true;
+  btn.textContent = '⏳ Enviando...';
+
+  try {
+    const res = await fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        accion:     'registrarPagoRenovacion',
+        token:      TOKEN,
+        nombre:     ALUMNO.nombre    || '',
+        nombreRep:  ALUMNO.nombreRep || '',
+        emailRep:   ALUMNO.emailRep  || '',
+        nivel:      ALUMNO.nivel     || '',
+        horario:    ALUMNO.horario   || '',
+        plan:       ALUMNO.plan      || '',
+        moneda:     MONEDA,
+        metodo,
+        referencia: ref,
+        banco,
+        telefono:   telMov,
+        monto,
+        montoBS,
+        meses,
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showState('success');
+    } else {
+      alert(data.error || 'Error al enviar. Intenta de nuevo.');
+      btn.disabled = false;
+      btn.textContent = '✅ Confirmar Pago';
+    }
+  } catch(e) {
+    alert('Error de conexión. Verifica tu internet e intenta de nuevo.');
+    btn.disabled = false;
+    btn.textContent = '✅ Confirmar Pago';
+  }
+}
+</script>
+</body>
+</html>
