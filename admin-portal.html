@@ -1167,9 +1167,9 @@ function switchTab(tab) {
 async function loadDashboard() {
   try {
     const [rAlumnos, rInst, rPagos, rClases] = await Promise.all([
-      fetch(`${API}?action=obtenerTodosAlumnos`).then(r=>r.json()).catch(()=>({alumnos:[]})),
+      fetch(`${API_ADMIN}?action=obtenerTodosAlumnos`).then(r=>r.json()).catch(()=>({alumnos:[]})),
       fetch(`${API}?action=obtenerInstructores`).then(r=>r.json()).catch(()=>({instructores:[]})),
-      fetch(`${API}?action=obtenerPagos`).then(r=>r.json()).catch(()=>({pagos:[]})),
+      fetch(`${API_ADMIN}?action=obtenerPagos`).then(r=>r.json()).catch(()=>({pagos:[]})),
       fetch(`${API}?action=obtenerHistorial`).then(r=>r.json()).catch(()=>({reportes:[]})),
     ]);
 
@@ -1181,7 +1181,16 @@ async function loadDashboard() {
     const hoy = new Date();
     const mesActual = hoy.getMonth(); const anioActual = hoy.getFullYear();
     const pagosMes = pagos.filter(p => {
-      const f = new Date(p.fecha);
+      const fechaStr = p.fechaPago || p.fecha || '';
+      if (!fechaStr) return false;
+      let f;
+      if (String(fechaStr).includes('/')) {
+        const parts = String(fechaStr).split('/');
+        if (parts.length === 3) f = new Date(parts[2], parseInt(parts[1])-1, parseInt(parts[0]));
+      } else {
+        f = new Date(fechaStr);
+      }
+      if (!f || isNaN(f)) return false;
       return f.getMonth() === mesActual && f.getFullYear() === anioActual;
     });
     const ingresos = pagosMes.reduce((s,p) => s + (parseFloat(p.monto)||0), 0);
@@ -1380,7 +1389,7 @@ async function revocarToken(token) {
 // ═══════════════════════════════════════════════════════
 async function loadAlumnos() {
   try {
-    const res = await fetch(`${API}?action=obtenerTodosAlumnos`);
+    const res = await fetch(`${API_ADMIN}?action=obtenerTodosAlumnos`);
     const data = await res.json();
     allAlumnos = data.alumnos || [];
     renderAlumnos(allAlumnos);
@@ -1499,7 +1508,7 @@ async function loadPagos() {
   table.style.display = 'none';
 
   try {
-    const res  = await fetch(`${API}?action=obtenerPagos`);
+    const res  = await fetch(`${API_ADMIN}?action=obtenerPagos`);
     const data = await res.json();
     let pagos  = data.pagos || [];
 
