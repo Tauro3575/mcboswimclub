@@ -2134,15 +2134,13 @@ function abrirModalPago(nombre, nivel, email) {
     if (!found && nombre) {
       var opt = document.createElement('option');
       opt.value = nombre;
-      opt.textContent = nombre + (nivel ? ' (' + nivel + ') — Lead' : '');
+      opt.textContent = nombre + (nivel ? ' (' + nivel + ')' : '');
       opt.dataset.email = email;
       sel.appendChild(opt);
       sel.value = nombre;
     }
-    autocompletarMonto();
-    var prev = document.getElementById('preview-email');
-    if (prev) prev.textContent = email || 'sin email registrado';
-  }, 100);
+    onAlumnoChange();
+  }, 150);
 }
 
 function filtrarAlumnos() {
