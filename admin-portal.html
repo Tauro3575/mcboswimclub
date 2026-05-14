@@ -239,18 +239,53 @@
       <h1>Maracaibo Swimming Club</h1>
       <p>Panel de Administración</p>
     </div>
-    <h2 class="login-title">Acceso Admin</h2>
-    <p class="login-sub">Solo personal autorizado</p>
-    <div class="form-group">
-      <label>Email</label>
-      <input type="email" id="login-email" placeholder="admin@mcboswimclub.com"/>
+
+    <!-- PASO 1: Email + Contraseña -->
+    <div id="login-step1">
+      <h2 class="login-title">Acceso Admin</h2>
+      <p class="login-sub">Solo personal autorizado</p>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="login-email" placeholder="admin@mcboswimclub.com" onkeydown="if(event.key==='Enter')doLogin()"/>
+      </div>
+      <div class="form-group">
+        <label>Contraseña</label>
+        <input type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/>
+      </div>
+      <button class="btn-login" onclick="doLogin()">⚙️ Ingresar al Panel</button>
+      <div class="login-error" id="login-error"></div>
     </div>
-    <div class="form-group">
-      <label>Contraseña</label>
-      <input type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/>
+
+    <!-- PASO 2: Código 2FA -->
+    <div id="login-step2" style="display:none;">
+      <h2 class="login-title">Verificación 2FA</h2>
+      <p class="login-sub">Ingresa el código de Google Authenticator</p>
+      <div style="text-align:center;font-size:3rem;margin:1rem 0;">🔐</div>
+      <div class="form-group">
+        <label>Código de 6 dígitos</label>
+        <input type="number" id="totp-input" placeholder="000000" maxlength="6"
+          style="text-align:center;font-size:1.5rem;letter-spacing:.5rem;"
+          onkeydown="if(event.key==='Enter')doLogin2FA()"/>
+      </div>
+      <button class="btn-login" id="btn-verify-2fa" onclick="doLogin2FA()">✅ Verificar</button>
+      <div class="login-error" id="login-error-2fa"></div>
+      <p style="text-align:center;margin-top:1rem;">
+        <a href="#" onclick="doLogout();return false;" style="color:rgba(255,255,255,.4);font-size:.8rem;">← Volver</a>
+      </p>
     </div>
-    <button class="btn-login" onclick="doLogin()">⚙️ Ingresar al Panel</button>
-    <div class="login-error" id="login-error">❌ Credenciales incorrectas.</div>
+
+    <!-- PASO QR: Primera configuración -->
+    <div id="login-step-qr" style="display:none;">
+      <h2 class="login-title">Configura 2FA</h2>
+      <p class="login-sub">Escanea con Google Authenticator</p>
+      <div style="text-align:center;margin:1rem 0;">
+        <img id="qr-image" src="" alt="QR Code" style="width:180px;height:180px;border-radius:12px;background:white;padding:8px;"/>
+      </div>
+      <p style="color:rgba(255,255,255,.5);font-size:.75rem;text-align:center;margin-bottom:.5rem;">O ingresa este código manualmente:</p>
+      <div style="background:rgba(255,255,255,.08);border-radius:8px;padding:.7rem;text-align:center;font-family:monospace;color:var(--gold);font-size:.85rem;letter-spacing:.1em;margin-bottom:1rem;" id="qr-secret"></div>
+      <button class="btn-login" onclick="doLoginQR()">✅ Ya lo configuré → Continuar</button>
+    </div>
+
   </div>
 </div>
 
@@ -1065,6 +1100,29 @@ let currentNombre = 'Administrador';
 // ═══════════════════════════════════════════════════════
 // LOGIN / LOGOUT
 // ═══════════════════════════════════════════════════════
+// ── SESIÓN ──
+let sessionToken  = localStorage.getItem('msc_session_token') || '';
+let sessionExpira = parseInt(localStorage.getItem('msc_session_expira') || '0');
+let currentUser   = JSON.parse(localStorage.getItem('msc_user') || 'null');
+
+// Verificar sesión activa al cargar
+window.addEventListener('load', function() {
+  if (sessionToken && Date.now() < sessionExpira) {
+    currentUser = JSON.parse(localStorage.getItem('msc_user') || 'null');
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    if (currentUser) document.getElementById('admin-nombre').textContent = currentUser.nombre;
+    initApp();
+  }
+});
+
+// Auto-logout por inactividad
+setInterval(function() {
+  if (sessionToken && Date.now() > sessionExpira) doLogout();
+}, 60000);
+
+let _loginEmail = '', _loginPass = '';
+
 async function doLogin() {
   const email = document.getElementById('login-email').value.trim();
   const pass  = document.getElementById('login-pass').value;
@@ -1072,57 +1130,117 @@ async function doLogin() {
   err.style.display = 'none';
 
   if (!email || !pass) {
-    err.textContent = '❌ Completa todos los campos.';
+    err.textContent = 'Completa todos los campos.';
     err.style.display = 'block'; return;
   }
 
-  const ADMIN_USERS = {
-    'waltertordecilla75@gmail.com': { pass: 'T3ln3tsa75',  rol: 'admin',     nombre: 'Walter Tordecilla' },
-    'gabriela.lorefice.gls@gmail.com': { pass: 'T3ln3ts@71', rol: 'admin',   nombre: 'Gabriela Lorefice' },
-    'juanpirela1302@gmail.com':      { pass: 'Mcb0SWC2026', rol: 'asistente', nombre: 'Juan Manuel Pirela' },
-  };
-
-  const user = ADMIN_USERS[email];
-  if (user && user.pass === pass) {
-    currentRol    = user.rol;
-    currentNombre = user.nombre;
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-    initApp();
-    return;
-  }
+  const btn = document.querySelector('.btn-login');
+  btn.textContent = '⏳ Verificando...';
+  btn.disabled = true;
 
   try {
-    const res  = await fetch(API, {
+    const res  = await fetch('/.netlify/functions/auth', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ accion: 'loginAdmin', email, password: pass })
     });
     const data = await res.json();
-    if (data.success) {
-      document.getElementById('login-screen').style.display = 'none';
-      document.getElementById('app').style.display = 'block';
-      initApp();
-    } else {
-      err.textContent = '❌ Credenciales incorrectas.';
-      err.style.display = 'block';
+
+    if (data.primerLogin) {
+      _loginEmail = email; _loginPass = pass;
+      document.getElementById('login-step1').style.display = 'none';
+      document.getElementById('login-step-qr').style.display = 'block';
+      document.getElementById('qr-secret').textContent = data.secret;
+      document.getElementById('qr-image').src =
+        'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(data.qrUrl);
+      return;
     }
+    if (data.requiere2FA || data.success === false && !data.bloqueado && !data.error?.includes('incorrecta')) {
+      _loginEmail = email; _loginPass = pass;
+      document.getElementById('login-step1').style.display = 'none';
+      document.getElementById('login-step2').style.display = 'block';
+      setTimeout(function(){ document.getElementById('totp-input').focus(); }, 100);
+      return;
+    }
+    if (!data.success) {
+      const r = data.intentosRestantes;
+      err.textContent = (data.error || 'Credenciales incorrectas') + (r !== undefined ? ' (' + r + ' intento' + (r!==1?'s':'') + ' restante' + (r!==1?'s':'') + ')' : '');
+      err.style.display = 'block';
+      return;
+    }
+    // Login sin 2FA (no debería pasar pero por si acaso)
+    _guardarSesion(data);
   } catch(e) {
-    err.textContent = '❌ Credenciales incorrectas.';
+    err.textContent = 'Error de conexión. Intenta de nuevo.';
     err.style.display = 'block';
+  } finally {
+    btn.textContent = '⚙️ Ingresar al Panel';
+    btn.disabled = false;
   }
 }
 
+async function doLogin2FA() {
+  const totp  = document.getElementById('totp-input').value.trim();
+  const err   = document.getElementById('login-error-2fa') || document.getElementById('login-error');
+  if (!totp || totp.length !== 6) {
+    err.textContent = 'El código debe tener 6 dígitos.';
+    err.style.display = 'block'; return;
+  }
+  err.style.display = 'none';
+  const btn = document.getElementById('btn-verify-2fa');
+  if(btn){ btn.textContent = '⏳ Verificando...'; btn.disabled = true; }
+
+  try {
+    const res = await fetch('/.netlify/functions/auth', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ accion: 'loginAdmin', email: _loginEmail, password: _loginPass, totp })
+    });
+    const data = await res.json();
+    if (data.success) {
+      _guardarSesion(data);
+    } else {
+      err.textContent = data.error || 'Código incorrecto';
+      err.style.display = 'block';
+    }
+  } catch(e) {
+    err.textContent = 'Error de conexión.';
+    err.style.display = 'block';
+  } finally {
+    if(btn){ btn.textContent = '✅ Verificar'; btn.disabled = false; }
+  }
+}
+
+function doLoginQR() {
+  document.getElementById('login-step-qr').style.display = 'none';
+  document.getElementById('login-step2').style.display = 'block';
+  setTimeout(function(){ document.getElementById('totp-input').focus(); }, 100);
+}
+
+function _guardarSesion(data) {
+  sessionToken  = data.sessionToken;
+  sessionExpira = data.expira;
+  currentUser   = { nombre: data.nombre, email: data.email, rol: data.rol };
+  localStorage.setItem('msc_session_token',  sessionToken);
+  localStorage.setItem('msc_session_expira', String(sessionExpira));
+  localStorage.setItem('msc_user', JSON.stringify(currentUser));
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('admin-nombre').textContent = data.nombre;
+  initApp();
+}
+
 function doLogout() {
-  currentRol = 'admin';
-  currentNombre = 'Administrador';
+  localStorage.removeItem('msc_session_token');
+  localStorage.removeItem('msc_session_expira');
+  localStorage.removeItem('msc_user');
+  sessionToken = ''; sessionExpira = 0; currentUser = null;
   document.getElementById('login-screen').style.display = 'flex';
   document.getElementById('app').style.display = 'none';
+  document.getElementById('login-step1').style.display = 'block';
+  document.getElementById('login-step2').style.display = 'none';
+  const qrStep = document.getElementById('login-step-qr');
+  if (qrStep) qrStep.style.display = 'none';
   document.getElementById('login-pass').value = '';
   document.getElementById('login-email').value = '';
-  // Restaurar tabs visibles
-  document.querySelectorAll('.tab-btn').forEach(function(btn) {
-    btn.style.display = '';
-  });
 }
 
 // ═══════════════════════════════════════════════════════
