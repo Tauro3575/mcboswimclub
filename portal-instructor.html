@@ -279,18 +279,53 @@
       <h1>Maracaibo Swimming Club</h1>
       <p>Portal del Instructor</p>
     </div>
-    <h2 class="login-title">Acceso</h2>
-    <p class="login-sub">Ingresa tus credenciales para continuar</p>
-    <div class="form-group">
-      <label>Email</label>
-      <input type="email" id="login-email" placeholder="tu@email.com"/>
+
+    <!-- PASO 1: Email + Contraseña -->
+    <div id="login-step1">
+      <h2 class="login-title">Acceso</h2>
+      <p class="login-sub">Ingresa tus credenciales para continuar</p>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="login-email" placeholder="tu@email.com" onkeydown="if(event.key==='Enter')doLogin()"/>
+      </div>
+      <div class="form-group">
+        <label>Contraseña</label>
+        <input type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/>
+      </div>
+      <button class="btn-login" id="btn-login" onclick="doLogin()">Entrar al Portal →</button>
+      <div class="login-error" id="login-error"></div>
     </div>
-    <div class="form-group">
-      <label>Contraseña</label>
-      <input type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/>
+
+    <!-- PASO 2: Código 2FA -->
+    <div id="login-step2" style="display:none;">
+      <h2 class="login-title">Verificación 2FA</h2>
+      <p class="login-sub">Ingresa el código de Google Authenticator</p>
+      <div style="text-align:center;font-size:3rem;margin:1rem 0;">🔐</div>
+      <div class="form-group">
+        <label>Código de 6 dígitos</label>
+        <input type="number" id="totp-input" placeholder="000000" maxlength="6"
+          style="text-align:center;font-size:1.4rem;letter-spacing:.4rem;"
+          onkeydown="if(event.key==='Enter')doLogin2FA()"/>
+      </div>
+      <button class="btn-login" id="btn-verify-2fa" onclick="doLogin2FA()">✅ Verificar</button>
+      <div class="login-error" id="login-error-2fa"></div>
+      <p style="text-align:center;margin-top:1rem;">
+        <a href="#" onclick="volverStep1();return false;" style="color:rgba(255,255,255,.4);font-size:.8rem;">← Volver</a>
+      </p>
     </div>
-    <button class="btn-login" onclick="doLogin()">Entrar al Portal →</button>
-    <div class="login-error" id="login-error">❌ Credenciales incorrectas.</div>
+
+    <!-- PASO QR: Primera configuración -->
+    <div id="login-step-qr" style="display:none;">
+      <h2 class="login-title">Configura 2FA</h2>
+      <p class="login-sub">Escanea con Google Authenticator</p>
+      <div style="text-align:center;margin:1rem 0;">
+        <img id="qr-image" src="" alt="QR" style="width:170px;height:170px;border-radius:10px;background:white;padding:8px;"/>
+      </div>
+      <p style="color:rgba(255,255,255,.5);font-size:.75rem;text-align:center;margin-bottom:.5rem;">O ingresa este código manualmente:</p>
+      <div style="background:rgba(255,255,255,.08);border-radius:8px;padding:.7rem;text-align:center;font-family:monospace;color:#f4b942;font-size:.8rem;letter-spacing:.1em;margin-bottom:1rem;" id="qr-secret"></div>
+      <button class="btn-login" onclick="doLoginQR()">✅ Ya lo configuré → Continuar</button>
+    </div>
+
   </div>
 </div>
 
@@ -603,6 +638,8 @@ let evaluations = {};
 let escalados = {};
 
 // ── LOGIN ────────────────────────────────────────────
+let _instrEmail = '', _instrPass = '';
+
 async function doLogin() {
   const email = document.getElementById('login-email').value.trim();
   const pass  = document.getElementById('login-pass').value;
@@ -610,9 +647,13 @@ async function doLogin() {
   err.style.display = 'none';
 
   if (!email || !pass) {
-    err.textContent = '❌ Completa todos los campos.';
+    err.textContent = 'Completa todos los campos.';
     err.style.display = 'block'; return;
   }
+
+  const btn = document.getElementById('btn-login');
+  btn.textContent = '⏳ Verificando...';
+  btn.disabled = true;
 
   try {
     const res  = await fetch(API, {
@@ -620,27 +661,99 @@ async function doLogin() {
       body: JSON.stringify({ accion: 'loginInstructor', email, password: pass })
     });
     const data = await res.json();
+
+    if (data.primerLogin) {
+      _instrEmail = email; _instrPass = pass;
+      document.getElementById('login-step1').style.display = 'none';
+      document.getElementById('login-step-qr').style.display = 'block';
+      document.getElementById('qr-secret').textContent = data.secret;
+      document.getElementById('qr-image').src =
+        'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(data.qrUrl);
+      return;
+    }
+
+    if (data.requiere2FA) {
+      _instrEmail = email; _instrPass = pass;
+      document.getElementById('login-step1').style.display = 'none';
+      document.getElementById('login-step2').style.display = 'block';
+      setTimeout(function(){ document.getElementById('totp-input').focus(); }, 100);
+      return;
+    }
+
     if (data.success) {
-      currentInstructor = data.nombre;
-      currentClases = data.clasesAsignadas || [];
-      document.getElementById('login-screen').style.display = 'none';
-      document.getElementById('app').style.display = 'block';
-      initApp();
+      _iniciarSesion(data);
     } else {
-      err.textContent = '❌ ' + (data.error || 'Credenciales incorrectas.');
+      err.textContent = data.error || 'Credenciales incorrectas.';
       err.style.display = 'block';
     }
   } catch(e) {
-    err.textContent = '❌ Error de conexión. Intenta de nuevo.';
+    err.textContent = 'Error de conexión. Intenta de nuevo.';
     err.style.display = 'block';
+  } finally {
+    btn.textContent = 'Entrar al Portal →';
+    btn.disabled = false;
   }
+}
+
+async function doLogin2FA() {
+  const totp  = document.getElementById('totp-input').value.trim();
+  const err   = document.getElementById('login-error-2fa');
+  if (!totp || totp.length !== 6) {
+    err.textContent = 'El código debe tener 6 dígitos.';
+    err.style.display = 'block'; return;
+  }
+  err.style.display = 'none';
+  const btn = document.getElementById('btn-verify-2fa');
+  btn.textContent = '⏳ Verificando...'; btn.disabled = true;
+
+  try {
+    const res = await fetch(API, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ accion: 'loginInstructor', email: _instrEmail, password: _instrPass, totp })
+    });
+    const data = await res.json();
+    if (data.success) {
+      _iniciarSesion(data);
+    } else {
+      err.textContent = data.error || 'Código incorrecto';
+      err.style.display = 'block';
+    }
+  } catch(e) {
+    err.textContent = 'Error de conexión.';
+    err.style.display = 'block';
+  } finally {
+    btn.textContent = '✅ Verificar'; btn.disabled = false;
+  }
+}
+
+function doLoginQR() {
+  document.getElementById('login-step-qr').style.display = 'none';
+  document.getElementById('login-step2').style.display = 'block';
+  setTimeout(function(){ document.getElementById('totp-input').focus(); }, 100);
+}
+
+function volverStep1() {
+  document.getElementById('login-step2').style.display = 'none';
+  document.getElementById('login-step1').style.display = 'block';
+}
+
+function _iniciarSesion(data) {
+  currentInstructor = data.nombre;
+  currentClases     = data.clasesAsignadas || [];
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  initApp();
 }
 
 function doLogout() {
   currentInstructor = null;
   currentClases = [];
+  _instrEmail = ''; _instrPass = '';
   document.getElementById('login-screen').style.display = 'flex';
   document.getElementById('app').style.display = 'none';
+  document.getElementById('login-step1').style.display = 'block';
+  document.getElementById('login-step2').style.display = 'none';
+  document.getElementById('login-step-qr').style.display = 'none';
   document.getElementById('login-pass').value = '';
   document.getElementById('login-email').value = '';
 }
