@@ -516,24 +516,6 @@ function closeLightbox() {
   document.getElementById('lightbox').classList.remove('active');
   document.body.style.overflow = '';
 }
-var pmSelPlan = 'Mensual 1h', pmSelPrice = '$50';
-function openPayModal() { document.getElementById('pay-modal').classList.add('open'); }
-function closePayModal() {
-  document.getElementById('pay-modal').classList.remove('open');
-  document.getElementById('pm-form-view').style.display = 'block';
-  document.getElementById('pm-success-view').style.display = 'none';
-}
-function pmPlan(el, plan, price) {
-  document.querySelectorAll(');
-  el.classList.add('active'); pmSelPlan = plan; pmSelPrice = price;
-}
-function pmSubmit() {
-  var nombre = document.getElementById('pm-nombre').value.trim();
-  var email  = document.getElementById('pm-email').value.trim();
-  if (!nombre || !email) { alert('Por favor completa nombre y correo.'); return; }
-  document.getElementById('pm-form-view').style.display = 'none';
-  document.getElementById('pm-success-view').style.display = 'block';
-}
 
 document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeLightbox(); });
 document.getElementById('chat-input').addEventListener('keydown', function(e) { if (e.key === 'Enter') sendMessage(); });
