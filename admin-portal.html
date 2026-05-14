@@ -1512,54 +1512,101 @@ async function loadPendientes() {
   list.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--gray);">⏳ Cargando...</div>';
 
   try {
-    const res  = await fetch(`${API_ADMIN}?action=obtenerPagosPendientes`);
-    const data = await res.json();
-    const pendientes = data.pendientes || [];
+    const [resPortal, resAlumnos] = await Promise.all([
+      fetch(`${API_ADMIN}?action=obtenerPagosPendientes`),
+      fetch(`${API_ADMIN}?action=obtenerTodosAlumnos`)
+    ]);
+    const dataPortal  = await resPortal.json();
+    const dataAlumnos = await resAlumnos.json();
 
-    // Actualizar badge
+    const pendientesPortal = dataPortal.pendientes || [];
+    const alumnos          = dataAlumnos.alumnos   || [];
+
+    // Alumnos activos sin pago este mes
+    const sinPago = alumnos.filter(a =>
+      a.estado === 'Activo' && a.estadoPago !== 'Pagado'
+    );
+
+    // Actualizar badge total
     const badge = document.getElementById('badge-pendientes');
+    const total = pendientesPortal.length + sinPago.length;
     if (badge) {
-      badge.textContent = pendientes.length;
-      badge.style.display = pendientes.length > 0 ? '' : 'none';
+      badge.textContent = total;
+      badge.style.display = total > 0 ? '' : 'none';
     }
 
-    if (!pendientes.length) {
-      list.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--gray);">✅ No hay pagos pendientes de aprobación</div>';
-      return;
-    }
+    let html = '';
 
-    list.innerHTML = pendientes.map(p => `
-      <div style="border:1.5px solid rgba(0,87,168,.1);border-radius:14px;padding:1.2rem 1.4rem;margin-bottom:1rem;background:white;">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:.5rem;">
-          <div>
-            <strong style="color:var(--navy);font-size:1rem;">${p.nombre}</strong>
-            <span style="margin-left:.6rem;font-size:.78rem;color:var(--gray);">Rep: ${p.nombreRep}</span>
-            <br/>
-            <span style="font-size:.8rem;color:var(--gray);">${p.emailRep}</span>
-          </div>
-          <div style="text-align:right;">
-            <div style="font-size:1.2rem;font-weight:700;color:${p.moneda==='BS'?'#1d4ed8':'#16a34a'};">
-              ${p.moneda==='BS' ? 'Bs. '+parseFloat(p.monto).toLocaleString('es-VE') : '$'+parseFloat(p.monto).toFixed(2)}
+    // ── Sección 1: Del portal de renovación ──
+    html += `<div style="margin-bottom:1.5rem;">
+      <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.8rem;">
+        <span style="font-size:1.1rem;">🔔</span>
+        <strong style="color:var(--navy);">Del Portal de Renovación</strong>
+        <span style="background:#f59e0b;color:white;border-radius:50px;padding:.1rem .6rem;font-size:.75rem;">${pendientesPortal.length}</span>
+        <span style="font-size:.78rem;color:var(--gray);">— Esperan aprobación</span>
+      </div>`;
+
+    if (!pendientesPortal.length) {
+      html += `<div style="background:#f8fafc;border-radius:10px;padding:1rem;text-align:center;color:var(--gray);font-size:.85rem;">✅ Sin pagos pendientes del portal</div>`;
+    } else {
+      html += pendientesPortal.map(p => `
+        <div style="border:1.5px solid #f59e0b;border-radius:14px;padding:1.2rem 1.4rem;margin-bottom:.8rem;background:#fffbeb;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:.5rem;">
+            <div>
+              <strong style="color:var(--navy);">${p.nombre}</strong>
+              <span style="margin-left:.6rem;font-size:.78rem;color:var(--gray);">Rep: ${p.nombreRep}</span>
+              <br/><span style="font-size:.78rem;color:var(--gray);">${p.emailRep}</span>
             </div>
-            <div style="font-size:.75rem;color:var(--gray);">${p.metodo} · ${p.moneda}</div>
+            <div style="text-align:right;">
+              <div style="font-size:1.1rem;font-weight:700;color:${p.moneda==='BS'?'#1d4ed8':'#16a34a'};">
+                ${p.moneda==='BS'?'Bs.'+parseFloat(p.monto).toLocaleString('es-VE'):'$'+parseFloat(p.monto).toFixed(2)}
+              </div>
+              <div style="font-size:.75rem;color:var(--gray);">${p.metodo} · ${p.moneda}</div>
+            </div>
           </div>
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.4rem .8rem;margin:.8rem 0;font-size:.82rem;">
-          <div><span style="color:var(--gray);">Período:</span> <strong>${p.meses}</strong></div>
-          <div><span style="color:var(--gray);">Plan:</span> <strong>${p.plan}</strong></div>
-          <div><span style="color:var(--gray);">Referencia:</span> <strong>${p.referencia||'—'}</strong></div>
-          <div><span style="color:var(--gray);">Banco:</span> <strong>${p.banco||'—'}</strong></div>
-          <div><span style="color:var(--gray);">Fecha solicitud:</span> <strong>${p.fecha}</strong></div>
-        </div>
-        <div style="display:flex;gap:.6rem;margin-top:.8rem;">
-          <button class="btn btn-success" onclick="aprobarPagoPortal(${p.fila},'${p.nombre}','${p.monto}','${p.moneda}','${p.metodo}','${p.referencia}','${p.banco}','${p.meses}','${p.plan}')">
-            ✅ Aprobar y enviar recibo
-          </button>
-          <button class="btn btn-outline" style="border-color:#ef4444;color:#ef4444;" onclick="rechazarPagoPortal(${p.fila},'${p.nombre}')">
-            ❌ Rechazar
-          </button>
-        </div>
-      </div>`).join('');
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:.3rem .8rem;margin:.6rem 0;font-size:.8rem;">
+            <div><span style="color:var(--gray);">Período:</span> <strong>${p.meses}</strong></div>
+            <div><span style="color:var(--gray);">Referencia:</span> <strong>${p.referencia||'—'}</strong></div>
+            <div><span style="color:var(--gray);">Banco:</span> <strong>${p.banco||'—'}</strong></div>
+            <div><span style="color:var(--gray);">Solicitud:</span> <strong>${p.fecha}</strong></div>
+          </div>
+          <div style="display:flex;gap:.6rem;margin-top:.6rem;">
+            <button class="btn btn-success" onclick="aprobarPagoPortal(${p.fila},'${p.nombre}','${p.monto}','${p.moneda}','${p.metodo}','${p.referencia}','${p.banco}','${p.meses}','${p.plan}')">✅ Aprobar</button>
+            <button class="btn btn-outline" style="border-color:#ef4444;color:#ef4444;" onclick="rechazarPagoPortal(${p.fila},'${p.nombre}')">❌ Rechazar</button>
+          </div>
+        </div>`).join('');
+    }
+    html += '</div>';
+
+    // ── Sección 2: Sin pago registrado ──
+    html += `<div>
+      <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.8rem;">
+        <span style="font-size:1.1rem;">📋</span>
+        <strong style="color:var(--navy);">Sin Pago Registrado este Mes</strong>
+        <span style="background:#ef4444;color:white;border-radius:50px;padding:.1rem .6rem;font-size:.75rem;">${sinPago.length}</span>
+        <span style="font-size:.78rem;color:var(--gray);">— Pendientes de cancelar</span>
+      </div>`;
+
+    if (!sinPago.length) {
+      html += `<div style="background:#f8fafc;border-radius:10px;padding:1rem;text-align:center;color:var(--gray);font-size:.85rem;">✅ Todos los alumnos están al día</div>`;
+    } else {
+      html += sinPago.map(a => `
+        <div style="border:1.5px solid rgba(239,68,68,.2);border-radius:14px;padding:1rem 1.4rem;margin-bottom:.6rem;background:#fff5f5;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem;">
+          <div>
+            <strong style="color:var(--navy);">${a.nombre}</strong>
+            <span style="margin-left:.5rem;font-size:.75rem;background:rgba(0,87,168,.08);color:var(--blue);padding:.1rem .5rem;border-radius:50px;">${a.nivel||'—'}</span>
+            <br/>
+            <span style="font-size:.78rem;color:var(--gray);">${a.horario||'—'} · ${a.email||'sin email'}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:.8rem;">
+            <span style="font-size:1rem;font-weight:700;color:var(--navy);">$${parseFloat(a.mensualidad||50).toFixed(0)}</span>
+            <button class="btn btn-gold" style="font-size:.8rem;padding:.4rem .9rem;" onclick="abrirModalPago('${a.nombre}','${a.nivel||''}','${a.email||''}')">💳 Registrar Pago</button>
+          </div>
+        </div>`).join('');
+    }
+    html += '</div>';
+
+    list.innerHTML = html;
   } catch(e) {
     list.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--gray);">Error cargando pendientes</div>';
   }
