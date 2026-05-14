@@ -1311,12 +1311,45 @@ function switchTab(tab) {
 // ═══════════════════════════════════════════════════════
 // DASHBOARD
 // ═══════════════════════════════════════════════════════
+// ── Helper autenticado para API_ADMIN ──
+async function fetchAdmin(urlOrAction, options) {
+  const token = localStorage.getItem('msc_session_token') || '';
+  const authHeaders = {
+    'Authorization': 'Bearer ' + token,
+    'Content-Type': 'application/json'
+  };
+
+  if (typeof urlOrAction === 'string' && urlOrAction.startsWith('http')) {
+    // URL completa
+    const opts = options || {};
+    opts.headers = Object.assign({}, opts.headers || {}, authHeaders);
+    return fetch(urlOrAction, opts);
+  } else {
+    // Es una acción GET
+    return fetch(`${API_ADMIN}?action=${urlOrAction}`, {
+      headers: authHeaders
+    });
+  }
+}
+
+async function fetchAdminPost(body) {
+  const token = localStorage.getItem('msc_session_token') || '';
+  return fetch(API_ADMIN, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + token
+    },
+    body: JSON.stringify(body)
+  });
+}
+
 async function loadDashboard() {
   try {
     const [rAlumnos, rInst, rPagos, rClases] = await Promise.all([
-      fetch(`${API_ADMIN}?action=obtenerTodosAlumnos`).then(r=>r.json()).catch(()=>({alumnos:[]})),
+      fetchAdmin('obtenerTodosAlumnos').then(r=>r.json()).catch(()=>({alumnos:[]})),
       fetch(`${API}?action=obtenerInstructores`).then(r=>r.json()).catch(()=>({instructores:[]})),
-      fetch(`${API_ADMIN}?action=obtenerPagos`).then(r=>r.json()).catch(()=>({pagos:[]})),
+      fetchAdmin('obtenerPagos').then(r=>r.json()).catch(()=>({pagos:[]})),
       fetch(`${API}?action=obtenerHistorial`).then(r=>r.json()).catch(()=>({reportes:[]})),
     ]);
 
@@ -1536,7 +1569,7 @@ async function revocarToken(token) {
 // ═══════════════════════════════════════════════════════
 async function loadAlumnos() {
   try {
-    const res = await fetch(`${API_ADMIN}?action=obtenerTodosAlumnos`);
+    const res = await fetchAdmin('obtenerTodosAlumnos');
     const data = await res.json();
     allAlumnos = data.alumnos || [];
     renderAlumnos(allAlumnos);
@@ -1642,8 +1675,8 @@ async function loadPendientes() {
 
   try {
     const [resPortal, resAlumnos] = await Promise.all([
-      fetch(`${API_ADMIN}?action=obtenerPagosPendientes`),
-      fetch(`${API_ADMIN}?action=obtenerTodosAlumnos`)
+      fetchAdmin('obtenerPagosPendientes'),
+      fetchAdmin('obtenerTodosAlumnos')
     ]);
     const dataPortal  = await resPortal.json();
     const dataAlumnos = await resAlumnos.json();
@@ -1745,10 +1778,7 @@ async function aprobarPagoPortal(fila, nombre, monto, moneda, metodo, referencia
   if (!confirm('¿Aprobar el pago de ' + nombre + ' por ' + (moneda==='BS'?'Bs.':'$') + monto + '?')) return;
   showLoading('Aprobando pago y generando recibo...');
   try {
-    const res = await fetch(API_ADMIN, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ accion:'aprobarPago', fila, nombre, monto, moneda, metodo, referencia, banco, meses, plan })
-    });
+    const res = await fetchAdminPost({ accion:'aprobarPago', fila, nombre, monto, moneda, metodo, referencia, banco, meses, plan });
     const data = await res.json();
     hideLoading();
     if (data.success) {
@@ -1767,10 +1797,7 @@ async function rechazarPagoPortal(fila, nombre) {
   if (!confirm('¿Rechazar el pago de ' + nombre + '? Se notificará al representante.')) return;
   showLoading('Rechazando pago...');
   try {
-    const res = await fetch(API_ADMIN, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ accion:'rechazarPago', fila, nombre })
-    });
+    const res = await fetchAdminPost({ accion:'rechazarPago', fila, nombre });
     const data = await res.json();
     hideLoading();
     if (data.success) {
@@ -1827,7 +1854,7 @@ async function loadPagos() {
   table.style.display = 'none';
 
   try {
-    const res  = await fetch(`${API_ADMIN}?action=obtenerPagos`);
+    const res  = await fetchAdmin('obtenerPagos');
     const data = await res.json();
     let pagos  = data.pagos || [];
 
@@ -2194,15 +2221,12 @@ async function registrarPago() {
 
   showLoading('Registrando pago y generando recibo...');
   try {
-    const res = await fetch(API_ADMIN, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+    const res = await fetchAdminPost({
         accion: 'registrarPago',
         nombre: alumno, monto, moneda, metodo, plan, fecha, meses,
         referencia: ref, banco, telefono: tel, titular,
         montoBS, observacion: obs, fuente: 'Admin Panel'
-      })
-    });
+      });
     const data = await res.json();
     hideLoading();
     if (data.success) {
