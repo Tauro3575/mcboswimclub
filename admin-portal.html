@@ -281,6 +281,7 @@
       <button class="tab-btn" onclick="switchTab('tokens')">🔑 Tokens</button>
       <button class="tab-btn" onclick="switchTab('alumnos')">🏊 Alumnos</button>
       <button class="tab-btn" onclick="switchTab('pagos')">💳 Pagos</button>
+      <button class="tab-btn" onclick="switchTab('pendientes')" id="tab-btn-pendientes">⏳ Pendientes <span id="badge-pendientes" style="display:none;background:#ef4444;color:white;border-radius:50%;padding:.1rem .45rem;font-size:.7rem;margin-left:.3rem;">0</span></button>
       <button class="tab-btn" onclick="switchTab('asignacion')">📋 Asignación</button>
       <button class="tab-btn" id="tab-btn-promos" onclick="switchTab('promos')">🎁 Promociones</button>
     </div>
@@ -734,6 +735,23 @@
     </div>
 
     <!-- ══ TAB: ASIGNACIÓN ══ -->
+    <!-- ══ TAB: PAGOS PENDIENTES ══ -->
+    <div class="tab-content" id="tab-pendientes">
+      <div class="page-header">
+        <h2>⏳ Pagos Pendientes de Aprobación</h2>
+        <p>Pagos enviados por representantes a través del portal de renovación</p>
+      </div>
+      <div class="section-card">
+        <div class="section-card-header">
+          <h3>💳 Pendientes de revisar</h3>
+          <button class="btn btn-outline" onclick="loadPendientes()">🔄 Actualizar</button>
+        </div>
+        <div id="pendientes-list" style="padding:.5rem 0;">
+          <div style="text-align:center;padding:2rem;color:var(--gray);">Cargando...</div>
+        </div>
+      </div>
+    </div>
+
     <div class="tab-content" id="tab-asignacion">
       <div class="page-header">
         <h2>Asignación de Clases</h2>
@@ -1485,6 +1503,112 @@ function populatePagoAlumnoSelect(alumnos) {
 // ═══════════════════════════════════════════════════════
 // PAGOS
 // ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
+// PAGOS PENDIENTES DE APROBACIÓN
+// ═══════════════════════════════════════════════════════
+async function loadPendientes() {
+  const list = document.getElementById('pendientes-list');
+  if (!list) return;
+  list.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--gray);">⏳ Cargando...</div>';
+
+  try {
+    const res  = await fetch(`${API_ADMIN}?action=obtenerPagosPendientes`);
+    const data = await res.json();
+    const pendientes = data.pendientes || [];
+
+    // Actualizar badge
+    const badge = document.getElementById('badge-pendientes');
+    if (badge) {
+      badge.textContent = pendientes.length;
+      badge.style.display = pendientes.length > 0 ? '' : 'none';
+    }
+
+    if (!pendientes.length) {
+      list.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--gray);">✅ No hay pagos pendientes de aprobación</div>';
+      return;
+    }
+
+    list.innerHTML = pendientes.map(p => `
+      <div style="border:1.5px solid rgba(0,87,168,.1);border-radius:14px;padding:1.2rem 1.4rem;margin-bottom:1rem;background:white;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:.5rem;">
+          <div>
+            <strong style="color:var(--navy);font-size:1rem;">${p.nombre}</strong>
+            <span style="margin-left:.6rem;font-size:.78rem;color:var(--gray);">Rep: ${p.nombreRep}</span>
+            <br/>
+            <span style="font-size:.8rem;color:var(--gray);">${p.emailRep}</span>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:1.2rem;font-weight:700;color:${p.moneda==='BS'?'#1d4ed8':'#16a34a'};">
+              ${p.moneda==='BS' ? 'Bs. '+parseFloat(p.monto).toLocaleString('es-VE') : '$'+parseFloat(p.monto).toFixed(2)}
+            </div>
+            <div style="font-size:.75rem;color:var(--gray);">${p.metodo} · ${p.moneda}</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.4rem .8rem;margin:.8rem 0;font-size:.82rem;">
+          <div><span style="color:var(--gray);">Período:</span> <strong>${p.meses}</strong></div>
+          <div><span style="color:var(--gray);">Plan:</span> <strong>${p.plan}</strong></div>
+          <div><span style="color:var(--gray);">Referencia:</span> <strong>${p.referencia||'—'}</strong></div>
+          <div><span style="color:var(--gray);">Banco:</span> <strong>${p.banco||'—'}</strong></div>
+          <div><span style="color:var(--gray);">Fecha solicitud:</span> <strong>${p.fecha}</strong></div>
+        </div>
+        <div style="display:flex;gap:.6rem;margin-top:.8rem;">
+          <button class="btn btn-success" onclick="aprobarPagoPortal(${p.fila},'${p.nombre}','${p.monto}','${p.moneda}','${p.metodo}','${p.referencia}','${p.banco}','${p.meses}','${p.plan}')">
+            ✅ Aprobar y enviar recibo
+          </button>
+          <button class="btn btn-outline" style="border-color:#ef4444;color:#ef4444;" onclick="rechazarPagoPortal(${p.fila},'${p.nombre}')">
+            ❌ Rechazar
+          </button>
+        </div>
+      </div>`).join('');
+  } catch(e) {
+    list.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--gray);">Error cargando pendientes</div>';
+  }
+}
+
+async function aprobarPagoPortal(fila, nombre, monto, moneda, metodo, referencia, banco, meses, plan) {
+  if (!confirm('¿Aprobar el pago de ' + nombre + ' por ' + (moneda==='BS'?'Bs.':'$') + monto + '?')) return;
+  showLoading('Aprobando pago y generando recibo...');
+  try {
+    const res = await fetch(API_ADMIN, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ accion:'aprobarPago', fila, nombre, monto, moneda, metodo, referencia, banco, meses, plan })
+    });
+    const data = await res.json();
+    hideLoading();
+    if (data.success) {
+      showToast('✅', 'Pago aprobado · ' + (data.numeroRecibo||''), 'Recibo enviado al representante');
+      loadPendientes(); loadDashboard();
+    } else {
+      showToast('❌', 'Error', data.error || 'No se pudo aprobar');
+    }
+  } catch(e) {
+    hideLoading();
+    showToast('❌', 'Error de conexión', e.message);
+  }
+}
+
+async function rechazarPagoPortal(fila, nombre) {
+  if (!confirm('¿Rechazar el pago de ' + nombre + '? Se notificará al representante.')) return;
+  showLoading('Rechazando pago...');
+  try {
+    const res = await fetch(API_ADMIN, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ accion:'rechazarPago', fila, nombre })
+    });
+    const data = await res.json();
+    hideLoading();
+    if (data.success) {
+      showToast('✅', 'Pago rechazado', 'Se notificó al representante');
+      loadPendientes();
+    } else {
+      showToast('❌', 'Error', data.error || 'No se pudo rechazar');
+    }
+  } catch(e) {
+    hideLoading();
+    showToast('❌', 'Error de conexión', e.message);
+  }
+}
+
 function toggleFiltroFechas() {
   const tipo = document.getElementById('filtro-tipo').value;
   document.getElementById('filtro-mes-wrap').style.display   = tipo === 'mes'   ? '' : 'none';
@@ -2282,6 +2406,7 @@ function actualizarTabActiva() {
     case 'tokens':       loadTokens(); break;
     case 'alumnos':      loadAlumnos(); break;
     case 'pagos':        loadPagos(); break;
+    case 'pendientes':   loadPendientes(); break;
     case 'asignacion':   loadAsignaciones(); break;
     case 'promos':       loadPromos && loadPromos(); break;
   }
