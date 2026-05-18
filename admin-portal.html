@@ -254,6 +254,40 @@
       </div>
       <button class="btn-login" onclick="doLogin()">⚙️ Ingresar al Panel</button>
       <div class="login-error" id="login-error"></div>
+      <p style="text-align:center;margin-top:1rem;">
+        <a href="#" onclick="mostrarResetForm();return false;" style="color:rgba(255,255,255,.4);font-size:.8rem;">¿Olvidaste tu contraseña?</a>
+      </p>
+    </div>
+
+    <!-- PASO RESET: Solicitar recuperación -->
+    <div id="login-step-reset" style="display:none;">
+      <h2 class="login-title">Recuperar Contraseña</h2>
+      <p class="login-sub">Te enviaremos un link a tu email</p>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="reset-email" placeholder="tu@email.com" onkeydown="if(event.key==='Enter')solicitarReset()"/>
+      </div>
+      <button class="btn-login" onclick="solicitarReset()">📧 Enviar Link</button>
+      <div class="login-error" id="reset-error"></div>
+      <p style="text-align:center;margin-top:1rem;">
+        <a href="#" onclick="volverLoginStep1();return false;" style="color:rgba(255,255,255,.4);font-size:.8rem;">← Volver</a>
+      </p>
+    </div>
+
+    <!-- PASO NUEVA CONTRASEÑA -->
+    <div id="login-step-nueva-pass" style="display:none;">
+      <h2 class="login-title">Nueva Contraseña</h2>
+      <p class="login-sub">Ingresa tu nueva contraseña</p>
+      <div class="form-group">
+        <label>Nueva contraseña</label>
+        <input type="password" id="nueva-pass" placeholder="Mín. 12 chars, mayúsc, núm, símbolo"/>
+      </div>
+      <div class="form-group">
+        <label>Confirmar contraseña</label>
+        <input type="password" id="nueva-pass-confirm" placeholder="Repite la contraseña" onkeydown="if(event.key==='Enter')completarReset()"/>
+      </div>
+      <button class="btn-login" onclick="completarReset()">✅ Guardar Contraseña</button>
+      <div class="login-error" id="nueva-pass-error"></div>
     </div>
 
     <!-- PASO 2: Código 2FA -->
@@ -1225,22 +1259,113 @@ let sessionExpira = parseInt(localStorage.getItem('msc_session_expira') || '0');
 let currentUser   = JSON.parse(localStorage.getItem('msc_user') || 'null');
 
 // Verificar sesión activa al cargar
-window.addEventListener('load', function() {
-  if (sessionToken && Date.now() < sessionExpira) {
-    currentUser = JSON.parse(localStorage.getItem('msc_user') || 'null');
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-    if (currentUser) document.getElementById('admin-nombre').textContent = currentUser.nombre;
-    initApp();
-  }
-});
-
 // Auto-logout por inactividad
 setInterval(function() {
   if (sessionToken && Date.now() > sessionExpira) doLogout();
 }, 60000);
 
 let _loginEmail = '', _loginPass = '';
+
+// ── Recuperación de contraseña ──
+let _resetToken = '';
+
+function mostrarResetForm() {
+  document.getElementById('login-step1').style.display = 'none';
+  document.getElementById('login-step-reset').style.display = 'block';
+  setTimeout(function(){ document.getElementById('reset-email').focus(); }, 100);
+}
+
+function volverLoginStep1() {
+  ['login-step-reset','login-step2','login-step-qr','login-step-nueva-pass'].forEach(function(id) {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+  document.getElementById('login-step1').style.display = 'block';
+}
+
+async function solicitarReset() {
+  const email = document.getElementById('reset-email').value.trim();
+  const err   = document.getElementById('reset-error');
+  err.style.display = 'none';
+  if (!email) { err.textContent = 'Ingresa tu email.'; err.style.display = 'block'; return; }
+
+  try {
+    const res  = await fetch('/.netlify/functions/auth', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ accion: 'solicitarResetPassword', email })
+    });
+    const data = await res.json();
+    err.style.color = '#86efac';
+    err.textContent = '✅ ' + (data.mensaje || 'Si el email existe, recibirás un link en breve.');
+    err.style.display = 'block';
+  } catch(e) {
+    err.style.color = '';
+    err.textContent = 'Error de conexión.';
+    err.style.display = 'block';
+  }
+}
+
+async function completarReset() {
+  const pass    = document.getElementById('nueva-pass').value;
+  const confirm = document.getElementById('nueva-pass-confirm').value;
+  const err     = document.getElementById('nueva-pass-error');
+  err.style.display = 'none';
+
+  if (!pass || !confirm) { err.textContent = 'Completa ambos campos.'; err.style.display = 'block'; return; }
+  if (pass !== confirm) { err.textContent = 'Las contraseñas no coinciden.'; err.style.display = 'block'; return; }
+
+  try {
+    const res  = await fetch('/.netlify/functions/auth', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ accion: 'completarResetPassword', token: _resetToken, password: pass })
+    });
+    const data = await res.json();
+    if (data.success) {
+      err.style.color = '#86efac';
+      err.textContent = '✅ Contraseña actualizada. Ahora puedes iniciar sesión.';
+      err.style.display = 'block';
+      setTimeout(volverLoginStep1, 2000);
+    } else {
+      err.textContent = data.error || 'No se pudo actualizar.';
+      err.style.display = 'block';
+    }
+  } catch(e) {
+    err.textContent = 'Error de conexión.';
+    err.style.display = 'block';
+  }
+}
+
+// Verificar si hay token de reset en la URL al cargar
+window.addEventListener('load', async function() {
+  const params = new URLSearchParams(window.location.search);
+  const resetToken = params.get('reset');
+  if (resetToken) {
+    try {
+      const res  = await fetch('/.netlify/functions/auth', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ accion: 'verificarTokenReset', token: resetToken })
+      });
+      const data = await res.json();
+      if (data.valido) {
+        _resetToken = resetToken;
+        document.getElementById('login-step1').style.display = 'none';
+        document.getElementById('login-step-nueva-pass').style.display = 'block';
+      } else {
+        document.getElementById('login-error').textContent = data.error || 'Link inválido o expirado.';
+        document.getElementById('login-error').style.display = 'block';
+      }
+    } catch(e) {
+      console.log('Error verificando token reset:', e);
+    }
+  } else if (sessionToken && Date.now() < sessionExpira) {
+    currentUser = JSON.parse(localStorage.getItem('msc_user') || 'null');
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    if (currentUser) document.getElementById('admin-nombre').textContent = currentUser.nombre;
+    aplicarModulos(currentUser?.modulos || []);
+    if (!currentUser?.modulos?.length) initApp();
+  }
+});
 
 async function doLogin() {
   const email = document.getElementById('login-email').value.trim();
@@ -1593,13 +1718,32 @@ function renderInstructores(list) {
       <td><span class="badge ${activo?'active':'inactive'}">${activo?'Activo':'Inactivo'}</span></td>
       <td style="font-size:.78rem;color:var(--gray);">${clases||'Sin asignar'}</td>
       <td>
-        <div style="display:flex;gap:.4rem;">
+        <div style="display:flex;gap:.4rem;flex-wrap:wrap;">
           <button class="btn btn-outline" onclick="abrirAsignarModal('${i.email}','${i.nombre}')">📋 Clases</button>
           <button class="btn ${activo?'btn-danger':'btn-success'}" onclick="toggleInstructor('${i.email}',${activo})">${activo?'🚫 Deshabilitar':'✅ Habilitar'}</button>
+          <button class="btn btn-outline" style="font-size:.75rem;" onclick="resetPasswordInstructor('${i.email}','${i.nombre}')">🔐 Reset Pass</button>
         </div>
       </td>
     </tr>`;
   }).join('');
+}
+
+async function resetPasswordInstructor(email, nombre) {
+  if (!confirm('¿Resetear la contraseña de ' + nombre + '? Se enviará una contraseña temporal a su email y deberá reconfigurar el 2FA.')) return;
+  showLoading('Reseteando contraseña...');
+  try {
+    const res = await fetchAdminPost({ accion: 'resetearPasswordInstructor', email });
+    const data = await res.json();
+    hideLoading();
+    if (data.success) {
+      showToast('✅', 'Contraseña reseteada', 'Se envió contraseña temporal a ' + email);
+    } else {
+      showToast('❌', 'Error', data.error || 'No se pudo resetear');
+    }
+  } catch(e) {
+    hideLoading();
+    showToast('❌', 'Error de conexión', e.message);
+  }
 }
 
 async function toggleInstructor(email, activo) {
