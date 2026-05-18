@@ -2963,8 +2963,7 @@ async function guardarEdicionAsistente(email, nombre, modulos) {
 }
 
 async function eliminarAsistente(email, nombre) {
-  if (!confirm('¿Eliminar el asistente ' + nombre + '?
-Perderá acceso inmediatamente.')) return;
+  if (!confirm('¿Eliminar el asistente ' + nombre + '? Perderá acceso inmediatamente.')) return;
   showLoading('Eliminando asistente...');
   try {
     const res  = await fetchAdminPost({ accion:'eliminarAsistente', email });
