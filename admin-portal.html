@@ -319,6 +319,8 @@
       <button class="tab-btn" onclick="switchTab('pendientes')" id="tab-btn-pendientes">⏳ Pendientes <span id="badge-pendientes" style="display:none;background:#ef4444;color:white;border-radius:50%;padding:.1rem .45rem;font-size:.7rem;margin-left:.3rem;">0</span></button>
       <button class="tab-btn" onclick="switchTab('asignacion')">📋 Asignación</button>
       <button class="tab-btn" id="tab-btn-promos" onclick="switchTab('promos')">🎁 Promociones</button>
+      <button class="tab-btn" id="tab-btn-asistentes" onclick="switchTab('asistentes')">👥 Asistentes</button>
+      <button class="tab-btn" onclick="switchTab('asistentes')">👥 Asistentes</button>
     </div>
 
     <!-- ══ TAB: DASHBOARD ══ -->
@@ -714,6 +716,60 @@
     </div>
 
     <!-- ══ TAB: PROMOCIONES ══ -->
+    <!-- ══ TAB: ASISTENTES ══ -->
+    <div class="tab-content" id="tab-asistentes">
+      <div class="page-header">
+        <h2>👥 Asistentes Administrativos</h2>
+        <p>Gestiona los accesos y módulos de cada asistente</p>
+      </div>
+
+      <div class="section-card" style="margin-bottom:1.2rem;">
+        <div class="section-card-header">
+          <h3>➕ Crear Asistente</h3>
+        </div>
+        <div style="padding:1rem;display:grid;grid-template-columns:1fr 1fr;gap:.8rem;">
+          <div class="form-group-light">
+            <label>Nombre completo</label>
+            <input type="text" id="ast-nombre" placeholder="Nombre del asistente"/>
+          </div>
+          <div class="form-group-light">
+            <label>Email</label>
+            <input type="email" id="ast-email" placeholder="email@ejemplo.com"/>
+          </div>
+          <div class="form-group-light">
+            <label>Contraseña temporal (NIS2)</label>
+            <input type="text" id="ast-pass" placeholder="Mín. 12 chars, mayús, núm, símbolo"/>
+          </div>
+          <div class="form-group-light">
+            <label>Módulos permitidos</label>
+            <div style="display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.4rem;" id="ast-modulos-check">
+              <label style="display:flex;align-items:center;gap:.3rem;font-size:.82rem;cursor:pointer;"><input type="checkbox" value="dashboard"/> Dashboard</label>
+              <label style="display:flex;align-items:center;gap:.3rem;font-size:.82rem;cursor:pointer;"><input type="checkbox" value="alumnos"/> Alumnos</label>
+              <label style="display:flex;align-items:center;gap:.3rem;font-size:.82rem;cursor:pointer;"><input type="checkbox" value="pagos"/> Pagos</label>
+              <label style="display:flex;align-items:center;gap:.3rem;font-size:.82rem;cursor:pointer;"><input type="checkbox" value="pendientes"/> Pendientes</label>
+              <label style="display:flex;align-items:center;gap:.3rem;font-size:.82rem;cursor:pointer;"><input type="checkbox" value="instructores"/> Instructores</label>
+              <label style="display:flex;align-items:center;gap:.3rem;font-size:.82rem;cursor:pointer;"><input type="checkbox" value="tokens"/> Tokens</label>
+              <label style="display:flex;align-items:center;gap:.3rem;font-size:.82rem;cursor:pointer;"><input type="checkbox" value="asignacion"/> Asignación</label>
+              <label style="display:flex;align-items:center;gap:.3rem;font-size:.82rem;cursor:pointer;"><input type="checkbox" value="promos"/> Promociones</label>
+            </div>
+          </div>
+        </div>
+        <div style="padding:0 1rem 1rem;">
+          <button class="btn btn-primary" onclick="crearAsistente()">➕ Crear Asistente</button>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <div class="section-card-header">
+          <h3>👥 Asistentes Activos</h3>
+          <button class="btn btn-outline" onclick="loadAsistentes()">🔄 Actualizar</button>
+        </div>
+        <div id="asistentes-list" style="padding:.5rem 0;">
+          <div style="text-align:center;padding:2rem;color:var(--gray);">Cargando...</div>
+        </div>
+      </div>
+    </div>
+
     <div class="tab-content" id="tab-promos">
       <div class="page-header">
         <h2>Gestión de Promociones</h2>
@@ -766,6 +822,25 @@
 
       <div style="background:rgba(244,185,66,.08);border:1.5px solid rgba(244,185,66,.25);border-radius:14px;padding:1.2rem 1.5rem;">
         <p style="font-size:.85rem;color:#92400e;">⚠️ <strong>Importante:</strong> Las promociones activas aparecen automáticamente en el formulario de inscripción y en el modal de pago. El asistente puede seleccionarlas pero no activarlas o desactivarlas.</p>
+      </div>
+    </div>
+
+    <!-- ══ TAB: ASISTENTES ══ -->
+    <div class="tab-content" id="tab-asistentes">
+      <div class="page-header">
+        <h2>👥 Asistentes Administrativos</h2>
+        <p>Gestiona los accesos y módulos de los asistentes</p>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;margin-bottom:1rem;">
+        <button class="btn btn-gold" onclick="openModal('modal-asistente')">+ Nuevo Asistente</button>
+      </div>
+
+      <div class="section-card">
+        <div class="section-card-header"><h3>👥 Asistentes activos</h3></div>
+        <div id="asistentes-list" style="padding:.5rem 0;">
+          <div style="text-align:center;padding:2rem;color:var(--gray);">Cargando...</div>
+        </div>
       </div>
     </div>
 
@@ -866,6 +941,50 @@
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeModal('modal-token')">Cancelar</button>
       <button class="btn btn-gold btn-lg" onclick="generarToken()">⚡ Generar Token</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: ASISTENTE ADMINISTRATIVO ═══ -->
+<div class="modal-overlay" id="modal-asistente">
+  <div class="modal" style="position:relative;max-width:560px;max-height:90vh;overflow-y:auto;">
+    <button class="modal-close" onclick="closeModal('modal-asistente')">✕</button>
+    <h3 id="modal-asistente-title">👥 Nuevo Asistente</h3>
+    <input type="hidden" id="asistente-modo" value="crear"/>
+
+    <div class="form-row">
+      <div class="form-group-light">
+        <label>Nombre completo</label>
+        <input type="text" id="asistente-nombre" placeholder="Nombre del asistente"/>
+      </div>
+      <div class="form-group-light">
+        <label>Email</label>
+        <input type="email" id="asistente-email" placeholder="email@ejemplo.com"/>
+      </div>
+    </div>
+
+    <div class="form-group-light" id="asistente-pass-group">
+      <label>Contraseña temporal <span style="color:var(--gray);font-weight:400;font-size:.78rem;">(mín. 12 chars, mayúsc, núm, símbolo)</span></label>
+      <input type="password" id="asistente-pass" placeholder="Contraseña NIS2"/>
+    </div>
+
+    <div class="form-group-light">
+      <label>Módulos permitidos</label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-top:.5rem;">
+        <label style="display:flex;align-items:center;gap:.5rem;font-size:.85rem;cursor:pointer;"><input type="checkbox" class="mod-check" value="dashboard" checked/> 📊 Dashboard</label>
+        <label style="display:flex;align-items:center;gap:.5rem;font-size:.85rem;cursor:pointer;"><input type="checkbox" class="mod-check" value="alumnos" checked/> 🏊 Alumnos</label>
+        <label style="display:flex;align-items:center;gap:.5rem;font-size:.85rem;cursor:pointer;"><input type="checkbox" class="mod-check" value="pagos" checked/> 💳 Pagos</label>
+        <label style="display:flex;align-items:center;gap:.5rem;font-size:.85rem;cursor:pointer;"><input type="checkbox" class="mod-check" value="pendientes" checked/> ⏳ Pendientes</label>
+        <label style="display:flex;align-items:center;gap:.5rem;font-size:.85rem;cursor:pointer;"><input type="checkbox" class="mod-check" value="instructores"/> 👨‍🏫 Instructores</label>
+        <label style="display:flex;align-items:center;gap:.5rem;font-size:.85rem;cursor:pointer;"><input type="checkbox" class="mod-check" value="tokens"/> 🔑 Tokens</label>
+        <label style="display:flex;align-items:center;gap:.5rem;font-size:.85rem;cursor:pointer;"><input type="checkbox" class="mod-check" value="asignacion"/> 📋 Asignación</label>
+        <label style="display:flex;align-items:center;gap:.5rem;font-size:.85rem;cursor:pointer;"><input type="checkbox" class="mod-check" value="promos"/> 🎁 Promociones</label>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-asistente')">Cancelar</button>
+      <button class="btn btn-success btn-lg" onclick="guardarAsistente()">💾 Guardar Asistente</button>
     </div>
   </div>
 </div>
@@ -1218,14 +1337,30 @@ function doLoginQR() {
 function _guardarSesion(data) {
   sessionToken  = data.sessionToken;
   sessionExpira = data.expira;
-  currentUser   = { nombre: data.nombre, email: data.email, rol: data.rol };
+  currentUser   = { nombre: data.nombre, email: data.email, rol: data.rol, modulos: data.modulos || [] };
   localStorage.setItem('msc_session_token',  sessionToken);
   localStorage.setItem('msc_session_expira', String(sessionExpira));
   localStorage.setItem('msc_user', JSON.stringify(currentUser));
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app').style.display = 'block';
   document.getElementById('admin-nombre').textContent = data.nombre;
-  initApp();
+
+  // Controlar visibilidad de módulos según rol
+  const modulos = data.modulos || [];
+  const esAsistente = data.rol === 'Asistente';
+  if (esAsistente && modulos.length > 0) {
+    const TABS = ['dashboard','instructores','tokens','alumnos','pagos','pendientes','asignacion','promos','asistentes'];
+    TABS.forEach(tab => {
+      const btn = document.querySelector(`[onclick="switchTab('${tab}')"]`);
+      if (btn) btn.style.display = modulos.includes(tab) ? '' : 'none';
+    });
+    // Ir al primer módulo permitido
+    if (modulos.length > 0) switchTab(modulos[0]);
+  } else {
+    // Super admin — mostrar todo
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.style.display = '');
+    initApp();
+  }
 }
 
 function doLogout() {
@@ -1291,7 +1426,7 @@ function aplicarRol() {
 function switchTab(tab) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-  const tabs = ['dashboard','instructores','tokens','alumnos','pagos','pendientes','asignacion','promos'];
+  const tabs = ['dashboard','instructores','tokens','alumnos','pagos','pendientes','asignacion','promos','asistentes'];
   const idx = tabs.indexOf(tab);
   if (idx >= 0) document.querySelectorAll('.tab-btn')[idx].classList.add('active');
   const el = document.getElementById('tab-'+tab);
@@ -1305,6 +1440,7 @@ function switchTab(tab) {
     case 'pendientes':   loadPendientes(); break;
     case 'asignacion':   loadAsignaciones(); break;
     case 'promos':       loadPromos && loadPromos(); break;
+    case 'asistentes':   loadAsistentes(); break;
   }
 }
 
@@ -1805,6 +1941,123 @@ async function rechazarPagoPortal(fila, nombre) {
       loadPendientes();
     } else {
       showToast('❌', 'Error', data.error || 'No se pudo rechazar');
+    }
+  } catch(e) {
+    hideLoading();
+    showToast('❌', 'Error de conexión', e.message);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// ASISTENTES ADMINISTRATIVOS
+// ═══════════════════════════════════════════════════════
+const MODULOS_NOMBRES = {
+  dashboard:'📊 Dashboard', alumnos:'🏊 Alumnos', pagos:'💳 Pagos',
+  pendientes:'⏳ Pendientes', instructores:'👨‍🏫 Instructores',
+  tokens:'🔑 Tokens', asignacion:'📋 Asignación', promos:'🎁 Promociones'
+};
+
+async function loadAsistentes() {
+  const list = document.getElementById('asistentes-list');
+  if (!list) return;
+  list.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--gray);">⏳ Cargando...</div>';
+
+  try {
+    const res  = await fetchAdmin('obtenerAsistentes');
+    const data = await res.json();
+    const asistentes = data.asistentes || [];
+
+    if (!asistentes.length) {
+      list.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--gray);">No hay asistentes registrados. Crea uno con el botón de arriba.</div>';
+      return;
+    }
+
+    list.innerHTML = asistentes.map(a => {
+      const mods = a.modulos ? a.modulos.split(',').map(m => MODULOS_NOMBRES[m.trim()] || m).join(' · ') : 'Acceso total';
+      return `<div style="border:1.5px solid rgba(0,87,168,.1);border-radius:14px;padding:1.2rem 1.4rem;margin-bottom:.8rem;background:white;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.8rem;">
+        <div>
+          <strong style="color:var(--navy);font-size:.95rem;">${a.nombre}</strong>
+          <span style="margin-left:.5rem;background:rgba(0,87,168,.08);color:var(--blue);font-size:.72rem;padding:.15rem .5rem;border-radius:50px;">Asistente</span>
+          <br/>
+          <span style="font-size:.8rem;color:var(--gray);">${a.email}</span>
+          <br/>
+          <span style="font-size:.75rem;color:var(--gray);margin-top:.3rem;display:block;">${mods}</span>
+        </div>
+        <div style="display:flex;gap:.5rem;">
+          <button class="btn btn-outline" style="font-size:.78rem;padding:.35rem .8rem;" onclick="editarAsistente('${a.email}','${a.nombre}','${a.modulos}')">✏️ Editar</button>
+          <button class="btn btn-outline" style="font-size:.78rem;padding:.35rem .8rem;border-color:#ef4444;color:#ef4444;" onclick="confirmarEliminarAsistente('${a.email}','${a.nombre}')">🗑️ Eliminar</button>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    list.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--gray);">Error cargando asistentes</div>';
+  }
+}
+
+function editarAsistente(email, nombre, modulos) {
+  document.getElementById('modal-asistente-title').textContent = '✏️ Editar Asistente';
+  document.getElementById('asistente-modo').value  = 'editar';
+  document.getElementById('asistente-nombre').value = nombre;
+  document.getElementById('asistente-email').value  = email;
+  document.getElementById('asistente-email').disabled = true;
+  document.getElementById('asistente-pass-group').style.display = 'none';
+
+  const selMods = (modulos || '').split(',').map(m => m.trim());
+  document.querySelectorAll('.mod-check').forEach(cb => {
+    cb.checked = selMods.includes(cb.value);
+  });
+  openModal('modal-asistente');
+}
+
+async function guardarAsistente() {
+  const modo   = document.getElementById('asistente-modo').value;
+  const nombre = document.getElementById('asistente-nombre').value.trim();
+  const email  = document.getElementById('asistente-email').value.trim();
+  const pass   = document.getElementById('asistente-pass').value;
+  const mods   = [...document.querySelectorAll('.mod-check:checked')].map(cb => cb.value).join(',');
+
+  if (!nombre || !email) { showToast('⚠️','Faltan datos','Nombre y email son requeridos'); return; }
+  if (modo === 'crear' && !pass) { showToast('⚠️','Falta contraseña','Define una contraseña temporal'); return; }
+  if (!mods) { showToast('⚠️','Sin módulos','Selecciona al menos un módulo'); return; }
+
+  showLoading(modo === 'crear' ? 'Creando asistente...' : 'Actualizando asistente...');
+  try {
+    const res = await fetchAdminPost({
+      accion: modo === 'crear' ? 'crearAsistente' : 'editarAsistente',
+      nombre, email, password: pass, modulos: mods
+    });
+    const data = await res.json();
+    hideLoading();
+    if (data.success) {
+      closeModal('modal-asistente');
+      showToast('✅', modo === 'crear' ? 'Asistente creado' : 'Asistente actualizado', 'Email enviado con credenciales');
+      loadAsistentes();
+      // Reset form
+      document.getElementById('asistente-email').disabled = false;
+      document.getElementById('asistente-pass-group').style.display = '';
+      document.getElementById('asistente-modo').value = 'crear';
+      document.getElementById('modal-asistente-title').textContent = '👥 Nuevo Asistente';
+    } else {
+      showToast('❌', 'Error', data.error || 'No se pudo guardar');
+    }
+  } catch(e) {
+    hideLoading();
+    showToast('❌', 'Error de conexión', e.message);
+  }
+}
+
+async function confirmarEliminarAsistente(email, nombre) {
+  if (!confirm('¿Eliminar el asistente ' + nombre + '?\nSe revocará su acceso inmediatamente.')) return;
+  showLoading('Eliminando asistente...');
+  try {
+    const res = await fetchAdminPost({ accion: 'eliminarAsistente', email });
+    const data = await res.json();
+    hideLoading();
+    if (data.success) {
+      showToast('✅', 'Asistente eliminado', nombre + ' ya no tiene acceso');
+      loadAsistentes();
+    } else {
+      showToast('❌', 'Error', data.error || 'No se pudo eliminar');
     }
   } catch(e) {
     hideLoading();
@@ -2597,7 +2850,7 @@ function actualizarTabActiva() {
   btn.classList.add('spinning');
   setTimeout(() => btn.classList.remove('spinning'), 600);
 
-  const tabs = ['dashboard','instructores','tokens','alumnos','pagos','asignacion','promos'];
+  const tabs = ['dashboard','instructores','tokens','alumnos','pagos','pendientes','asignacion','promos','asistentes'];
   const activa = tabs.find(t => document.getElementById('tab-'+t)?.classList.contains('active'));
 
   switch(activa) {
@@ -2609,8 +2862,117 @@ function actualizarTabActiva() {
     case 'pendientes':   loadPendientes(); break;
     case 'asignacion':   loadAsignaciones(); break;
     case 'promos':       loadPromos && loadPromos(); break;
+    case 'asistentes':   loadAsistentes(); break;
   }
   showToast('🔄','Actualizando...','Datos del panel recargados');
+}
+
+// ═══════════════════════════════════════════════════════
+// GESTIÓN DE ASISTENTES
+// ═══════════════════════════════════════════════════════
+async function loadAsistentes() {
+  const list = document.getElementById('asistentes-list');
+  if (!list) return;
+  list.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--gray);">⏳ Cargando...</div>';
+  try {
+    const res  = await fetchAdmin('obtenerAsistentes');
+    const data = await res.json();
+    const asistentes = data.asistentes || [];
+    if (!asistentes.length) {
+      list.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--gray);">Sin asistentes creados aún</div>';
+      return;
+    }
+    const MODULOS_NOMBRES = { dashboard:'Dashboard', alumnos:'Alumnos', pagos:'Pagos', pendientes:'Pendientes', instructores:'Instructores', tokens:'Tokens', asignacion:'Asignación', promos:'Promociones' };
+    list.innerHTML = asistentes.map(a => {
+      const mods = a.modulos ? a.modulos.split(',').map(m => m.trim()).filter(Boolean) : [];
+      const modsHtml = mods.length
+        ? mods.map(m => `<span style="background:rgba(0,87,168,.08);color:var(--blue);font-size:.72rem;padding:.15rem .5rem;border-radius:50px;">${MODULOS_NOMBRES[m]||m}</span>`).join(' ')
+        : '<span style="color:var(--gray);font-size:.78rem;">Acceso total</span>';
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:1rem 1.2rem;border-bottom:1px solid rgba(0,87,168,.06);flex-wrap:wrap;gap:.5rem;">
+        <div>
+          <strong style="color:var(--navy);">${a.nombre}</strong>
+          <span style="margin-left:.5rem;font-size:.75rem;background:rgba(245,158,11,.1);color:#d97706;padding:.1rem .5rem;border-radius:50px;">Asistente</span>
+          <br/><span style="font-size:.78rem;color:var(--gray);">${a.email}</span>
+          <br/><div style="display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.4rem;">${modsHtml}</div>
+        </div>
+        <div style="display:flex;gap:.5rem;">
+          <button class="btn btn-outline" style="font-size:.78rem;padding:.35rem .8rem;" onclick="editarAsistenteModal('${a.email}','${a.nombre}','${a.modulos}')">✏️ Editar</button>
+          <button class="btn btn-outline" style="font-size:.78rem;padding:.35rem .8rem;border-color:#ef4444;color:#ef4444;" onclick="eliminarAsistente('${a.email}','${a.nombre}')">🗑️ Eliminar</button>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    list.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--gray);">Error cargando asistentes</div>';
+  }
+}
+
+function getModulosSeleccionados(containerId) {
+  return [...document.querySelectorAll('#' + containerId + ' input[type=checkbox]:checked')]
+    .map(cb => cb.value).join(',');
+}
+
+async function crearAsistente() {
+  const nombre  = document.getElementById('ast-nombre').value.trim();
+  const email   = document.getElementById('ast-email').value.trim();
+  const pass    = document.getElementById('ast-pass').value.trim();
+  const modulos = getModulosSeleccionados('ast-modulos-check');
+  if (!nombre || !email || !pass) { showToast('⚠️','Faltan datos','Completa todos los campos'); return; }
+  showLoading('Creando asistente...');
+  try {
+    const res  = await fetchAdminPost({ accion:'crearAsistente', nombre, email, password:pass, modulos });
+    const data = await res.json();
+    hideLoading();
+    if (data.success) {
+      showToast('✅','Asistente creado','Se envió email con credenciales');
+      document.getElementById('ast-nombre').value = '';
+      document.getElementById('ast-email').value  = '';
+      document.getElementById('ast-pass').value   = '';
+      document.querySelectorAll('#ast-modulos-check input').forEach(cb => cb.checked = false);
+      loadAsistentes();
+    } else {
+      showToast('❌','Error', data.error || 'No se pudo crear');
+    }
+  } catch(e) { hideLoading(); showToast('❌','Error',e.message); }
+}
+
+function editarAsistenteModal(email, nombre, modulosActuales) {
+  const mods = modulosActuales ? modulosActuales.split(',').map(m => m.trim()) : [];
+  const MODULOS = ['dashboard','alumnos','pagos','pendientes','instructores','tokens','asignacion','promos'];
+  const NOMBRES = { dashboard:'Dashboard', alumnos:'Alumnos', pagos:'Pagos', pendientes:'Pendientes', instructores:'Instructores', tokens:'Tokens', asignacion:'Asignación', promos:'Promociones' };
+  const checks = MODULOS.map(m => `<label style="display:flex;align-items:center;gap:.4rem;font-size:.85rem;cursor:pointer;"><input type="checkbox" id="edit-mod-${m}" value="${m}" ${mods.includes(m)?'checked':''}/> ${NOMBRES[m]}</label>`).join('');
+  if (confirm(`Editar módulos de ${nombre}?
+
+Se abrirá un diálogo de edición.`)) {
+    const nuevosMods = MODULOS.filter(m => {
+      const el = document.getElementById('edit-mod-' + m);
+      return el && el.checked;
+    }).join(',');
+    guardarEdicionAsistente(email, nombre, nuevosMods);
+  }
+}
+
+async function guardarEdicionAsistente(email, nombre, modulos) {
+  showLoading('Guardando cambios...');
+  try {
+    const res  = await fetchAdminPost({ accion:'editarAsistente', email, nombre, modulos });
+    const data = await res.json();
+    hideLoading();
+    if (data.success) { showToast('✅','Guardado','Módulos actualizados'); loadAsistentes(); }
+    else showToast('❌','Error', data.error||'No se pudo guardar');
+  } catch(e) { hideLoading(); showToast('❌','Error',e.message); }
+}
+
+async function eliminarAsistente(email, nombre) {
+  if (!confirm('¿Eliminar el asistente ' + nombre + '?
+Perderá acceso inmediatamente.')) return;
+  showLoading('Eliminando asistente...');
+  try {
+    const res  = await fetchAdminPost({ accion:'eliminarAsistente', email });
+    const data = await res.json();
+    hideLoading();
+    if (data.success) { showToast('✅','Eliminado','Asistente removido'); loadAsistentes(); }
+    else showToast('❌','Error', data.error||'No se pudo eliminar');
+  } catch(e) { hideLoading(); showToast('❌','Error',e.message); }
 }
 </script>
 
