@@ -478,7 +478,6 @@ let promos = { promo2x1: { activa: false }, promoTemporada: { activa: false } };
 
 // Cargar promos al iniciar
 window.addEventListener('load', async function() {
-  await cargarHorarios();
   try {
     const res  = await fetch(API + '?action=obtenerPromos');
     const data = await res.json();
@@ -520,8 +519,8 @@ function selectPromo(btn, promoId, precio, frecuencia) {
     document.getElementById('plan-group').style.display     = 'none';
     document.getElementById('horarios-group').style.display = 'block';
     const lista = document.getElementById('horarios-list');
-    lista.innerHTML = HORARIOS_SHEET.filter(h => h.frecuencia === 'Lunes a Viernes').map(h =>
-      `<button class="btn-option" onclick="selectHorario(this,'${h.horario}')">${h.horario}</button>`
+    lista.innerHTML = HORARIOS['Lunes a Viernes'].map(h =>
+      `<button class="btn-option" onclick="selectHorario(this,'${h}')">${h}</button>`
     ).join('');
     document.getElementById('precio-card').classList.add('visible');
     document.getElementById('precio-val').textContent  = '$30';
@@ -537,30 +536,10 @@ function selectPromo(btn, promoId, precio, frecuencia) {
   }
 }
 
-// Horarios — se cargan dinámicamente desde la Sheet
-let HORARIOS_SHEET = [];
-
-async function cargarHorarios() {
-  try {
-    const res  = await fetch(API + '?action=obtenerHorarios');
-    const data = await res.json();
-    HORARIOS_SHEET = data.horarios || [];
-  } catch(e) {
-    console.log('Error cargando horarios:', e);
-    // Fallback si falla la sheet
-    HORARIOS_SHEET = [
-      { horario:'3:00pm - 4:00pm', nivel:'Burbuja / Iniciación', frecuencia:'Lunes a Viernes' },
-      { horario:'4:00pm - 5:00pm', nivel:'Intermedio',           frecuencia:'Lunes a Viernes' },
-      { horario:'5:00pm - 6:00pm', nivel:'Avanzado / Adultos',   frecuencia:'Lunes a Viernes' },
-      { horario:'6:00pm - 7:00pm', nivel:'Adultos',              frecuencia:'Lunes a Viernes' },
-      { horario:'7:00pm - 8:00pm', nivel:'Adultos',              frecuencia:'Lunes a Viernes' },
-      { horario:'8:00am - 9:00am', nivel:'Avanzado / Adultos',   frecuencia:'Sabatino' },
-      { horario:'9:00am - 10:00am',nivel:'Iniciación',           frecuencia:'Sabatino' },
-      { horario:'10:00am - 11:00am',nivel:'Intermedio',          frecuencia:'Sabatino' },
-      { horario:'11:00am - 12:00pm',nivel:'Burbuja',             frecuencia:'Sabatino' },
-    ];
-  }
-}
+const HORARIOS = {
+  'Lunes a Viernes': ['3:00pm - 4:00pm','4:00pm - 5:00pm','5:00pm - 6:00pm','6:00pm - 7:00pm','7:00pm - 8:00pm'],
+  'Sabatino': ['8:00am - 9:00am','9:00am - 10:00am','10:00am - 11:00am','11:00am - 12:00pm']
+};
 
 const METODO_INFO = {
   'Zelle': { title:'Datos para Zelle:', content:'📧 Email: maracaiboswimmingclub@gmail.com<br/>👤 A nombre de: Maracaibo Swimming Club<br/>📱 Envía el comprobante por WhatsApp al 0414-6004468' },
@@ -666,24 +645,12 @@ function selectFrecuencia(btn, value) {
   document.getElementById('duracion-group').style.display = esSabatino ? 'block' : 'none';
   document.getElementById('plan-group').style.display = esSabatino ? 'none' : 'block';
 
-  // Filtrar horarios desde la sheet según frecuencia seleccionada
-  const nivel = document.getElementById('f-nivel').value || '';
-  const horariosFiltrados = HORARIOS_SHEET.filter(h => {
-    const mismaFrecuencia = h.frecuencia === value;
-    const mismoNivel = !nivel || h.nivel.toLowerCase().includes(nivel.toLowerCase()) ||
-                       nivel.toLowerCase().includes(h.nivel.split('/')[0].trim().toLowerCase());
-    return mismaFrecuencia && mismoNivel;
-  });
-
-  // Si no hay coincidencia exacta de nivel, mostrar todos de esa frecuencia
-  const listaFinal = horariosFiltrados.length > 0
-    ? horariosFiltrados
-    : HORARIOS_SHEET.filter(h => h.frecuencia === value);
-
+  // Actualizar horarios
+  const horarios = HORARIOS[value] || [];
   const lista = document.getElementById('horarios-list');
-  lista.innerHTML = listaFinal.map(h =>
-    `<button class="btn-option" onclick="selectHorario(this,'${h.horario}')">${h.horario}</button>`
-  ).join('') || '<p style="color:var(--gray);font-size:.85rem;">No hay horarios disponibles para este nivel</p>';
+  lista.innerHTML = horarios.map(h =>
+    `<button class="btn-option" onclick="selectHorario(this,'${h}')">${h}</button>`
+  ).join('');
   document.getElementById('horarios-group').style.display = 'block';
 
   // Si L-V, precio automático $50
@@ -751,11 +718,17 @@ function toggleMedico(btn, tipo) {
   const hidden   = document.getElementById('f-condicion-val');
   if (tipo === 'especificar') {
     textarea.style.display = 'block';
-    hidden.value = '';
+    hidden.value = textarea.value.trim() || '';
+    // Actualizar hidden mientras escribe
+    textarea.oninput = function() {
+      hidden.value = this.value.trim();
+      if (this.value.trim()) document.getElementById('e-condicion').style.display = 'none';
+    };
   } else {
     textarea.style.display = 'none';
     textarea.value = '';
     hidden.value = 'Ninguna';
+    document.getElementById('e-condicion').style.display = 'none';
   }
 }
 
@@ -766,11 +739,21 @@ function toggleMedicamento(btn, tipo) {
   const hidden   = document.getElementById('f-medicamentos-val');
   if (tipo === 'especificar') {
     textarea.style.display = 'block';
-    hidden.value = '';
+    hidden.value = textarea.value.trim() || '';
+    // Actualizar hidden mientras escribe
+    textarea.oninput = function() {
+      hidden.value = this.value.trim();
+      if (this.value.trim()) {
+        const errEl = document.getElementById('e-medicamentos');
+        if (errEl) errEl.style.display = 'none';
+      }
+    };
   } else {
     textarea.style.display = 'none';
     textarea.value = '';
     hidden.value = 'Ninguno';
+    const errEl = document.getElementById('e-medicamentos');
+    if (errEl) errEl.style.display = 'none';
   }
 }
 
