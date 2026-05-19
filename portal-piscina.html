@@ -233,6 +233,7 @@ body{font-family:'Outfit',sans-serif;background:var(--surface);min-height:100vh;
   <div class="content">
     <div class="tabs">
       <button class="tab-btn active" onclick="switchTab('registro')">📋 Registro Diario</button>
+      <button class="tab-btn" onclick="switchTab('inventario')">🧪 Inventario</button>
       <button class="tab-btn" onclick="switchTab('historial')">📊 Historial</button>
     </div>
 
@@ -289,17 +290,19 @@ body{font-family:'Outfit',sans-serif;background:var(--surface);min-height:100vh;
           <div class="field">
             <label>Tipo de Cloro</label>
             <div class="toggle-group">
-              <button class="toggle-btn" id="btn-cloro-ninguno" onclick="setCloro('ninguno')">❌ No se aplicó</button>
-              <button class="toggle-btn" id="btn-cloro-granulado" onclick="setCloro('granulado')">🔵 Granulado</button>
+              <button class="toggle-btn active" id="btn-cloro-ninguno" onclick="setCloro('ninguno')">❌ No se aplicó</button>
+              <button class="toggle-btn" id="btn-cloro-granulado" onclick="setCloro('granulado')">🔵 Granulado (kg)</button>
               <button class="toggle-btn" id="btn-cloro-pastillas" onclick="setCloro('pastillas')">⚪ Pastillas</button>
             </div>
           </div>
           <div class="field" id="cloro-cantidad-wrap" style="display:none;">
             <label id="cloro-cantidad-label">Cantidad (kg)</label>
-            <input type="number" id="r-cloro-cantidad" placeholder="0.5" min="0" step="0.1"/>
+            <input type="number" id="r-cloro-cantidad" placeholder="0.5" min="0" step="0.1" oninput="calcularCloro()"/>
+            <div id="cloro-conversion" style="display:none;font-size:.75rem;color:var(--blue);margin-top:.3rem;"></div>
           </div>
         </div>
         <input type="hidden" id="r-cloro-tipo" value="No se aplicó"/>
+        <input type="hidden" id="r-cloro-kg" value="0"/>
       </div>
 
       <!-- Soda Cáustica -->
@@ -320,6 +323,64 @@ body{font-family:'Outfit',sans-serif;background:var(--surface);min-height:100vh;
           </div>
         </div>
         <input type="hidden" id="r-soda-tipo" value="No se aplicó"/>
+      </div>
+
+      <!-- Floculante -->
+      <div class="card">
+        <div class="card-title">🧴 Floculante Aplicado</div>
+        <div class="form-row">
+          <div class="field">
+            <label>¿Se aplicó Floculante?</label>
+            <div class="toggle-group">
+              <button class="toggle-btn active" id="btn-floc-no" onclick="setQuimico('floc','no')">❌ No se aplicó</button>
+              <button class="toggle-btn" id="btn-floc-si" onclick="setQuimico('floc','si')">✅ Sí</button>
+            </div>
+          </div>
+          <div class="field" id="floc-cantidad-wrap" style="display:none;">
+            <label>Cantidad (litros)</label>
+            <input type="number" id="r-floc-cantidad" placeholder="1.0" min="0" step="0.1"/>
+          </div>
+        </div>
+        <input type="hidden" id="r-floc-tipo" value="No se aplicó"/>
+      </div>
+
+      <!-- Sulfato de Cobre -->
+      <div class="card">
+        <div class="card-title">🟦 Sulfato de Cobre Aplicado</div>
+        <div class="form-row">
+          <div class="field">
+            <label>¿Se aplicó Sulfato de Cobre?</label>
+            <div class="toggle-group">
+              <button class="toggle-btn active" id="btn-cobre-no" onclick="setQuimico('cobre','no')">❌ No se aplicó</button>
+              <button class="toggle-btn" id="btn-cobre-si" onclick="setQuimico('cobre','si')">✅ Sí</button>
+            </div>
+          </div>
+          <div class="field" id="cobre-cantidad-wrap" style="display:none;">
+            <label>Cantidad (kg)</label>
+            <input type="number" id="r-cobre-cantidad" placeholder="0.5" min="0" step="0.1"/>
+          </div>
+        </div>
+        <input type="hidden" id="r-cobre-tipo" value="No se aplicó"/>
+      </div>
+
+      <!-- Sulfato de Aluminio -->
+      <div class="card">
+        <div class="card-title">⚪ Sulfato de Aluminio / Alumbre</div>
+        <div class="form-row">
+          <div class="field">
+            <label>Tipo</label>
+            <div class="toggle-group">
+              <button class="toggle-btn active" id="btn-aluminio-ninguno" onclick="setAluminio('ninguno')">❌ No se aplicó</button>
+              <button class="toggle-btn" id="btn-aluminio-liquido" onclick="setAluminio('liquido')">💧 Líquido</button>
+              <button class="toggle-btn" id="btn-aluminio-polvo" onclick="setAluminio('polvo')">🪨 Polvo (Alumbre)</button>
+            </div>
+          </div>
+          <div class="field" id="aluminio-cantidad-wrap" style="display:none;">
+            <label id="aluminio-cantidad-label">Cantidad</label>
+            <input type="number" id="r-aluminio-cantidad" placeholder="1.0" min="0" step="0.1"/>
+          </div>
+        </div>
+        <input type="hidden" id="r-aluminio-tipo" value="No se aplicó"/>
       </div>
 
       <!-- Mantenimiento físico -->
@@ -363,6 +424,46 @@ body{font-family:'Outfit',sans-serif;background:var(--surface);min-height:100vh;
       </div>
 
       <button class="btn-submit" id="btn-registrar" onclick="guardarRegistro()">✅ Guardar Registro de Mantenimiento</button>
+
+    </div>
+
+    <!-- ══ INVENTARIO ══ -->
+    <div class="tab-content" id="tab-inventario">
+
+      <div class="card">
+        <div class="card-title">🧪 Stock Actual de Químicos</div>
+        <div id="stock-list" style="margin-bottom:1.5rem;">
+          <div style="text-align:center;padding:1rem;color:var(--gray);">Cargando inventario...</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">➕ Registrar Compra / Carga de Inventario</div>
+        <div class="form-row">
+          <div class="field">
+            <label>Químico</label>
+            <select id="inv-quimico" onchange="updateInvUnidad()">
+              <option value="cloro_granulado">🔵 Cloro Granulado</option>
+              <option value="cloro_pastillas">⚪ Cloro Pastillas (tambor 50kg)</option>
+              <option value="soda_escama">🔸 Soda Cáustica Escama</option>
+              <option value="soda_liquida">💧 Soda Cáustica Líquida</option>
+              <option value="floculante">🧴 Floculante</option>
+              <option value="sulfato_cobre">🟦 Sulfato de Cobre</option>
+              <option value="sulfato_aluminio_liq">💧 Sulfato de Aluminio Líquido</option>
+              <option value="sulfato_aluminio_polvo">🪨 Sulfato de Aluminio Polvo (Alumbre)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label id="inv-unidad-label">Cantidad (kg)</label>
+            <input type="number" id="inv-cantidad" placeholder="50" min="0" step="0.1"/>
+          </div>
+        </div>
+        <div class="field" style="margin-bottom:1rem;">
+          <label>Observaciones <span style="color:var(--gray);font-weight:400;">(opcional)</span></label>
+          <input type="text" id="inv-obs" placeholder="Ej: Compra del 20/05/2026, proveedor X"/>
+        </div>
+        <button class="btn-submit" onclick="registrarCompra()">📦 Registrar Compra</button>
+      </div>
 
     </div>
 
@@ -558,6 +659,7 @@ function switchTab(tab) {
   event.target.classList.add('active');
   document.getElementById('tab-' + tab).classList.add('active');
   if (tab === 'historial') loadHistorial();
+  if (tab === 'inventario') loadInventario();
 }
 
 // ── CONTROLES ──────────────────────────────────────
@@ -570,20 +672,157 @@ function checkPH(val) {
   else { ind.textContent = '🚨 pH crítico — acción inmediata requerida'; ind.className = 'range-label range-bad'; }
 }
 
+function calcularCloro() {
+  const tipo = document.getElementById('r-cloro-tipo').value;
+  const val  = parseFloat(document.getElementById('r-cloro-cantidad').value || 0);
+  const conv = document.getElementById('cloro-conversion');
+  if (tipo === 'Pastillas') {
+    const kg = val * 0.2; // 1 pastilla = 200g = 0.2kg
+    document.getElementById('r-cloro-kg').value = kg.toFixed(3);
+    conv.style.display = '';
+    conv.textContent = val + ' pastillas = ' + kg.toFixed(2) + ' kg (' + (val * 200) + 'g)';
+  } else {
+    document.getElementById('r-cloro-kg').value = val;
+    conv.style.display = 'none';
+  }
+}
+
 function setCloro(tipo) {
   ['ninguno','granulado','pastillas'].forEach(t => {
     document.getElementById('btn-cloro-' + t).classList.remove('active');
   });
   document.getElementById('btn-cloro-' + tipo).classList.add('active');
   document.getElementById('r-cloro-tipo').value = tipo === 'ninguno' ? 'No se aplicó' : tipo.charAt(0).toUpperCase() + tipo.slice(1);
+  document.getElementById('r-cloro-kg').value = '0';
   const wrap  = document.getElementById('cloro-cantidad-wrap');
   const label = document.getElementById('cloro-cantidad-label');
+  const conv  = document.getElementById('cloro-conversion');
+  if (tipo === 'ninguno') {
+    wrap.style.display = 'none';
+    conv.style.display = 'none';
+  } else {
+    wrap.style.display = '';
+    if (tipo === 'granulado') {
+      label.textContent = 'Cantidad (kg)';
+      document.getElementById('r-cloro-cantidad').placeholder = '1.5';
+      conv.style.display = 'none';
+    } else {
+      label.textContent = 'Cantidad (pastillas) — 1 pastilla = 200g';
+      document.getElementById('r-cloro-cantidad').placeholder = '5';
+    }
+    document.getElementById('r-cloro-cantidad').value = '';
+  }
+}
+
+function setQuimico(campo, estado) {
+  const si = document.getElementById('btn-' + campo + '-si');
+  const no = document.getElementById('btn-' + campo + '-no');
+  const wrap = document.getElementById(campo + '-cantidad-wrap');
+  if (estado === 'si') {
+    si.classList.add('active'); no.classList.remove('active');
+    wrap.style.display = '';
+    document.getElementById('r-' + campo + '-tipo').value = 'Sí';
+  } else {
+    no.classList.add('active'); si.classList.remove('active');
+    wrap.style.display = 'none';
+    document.getElementById('r-' + campo + '-tipo').value = 'No se aplicó';
+  }
+}
+
+function setAluminio(tipo) {
+  ['ninguno','liquido','polvo'].forEach(t => {
+    document.getElementById('btn-aluminio-' + t).classList.remove('active');
+  });
+  document.getElementById('btn-aluminio-' + tipo).classList.add('active');
+  document.getElementById('r-aluminio-tipo').value = tipo === 'ninguno' ? 'No se aplicó' : (tipo === 'liquido' ? 'Líquido' : 'Polvo');
+  const wrap  = document.getElementById('aluminio-cantidad-wrap');
+  const label = document.getElementById('aluminio-cantidad-label');
   if (tipo === 'ninguno') { wrap.style.display = 'none'; }
   else {
     wrap.style.display = '';
-    label.textContent = tipo === 'granulado' ? 'Cantidad (kg)' : 'Cantidad (unidades)';
-    document.getElementById('r-cloro-cantidad').placeholder = tipo === 'granulado' ? '1.5' : '5';
+    label.textContent = tipo === 'liquido' ? 'Cantidad (litros)' : 'Cantidad (kg)';
+    document.getElementById('r-aluminio-cantidad').placeholder = tipo === 'liquido' ? '1.0' : '0.5';
   }
+}
+
+// ── INVENTARIO ──────────────────────────────────────
+const QUIMICOS_LABELS = {
+  cloro_granulado:          '🔵 Cloro Granulado',
+  cloro_pastillas:          '⚪ Cloro Pastillas',
+  soda_escama:              '🔸 Soda Cáustica Escama',
+  soda_liquida:             '💧 Soda Cáustica Líquida',
+  floculante:               '🧴 Floculante',
+  sulfato_cobre:            '🟦 Sulfato de Cobre',
+  sulfato_aluminio_liq:     '💧 Sulf. Aluminio Líquido',
+  sulfato_aluminio_polvo:   '🪨 Sulf. Aluminio Polvo'
+};
+const QUIMICOS_UNIDAD = {
+  cloro_granulado:'kg', cloro_pastillas:'kg', soda_escama:'kg',
+  soda_liquida:'litros', floculante:'litros', sulfato_cobre:'kg',
+  sulfato_aluminio_liq:'litros', sulfato_aluminio_polvo:'kg'
+};
+
+function updateInvUnidad() {
+  const q = document.getElementById('inv-quimico').value;
+  document.getElementById('inv-unidad-label').textContent = 'Cantidad (' + (QUIMICOS_UNIDAD[q]||'kg') + ')';
+}
+
+async function loadInventario() {
+  const list = document.getElementById('stock-list');
+  try {
+    const res  = await fetch(API + '?action=obtenerInventarioPiscina');
+    const data = await res.json();
+    const inv  = data.inventario || {};
+
+    if (!Object.keys(inv).length) {
+      list.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--gray);">Sin inventario cargado aún. Registra tu primera compra abajo.</div>';
+      return;
+    }
+
+    list.innerHTML = Object.entries(inv).map(([q, d]) => {
+      const pct     = d.inicial > 0 ? Math.round((d.actual / d.inicial) * 100) : 0;
+      const color   = pct > 20 ? '#16a34a' : (pct > 10 ? '#f59e0b' : '#dc2626');
+      const alerta  = pct <= 10 ? '⚠️ ' : '';
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:.8rem 0;border-bottom:1px solid var(--border);">
+        <div>
+          <strong style="color:var(--navy);">${alerta}${QUIMICOS_LABELS[q]||q}</strong>
+          <div style="font-size:.78rem;color:var(--gray);">${d.actual.toFixed(2)} / ${d.inicial.toFixed(2)} ${QUIMICOS_UNIDAD[q]||'kg'}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:1.1rem;font-weight:700;color:${color};">${pct}%</div>
+          <div style="width:80px;height:6px;background:#e2e8f0;border-radius:3px;margin-top:.3rem;">
+            <div style="width:${Math.min(pct,100)}%;height:100%;background:${color};border-radius:3px;transition:.3s;"></div>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    list.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--gray);">Error cargando inventario.</div>';
+  }
+}
+
+async function registrarCompra() {
+  const quimico  = document.getElementById('inv-quimico').value;
+  const cantidad = parseFloat(document.getElementById('inv-cantidad').value || 0);
+  const obs      = document.getElementById('inv-obs').value.trim();
+
+  if (!cantidad || cantidad <= 0) { showToast('⚠️ Ingresa la cantidad comprada'); return; }
+
+  try {
+    const res  = await fetch(API, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ accion: 'registrarCompraQuimico', quimico, cantidad, obs, responsable: currentUser?.nombre || '' })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('✅ Compra registrada — Stock actualizado');
+      document.getElementById('inv-cantidad').value = '';
+      document.getElementById('inv-obs').value = '';
+      loadInventario();
+    } else {
+      showToast('❌ Error: ' + (data.error || 'No se pudo registrar'));
+    }
+  } catch(e) { showToast('❌ Error de conexión'); }
 }
 
 function setSoda(tipo) {
@@ -631,21 +870,28 @@ async function guardarRegistro() {
   btn.textContent = '⏳ Guardando...'; btn.disabled = true;
 
   const registro = {
-    accion:        'registrarControlPiscina',
-    fecha:         document.getElementById('r-fecha').value,
-    hora:          document.getElementById('r-hora').value,
-    responsable:   document.getElementById('r-responsable').value,
-    ph:            parseFloat(ph),
-    temperatura:   document.getElementById('r-temp').value || '',
-    nivelAgua:     document.getElementById('r-nivel-agua').value,
-    cloroTipo,
-    cloroCantidad: cloroCant || '0',
-    sodaTipo,
-    sodaCantidad:  sodaCant || '0',
-    limpFondo:     document.getElementById('r-fondo').value,
-    limpFiltros:   document.getElementById('r-filtros').value,
-    revBombas:     document.getElementById('r-bombas').value,
-    observaciones: document.getElementById('r-observaciones').value
+    accion:           'registrarControlPiscina',
+    fecha:            document.getElementById('r-fecha').value,
+    hora:             document.getElementById('r-hora').value,
+    responsable:      document.getElementById('r-responsable').value,
+    ph:               parseFloat(ph),
+    temperatura:      document.getElementById('r-temp').value || '',
+    nivelAgua:        document.getElementById('r-nivel-agua').value,
+    cloroTipo:        cloroTipo,
+    cloroCantidad:    cloroCant || '0',
+    cloroKg:          document.getElementById('r-cloro-kg').value || '0',
+    sodaTipo:         sodaTipo,
+    sodaCantidad:     sodaCant || '0',
+    flocTipo:         document.getElementById('r-floc-tipo').value,
+    flocCantidad:     document.getElementById('r-floc-cantidad')?.value || '0',
+    cobreTipo:        document.getElementById('r-cobre-tipo').value,
+    cobreCantidad:    document.getElementById('r-cobre-cantidad')?.value || '0',
+    aluminioTipo:     document.getElementById('r-aluminio-tipo').value,
+    aluminioCantidad: document.getElementById('r-aluminio-cantidad')?.value || '0',
+    limpFondo:        document.getElementById('r-fondo').value,
+    limpFiltros:      document.getElementById('r-filtros').value,
+    revBombas:        document.getElementById('r-bombas').value,
+    observaciones:    document.getElementById('r-observaciones').value
   };
 
   try {
