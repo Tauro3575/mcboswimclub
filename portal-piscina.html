@@ -423,7 +423,31 @@ body{font-family:'Outfit',sans-serif;background:var(--surface);min-height:100vh;
         </div>
       </div>
 
-      <button class="btn-submit" id="btn-registrar" onclick="guardarRegistro()">✅ Guardar Registro de Mantenimiento</button>
+      <!-- Firma de confirmación -->
+      <div class="card" style="border:2px solid var(--blue);background:linear-gradient(135deg,rgba(0,87,168,.04),rgba(0,180,216,.04));">
+        <div class="card-title">✍️ Confirmación y Firma</div>
+        <div class="form-row">
+          <div class="field">
+            <label>Cédula de identidad</label>
+            <input type="text" id="r-cedula" placeholder="Ej: V-12345678"/>
+          </div>
+          <div class="field" style="justify-content:flex-end;">
+            <div style="background:white;border:1.5px solid var(--border);border-radius:10px;padding:.8rem 1rem;font-size:.82rem;color:var(--gray);line-height:1.6;">
+              Al guardar este registro confirmo que:<br/>
+              ✅ Realicé personalmente este mantenimiento<br/>
+              ✅ Los datos registrados son verídicos<br/>
+              ✅ La fecha y hora son correctas
+            </div>
+          </div>
+        </div>
+        <div style="background:rgba(0,87,168,.06);border-radius:8px;padding:.8rem 1rem;font-size:.82rem;color:var(--navy);margin-top:.5rem;">
+          <strong>Responsable:</strong> <span id="firma-nombre">—</span> &nbsp;|&nbsp;
+          <strong>Fecha:</strong> <span id="firma-fecha">—</span> &nbsp;|&nbsp;
+          <strong>Hora:</strong> <span id="firma-hora">—</span>
+        </div>
+      </div>
+
+      <button class="btn-submit" id="btn-registrar" onclick="guardarRegistro()">✅ Confirmar y Guardar Registro</button>
 
     </div>
 
@@ -624,6 +648,17 @@ function _iniciarSesion(data) {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app').style.display = 'block';
   document.getElementById('user-nombre').textContent = data.nombre || data.email;
+
+  // Control de acceso por rol
+  const esSuperAdmin = data.rol && (data.rol.toLowerCase().includes('super') || data.rol.toLowerCase() === 'admin');
+  
+  if (!esSuperAdmin) {
+    // Piscinero — solo puede ver Registro Diario
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      if (!btn.textContent.includes('Registro')) btn.style.display = 'none';
+    });
+  }
+
   initApp();
 }
 
@@ -642,14 +677,26 @@ function doLogout() {
 function initApp() {
   const ahora = new Date();
   const pad   = n => String(n).padStart(2,'0');
-  document.getElementById('r-fecha').value = ahora.getFullYear() + '-' + pad(ahora.getMonth()+1) + '-' + pad(ahora.getDate());
-  document.getElementById('r-hora').value  = pad(ahora.getHours()) + ':' + pad(ahora.getMinutes());
+  const fecha = ahora.getFullYear() + '-' + pad(ahora.getMonth()+1) + '-' + pad(ahora.getDate());
+  const hora  = pad(ahora.getHours()) + ':' + pad(ahora.getMinutes());
+  const fechaLegible = pad(ahora.getDate()) + '/' + pad(ahora.getMonth()+1) + '/' + ahora.getFullYear();
+
+  document.getElementById('r-fecha').value = fecha;
+  document.getElementById('r-hora').value  = hora;
   document.getElementById('r-responsable').value = currentUser?.nombre || currentUser?.email || '';
+
+  // Datos de firma
+  const firmaNombre = document.getElementById('firma-nombre');
+  const firmaFecha  = document.getElementById('firma-fecha');
+  const firmaHora   = document.getElementById('firma-hora');
+  if (firmaNombre) firmaNombre.textContent = currentUser?.nombre || currentUser?.email || '—';
+  if (firmaFecha)  firmaFecha.textContent  = fechaLegible;
+  if (firmaHora)   firmaHora.textContent   = hora;
 
   // Defaults historial
   const hace90 = new Date(ahora.getTime() - 90*24*60*60*1000);
   document.getElementById('hist-desde').value = hace90.getFullYear() + '-' + pad(hace90.getMonth()+1) + '-' + pad(hace90.getDate());
-  document.getElementById('hist-hasta').value = ahora.getFullYear() + '-' + pad(ahora.getMonth()+1) + '-' + pad(ahora.getDate());
+  document.getElementById('hist-hasta').value = fecha;
 }
 
 // ── TABS ──────────────────────────────────────────
@@ -855,6 +902,9 @@ function setToggle(campo, valor) {
 
 // ── GUARDAR REGISTRO ──────────────────────────────
 async function guardarRegistro() {
+  const cedula = document.getElementById('r-cedula').value.trim();
+  if (!cedula) { showToast('⚠️ Ingresa tu cédula de identidad para confirmar el registro'); return; }
+
   const ph = document.getElementById('r-ph').value;
   if (!ph) { showToast('⚠️ Ingresa el valor de pH'); return; }
 
@@ -871,6 +921,7 @@ async function guardarRegistro() {
 
   const registro = {
     accion:           'registrarControlPiscina',
+    cedula:           cedula,
     fecha:            document.getElementById('r-fecha').value,
     hora:             document.getElementById('r-hora').value,
     responsable:      document.getElementById('r-responsable').value,
@@ -903,6 +954,7 @@ async function guardarRegistro() {
     if (data.success) {
       showToast('✅ Registro guardado correctamente');
       // Reset form
+      document.getElementById('r-cedula').value = '';
       document.getElementById('r-ph').value = '';
       document.getElementById('r-temp').value = '';
       document.getElementById('r-observaciones').value = '';
