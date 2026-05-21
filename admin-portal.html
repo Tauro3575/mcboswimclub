@@ -785,7 +785,6 @@
               <label style="display:flex;align-items:center;gap:.3rem;font-size:.82rem;cursor:pointer;"><input type="checkbox" value="tokens"/> Tokens</label>
               <label style="display:flex;align-items:center;gap:.3rem;font-size:.82rem;cursor:pointer;"><input type="checkbox" value="asignacion"/> Asignación</label>
               <label style="display:flex;align-items:center;gap:.3rem;font-size:.82rem;cursor:pointer;"><input type="checkbox" value="promos"/> Promociones</label>
-              <label style="display:flex;align-items:center;gap:.5rem;font-size:.85rem;cursor:pointer;"><input type="checkbox" class="mod-check" value="piscina"/> 🏊 Control Piscina</label>
             </div>
           </div>
         </div>
@@ -1021,6 +1020,64 @@
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeModal('modal-asistente')">Cancelar</button>
       <button class="btn btn-success btn-lg" onclick="guardarAsistente()">💾 Guardar Asistente</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: EDITAR PAGO ═══ -->
+<div class="modal-overlay" id="modal-editar-pago">
+  <div class="modal" style="max-width:520px;">
+    <button class="modal-close" onclick="closeModal('modal-editar-pago')">✕</button>
+    <h3>✏️ Editar Pago</h3>
+    <input type="hidden" id="ep-id"/>
+    <input type="hidden" id="ep-recibo"/>
+
+    <div style="background:rgba(0,87,168,.05);border-radius:10px;padding:.8rem 1rem;margin-bottom:1rem;font-size:.82rem;color:var(--navy);">
+      <strong>Recibo:</strong> <span id="ep-recibo-display">—</span> &nbsp;|&nbsp;
+      <strong>Alumno:</strong> <span id="ep-nombre-display">—</span>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group-light">
+        <label>Método de Pago</label>
+        <select id="ep-metodo">
+          <option value="Zelle">Zelle</option>
+          <option value="Transferencia USD">Transferencia USD</option>
+          <option value="Efectivo">Efectivo</option>
+          <option value="Pago Móvil">Pago Móvil</option>
+          <option value="Transferencia BS">Transferencia BS</option>
+        </select>
+      </div>
+      <div class="form-group-light">
+        <label>Referencia</label>
+        <input type="text" id="ep-referencia" placeholder="Código de confirmación"/>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group-light">
+        <label>Monto USD</label>
+        <input type="number" id="ep-monto" placeholder="0.00" step="0.01"/>
+      </div>
+      <div class="form-group-light">
+        <label>Monto BS (si aplica)</label>
+        <input type="number" id="ep-monto-bs" placeholder="0.00" step="0.01"/>
+      </div>
+    </div>
+
+    <div class="form-group-light">
+      <label>Motivo de la corrección <span style="color:var(--red);">*</span></label>
+      <textarea id="ep-motivo" placeholder="Ej: Se registró como Zelle pero fue Efectivo..." 
+        style="width:100%;padding:.65rem;border:1.5px solid var(--border);border-radius:10px;font-family:'Outfit',sans-serif;font-size:.85rem;resize:vertical;min-height:70px;"></textarea>
+    </div>
+
+    <div style="background:#fef9c3;border:1px solid #fde68a;border-radius:8px;padding:.7rem 1rem;font-size:.78rem;color:#92400e;margin-bottom:1rem;">
+      ⚠️ Esta corrección quedará registrada en el log del sistema con tu nombre, fecha y hora.
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-editar-pago')">Cancelar</button>
+      <button class="btn btn-success btn-lg" onclick="guardarEdicionPago()">💾 Guardar Corrección</button>
     </div>
   </div>
 </div>
@@ -1748,6 +1805,56 @@ async function resetPasswordInstructor(email, nombre) {
   }
 }
 
+// ═══════════════════════════════════════════════════════
+// EDITAR PAGO
+// ═══════════════════════════════════════════════════════
+function abrirEditarPago(p) {
+  document.getElementById('ep-id').value            = p.id || p.recibo || '';
+  document.getElementById('ep-recibo').value        = p.recibo || p.id || '';
+  document.getElementById('ep-recibo-display').textContent = p.recibo || p.id || '—';
+  document.getElementById('ep-nombre-display').textContent = p.nombre || '—';
+  document.getElementById('ep-metodo').value        = p.metodo || 'Zelle';
+  document.getElementById('ep-referencia').value    = p.referencia || '';
+  document.getElementById('ep-monto').value         = p.monto || '';
+  document.getElementById('ep-monto-bs').value      = p.montoBS || '';
+  document.getElementById('ep-motivo').value        = '';
+  openModal('modal-editar-pago');
+}
+
+async function guardarEdicionPago() {
+  const motivo = document.getElementById('ep-motivo').value.trim();
+  if (!motivo) { showToast('⚠️','Requerido','Debes indicar el motivo de la corrección'); return; }
+
+  const payload = {
+    accion:     'editarPago',
+    id:         document.getElementById('ep-id').value,
+    recibo:     document.getElementById('ep-recibo').value,
+    metodo:     document.getElementById('ep-metodo').value,
+    referencia: document.getElementById('ep-referencia').value,
+    monto:      document.getElementById('ep-monto').value,
+    montoBS:    document.getElementById('ep-monto-bs').value,
+    motivo,
+    editadoPor: currentUser?.nombre || currentUser?.email || 'Admin'
+  };
+
+  showLoading('Guardando corrección...');
+  try {
+    const res  = await fetchAdminPost(payload);
+    const data = await res.json();
+    hideLoading();
+    if (data.success) {
+      closeModal('modal-editar-pago');
+      showToast('✅','Pago corregido','Los cambios quedaron registrados en el log');
+      loadPagos();
+    } else {
+      showToast('❌','Error', data.error || 'No se pudo guardar');
+    }
+  } catch(e) {
+    hideLoading();
+    showToast('❌','Error de conexión', e.message);
+  }
+}
+
 async function toggleInstructor(email, activo) {
   const accion = activo ? 'deshabilitarInstructor' : 'habilitarInstructor';
   const msg = activo ? `¿Deshabilitar al instructor ${email}? No podrá acceder al portal.` : `¿Habilitar al instructor ${email}?`;
@@ -2339,6 +2446,10 @@ async function loadPagos() {
         <td style="padding:.6rem 1rem;text-align:right;font-weight:700;color:${esUSD?'#16a34a':'#1d4ed8'};">${montoStr}</td>
         <td style="padding:.6rem 1rem;text-align:center;">
           <span style="background:${esUSD?'#dcfce7':'#dbeafe'};color:${esUSD?'#15803d':'#1e40af'};font-size:.7rem;font-weight:700;padding:.2rem .6rem;border-radius:50px;">${p.moneda||'USD'}</span>
+        </td>
+        <td style="padding:.6rem .5rem;text-align:center;">
+          <button onclick="abrirEditarPago(${JSON.stringify(p).replace(/"/g,'&quot;')})" 
+            style="background:none;border:1.5px solid var(--border);border-radius:6px;padding:.25rem .5rem;cursor:pointer;font-size:.75rem;color:var(--blue);" title="Editar pago">✏️</button>
         </td>
       </tr>`;
     }).join('');
